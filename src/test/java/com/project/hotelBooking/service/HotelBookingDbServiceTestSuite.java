@@ -1,6 +1,6 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.controller.ElementNotFoundException;
+import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,5 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.controller.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.mapper.RoomMapper;
@@ -34,6 +33,9 @@ public class DbService {
     private static final int PAGE_SIZE=5;
 
     //Localization
+
+    public Localization getLocalization(Localization localization) { return localizationRepository.findLocalizationByCityAndCountry(
+           localization.getCity(), localization.getCountry());}
     public Localization saveLocalization(Localization localization) {
         return localizationRepository.save(localization);
     }
@@ -59,7 +61,6 @@ public class DbService {
                 .filter(hotel -> hotel.getLocalizationId()==id).collect(Collectors.toList());
     }
     public Localization editLocalization(Localization localization) {
-        localizationRepository.findById(localization.getId()).orElseThrow(()->new ElementNotFoundException("No such element"));
         return localizationRepository.save(localization);
     }
     public void deleteAllLocalizations() {
@@ -67,6 +68,8 @@ public class DbService {
     }
 
     //Hotel
+    public Hotel getHotel(Hotel hotel) { return hotelRepository.findHotelByNameAndHotelChain(
+            hotel.getName(), hotel.getHotelChain());}
     public Hotel saveHotel(Hotel hotel) {
         return hotelRepository.save(hotel);
     }
@@ -92,7 +95,6 @@ public class DbService {
                 .filter(room -> room.getHotelId()==id).collect(Collectors.toList());
     }
     public Hotel editHotel(Hotel hotel) {
-        hotelRepository.findById(hotel.getId()).orElseThrow(()->new ElementNotFoundException("No such element"));
         return hotelRepository.save(hotel);
     }
     public void deleteAllHotels() {
@@ -100,6 +102,8 @@ public class DbService {
     }
 
     //Room
+    public Room getRoom(Room room) { return roomRepository.findRoomByRoomNumberAndHotelId(
+            room.getRoomNumber(),room.getHotelId());}
     public Room saveRoom(Room room) {
         return roomRepository.save(room);
     }
@@ -124,7 +128,6 @@ public class DbService {
                 .filter(booking -> booking.getRoomId()==id).collect(Collectors.toList());
     }
     public Room editRoom(Room room) {
-        roomRepository.findById(room.getId()).orElseThrow(()->new ElementNotFoundException("No such element"));
         return roomRepository.save(room);
     }
     public void deleteAllRooms() {
@@ -132,6 +135,8 @@ public class DbService {
     }
 
     //User
+    public User getUser(User user) { return userRepository.findUserByFirstNameAndLastNameAndDateOfBirth(
+            user.getFirstName(), user.getLastName(), user.getDateOfBirth());}
     public User saveUser(User user) {
         return userRepository.save(user);
     }
@@ -156,7 +161,6 @@ public class DbService {
                 .filter(booking -> booking.getUserId()==id).collect(Collectors.toList());
     }
     public User editUser(User user) {
-        userRepository.findById(user.getId()).orElseThrow(()->new ElementNotFoundException("No such element"));
         return userRepository.save(user);
     }
     public void deleteAllUsers() {
@@ -177,7 +181,6 @@ public class DbService {
         return bookingRepository.findAllBookings(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")));
     }
     public Booking editBooking(Booking booking) {
-        bookingRepository.findById(booking.getId()).orElseThrow(()->new ElementNotFoundException("No such element"));
         return bookingRepository.save(booking);
     }
     public void deleteAllBookings() {

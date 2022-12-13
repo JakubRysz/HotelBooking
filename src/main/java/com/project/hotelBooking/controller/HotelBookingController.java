@@ -1,5 +1,6 @@
 package com.project.hotelBooking.controller;
 
+import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.mapper.*;
 
@@ -31,17 +32,20 @@ public class HotelBookingController {
     private BookingMapper bookingMapper;
     @Autowired
     private Manager manager;
+    @Autowired
+    private Validator validator;
 
     //Localization
     @PostMapping("/localizations")
     public LocalizationDto createLocalization(@RequestBody LocalizationDto localizationDto) {
-        System.out.println(localizationDto);
+        Localization localization = localizationMapper.mapToLocalization(localizationDto);
+        validator.validateLocalization(localization);
         return localizationMapper.mapToLocalizationDto(dbService.saveLocalization(localizationMapper.mapToLocalization(localizationDto)));
     }
     @GetMapping("/localizations/Hotels/{id}")
     public LocalizationWithHotelsDto getSingleLocalizationWithHotels(@PathVariable Long id) {
         return localizationMapper.mapToLocalizationWithHotelsDto(dbService.getLocalizationById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such element")));
+                .orElseThrow(()->new ElementNotFoundException("No such localization")));
     }
     @GetMapping("/localizations/Hotels")
     public List<LocalizationWithHotelsDto> getLocalizationsWithHotels(@RequestParam(required = false) Integer page, Sort.Direction sort) {
@@ -62,6 +66,7 @@ public class HotelBookingController {
     @PutMapping("/localizations")
     public LocalizationDto editLocalization(@RequestBody LocalizationDto localizationDto) {
         Localization localization = localizationMapper.mapToLocalization(localizationDto);
+        validator.validateLocalizationEdit(localization);
         return localizationMapper.mapToLocalizationDto(dbService.editLocalization(localization));
     }
     @DeleteMapping("/localizations/{id}")
@@ -72,12 +77,14 @@ public class HotelBookingController {
     //Hotel
     @PostMapping("/hotels")
     public HotelDto createHotel(@RequestBody HotelWithRoomsDto hotelWithRoomsDto) {
-        return hotelMapper.mapToHotelDto(dbService.saveHotel(hotelMapper.mapToHotel(hotelWithRoomsDto)));
+        Hotel hotel = hotelMapper.mapToHotel(hotelWithRoomsDto);
+        validator.validateHotel(hotel);
+        return hotelMapper.mapToHotelDto(dbService.saveHotel(hotel));
     }
     @GetMapping("/hotels/Rooms/{id}")
     public HotelWithRoomsDto getSingleHotelWithRooms(@PathVariable Long id) {
         return hotelMapper.mapToHotelWithRoomsDto(dbService.getHotelById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such element")));
+                .orElseThrow(()->new ElementNotFoundException("No such hotel")));
     }
     @GetMapping("/hotels/Rooms")
     public List<HotelWithRoomsDto> getHotelsWithRooms(@RequestParam(required = false) Integer page, Sort.Direction sort) {
@@ -98,6 +105,7 @@ public class HotelBookingController {
     @PutMapping("/hotels")
     public HotelDto editHotel(@RequestBody HotelDto hotelDto) {
         Hotel hotel = hotelMapper.mapToHotel(hotelDto);
+        validator.validateHotelEdit(hotel);
         return hotelMapper.mapToHotelDto(dbService.editHotel(hotel));
     }
     @DeleteMapping("/hotels/{id}")
@@ -105,15 +113,55 @@ public class HotelBookingController {
         dbService.deleteHotelById(id);
     }
 
+    //Room
+    @PostMapping("/rooms")
+    public RoomDto createRoom(@RequestBody RoomWithBookingsDto roomWithBookingsDto) {
+        Room room = roomMapper.mapToRoom(roomWithBookingsDto);
+        validator.validateRoom(room);
+        return roomMapper.mapToRoomDto(dbService.saveRoom(room));
+    }
+    @GetMapping("/rooms/Bookings/{id}")
+    public RoomWithBookingsDto getSingleRoom(@PathVariable Long id) {
+        return roomMapper.mapToRoomWithBookingsDto(dbService.getRoomById(id)
+                .orElseThrow(()->new ElementNotFoundException("No such room")));
+    }
+    @GetMapping("/rooms/Bookings")
+    public List<RoomWithBookingsDto> getRoomsWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
+        if(page==null||page<0) page=0;
+        if (sort==null) sort=Sort.Direction.ASC;
+        return (dbService.getRoomsWithBookings(page, sort).stream()
+                .map(k -> roomMapper.mapToRoomWithBookingsDto(k))
+                .collect(Collectors.toList()));
+    }
+    @GetMapping("/rooms")
+    public List<RoomDto> getRooms(@RequestParam(required = false) Integer page, Sort.Direction sort) {
+        if(page==null||page<0) page=0;
+        if (sort==null) sort=Sort.Direction.ASC;
+        return (dbService.getRooms(page, sort).stream().map(k -> roomMapper.mapToRoomDto(k)).collect(Collectors.toList()));
+    }
+    @PutMapping("/rooms")
+    public RoomDto editRoom(@RequestBody RoomDto roomDto) {
+        Room room = roomMapper.mapToRoom(roomDto);
+        validator.validateRoomEdit(room);
+        return roomMapper.mapToRoomDto(dbService.editRoom(room));
+    }
+    @DeleteMapping("/rooms/{id}")
+    public void deleteRoom(@PathVariable Long id) {
+        dbService.deleteRoomById(id);
+    }
+
     //User
     @PostMapping("/users")
-    public UserWithBookingDto createUser(@RequestBody UserWithBookingDto userWithBookingDto) {
-        return userMapper.mapToUserWithBookingDto(dbService.saveUser(userMapper.mapToUser(userWithBookingDto)));
-    }
+    public UserDto createUser(@RequestBody UserDto userDto) {
+        User user = userMapper.mapToUser(userDto);
+        validator.validateUser(user);
+        return userMapper.mapToUserDto(dbService.saveUser(userMapper.mapToUser(userDto)));
+    };
+
     @GetMapping("/users/Bookings/{id}")
     public UserWithBookingDto getSingleUser(@PathVariable Long id) {
         return userMapper.mapToUserWithBookingDto(dbService.getUserById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such element")));
+                .orElseThrow(()->new ElementNotFoundException("No such user")));
     }
     @GetMapping("/users/Bookings")
     public List<UserWithBookingDto> getUsersWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
@@ -134,6 +182,7 @@ public class HotelBookingController {
     @PutMapping("/users")
     public UserDto editUser(@RequestBody UserDto userDto) {
         User user = userMapper.mapToUser(userDto);
+        validator.validateUserEdit(user);
         return userMapper.mapToUserDto(dbService.editUser(user));
     }
     @DeleteMapping("/users/{id}")
@@ -141,59 +190,18 @@ public class HotelBookingController {
         dbService.deleteUserById(id);
     }
 
-    //Room
-    @PostMapping("/rooms")
-    public RoomDto createRoom(@RequestBody RoomWithBookingsDto roomWithBookingsDto) {
-        return roomMapper.mapToRoomDto(dbService.saveRoom(roomMapper.mapToRoom(roomWithBookingsDto)));
-    }
-    @GetMapping("/rooms/Bookings/{id}")
-    public RoomWithBookingsDto getSingleRoom(@PathVariable Long id) {
-        return roomMapper.mapToRoomWithBookingsDto(dbService.getRoomById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such element")));
-    }
-    @GetMapping("/rooms/Bookings")
-    public List<RoomWithBookingsDto> getRoomsWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
-        if(page==null||page<0) page=0;
-        if (sort==null) sort=Sort.Direction.ASC;
-        return (dbService.getRoomsWithBookings(page, sort).stream()
-                .map(k -> roomMapper.mapToRoomWithBookingsDto(k))
-                .collect(Collectors.toList()));
-    }
-    @GetMapping("/rooms")
-    public List<RoomDto> getRooms(@RequestParam(required = false) Integer page, Sort.Direction sort) {
-        if(page==null||page<0) page=0;
-        if (sort==null) sort=Sort.Direction.ASC;
-        return (dbService.getRooms(page, sort).stream().map(k -> roomMapper.mapToRoomDto(k)).collect(Collectors.toList()));
-    }
-    @PutMapping("/rooms")
-    public RoomDto editRoom(@RequestBody RoomDto roomDto) {
-        Room room = roomMapper.mapToRoom(roomDto);
-        return roomMapper.mapToRoomDto(dbService.editRoom(room));
-    }
-    @DeleteMapping("/rooms/{id}")
-    public void deleteRoom(@PathVariable Long id) {
-        dbService.deleteRoomById(id);
-    }
-
     //Booking
     @PostMapping("/bookings")
     public BookingDto createBooking(@RequestBody BookingDto bookingDto) {
-    Long roomId = bookingDto.getRoomId();
-    Room room = dbService.getRoomById(roomId)
-            .orElseThrow(() -> new ElementNotFoundException("No such element"));
-    List<Booking> roomBookings = room.getBookings();
-    if (Validator.validateDate(bookingMapper.mapToBooking(bookingDto))) {
-         if (Validator.validateIfRoomFree(roomBookings, bookingMapper.mapToBooking(bookingDto))) {
-             return bookingMapper.mapToBookingDto(dbService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
-         }
-        throw new CreateBookingException("Room occupied in this time");
+        Booking booking = bookingMapper.mapToBooking(bookingDto);
+        validator.validateBooking(booking);
+        return bookingMapper.mapToBookingDto(dbService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
     }
-        throw new CreateBookingException("Wrong date");
-    }
+
     @GetMapping("/bookings/{id}")
     public BookingDto getSingleBooking(@PathVariable Long id) throws ElementNotFoundException {
         return bookingMapper.mapToBookingDto(dbService.getBookingById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such element")));
+                .orElseThrow(()->new ElementNotFoundException("No such booking")));
     }
     @GetMapping("/bookings")
     public List<BookingDto> getBookings(@RequestParam (required = false) Integer page, Sort.Direction sort) {
@@ -204,6 +212,7 @@ public class HotelBookingController {
     @PutMapping("/bookings")
     public BookingDto editBooking(@RequestBody BookingDto bookingDto) {
         Booking booking = bookingMapper.mapToBooking(bookingDto);
+        validator.validateBookingEdit(booking);
         return bookingMapper.mapToBookingDto(dbService.editBooking(booking));
     }
     @DeleteMapping("/bookings/{id}")

@@ -19,5 +19,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
 
     @Query("select h from Hotel h where h.localizationId in :ids")
     List<Hotel> findAllByLocalizationIdIn(@Param("ids") List<Long> list);
+    Hotel findHotelByNameAndHotelChain(String name, String hotelChain);
 
 }
