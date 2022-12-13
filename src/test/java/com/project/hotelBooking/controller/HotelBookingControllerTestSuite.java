@@ -1,14 +1,8 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.Hotel;
-import com.project.hotelBooking.domain.Localization;
-import com.project.hotelBooking.domain.Room;
-import com.project.hotelBooking.domain.User;
-import com.project.hotelBooking.repository.HotelRepository;
-import com.project.hotelBooking.repository.LocalizationRepository;
-import com.project.hotelBooking.repository.RoomRepository;
-import com.project.hotelBooking.repository.UserRepository;
+import com.project.hotelBooking.domain.*;
+import com.project.hotelBooking.repository.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,7 +38,10 @@ class HotelBookingControllerTestSuite {
     private RoomRepository roomRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BookingRepository bookingRepository;
 
+    //Localization
     @Test
     public void shouldCreateLocalization() throws Exception {
 
@@ -191,6 +188,7 @@ class HotelBookingControllerTestSuite {
         assertEquals(localizationsNumberBefore-1, localizationsNumberAfter);
     }
 
+    //Hotel
     @Test
     public void shouldCreateHotel() throws Exception {
 
@@ -392,6 +390,7 @@ class HotelBookingControllerTestSuite {
         localizationRepository.delete(newLocalization);
     }
 
+    //Room
     @Test
     public void shouldCreateRoom() throws Exception {
 
@@ -599,6 +598,7 @@ class HotelBookingControllerTestSuite {
         assertEquals(roomsNumberBefore-1, roomsNumberAfter);
     }
 
+    //User
     @Test
     public void shouldCreateUser() throws Exception {
 
@@ -741,7 +741,7 @@ class HotelBookingControllerTestSuite {
 
         //given
         User newUser = new User();
-        newUser.setFirstName("Poul");
+        newUser.setFirstName("Paul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
         userRepository.save(newUser);
@@ -756,6 +756,249 @@ class HotelBookingControllerTestSuite {
 
         //then
         assertEquals(usersNumberBefore-1, usersNumberAfter);
+    }
+
+    //Booking
+    @Test
+    public void shouldCreateBooking() throws Exception {
+
+        //given
+        Room newRoom = new Room();
+        newRoom.setRoomNumber(15);
+        newRoom.setNumberOfPersons(2);
+        newRoom.setStandard(4);
+        roomRepository.save(newRoom);
+
+        User newUser = new User();
+        newUser.setFirstName("Poul");
+        newUser.setLastName("Smith");
+        newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        userRepository.save(newUser);
+
+        Booking newBooking = new Booking();
+        newBooking.setUserId(newUser.getId());
+        newBooking.setRoomId(newRoom.getId());
+        newBooking.setStart_date(LocalDate.of(2023,07,10));
+        newBooking.setEnd_date(LocalDate.of(2023,07,12));
+
+        final String jsonContentNewBooking = objectMapper.writeValueAsString(newBooking);
+        int bookingsNumberBefore = bookingRepository.findAllBookings(Pageable.unpaged()).size();
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/v1/bookings")
+                        .content(jsonContentNewBooking)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        //then
+        Booking booking = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Booking.class);
+        int bookingsNumberAfter = bookingRepository.findAllBookings(Pageable.unpaged()).size();
+        assertEquals(newBooking.getUserId(), booking.getUserId());
+        assertEquals(newBooking.getRoomId(), booking.getRoomId());
+        assertEquals(newBooking.getStart_date(), booking.getStart_date());
+        assertEquals(newBooking.getEnd_date(), booking.getEnd_date());
+        assertEquals(bookingsNumberBefore+1, bookingsNumberAfter);
+
+        bookingRepository.delete(booking);
+        roomRepository.delete(newRoom);
+        userRepository.delete(newUser);
+    }
+
+    @Test
+    public void shouldGetSingleBooking() throws Exception {
+
+        //given
+        Room newRoom = new Room();
+        newRoom.setRoomNumber(15);
+        newRoom.setNumberOfPersons(2);
+        newRoom.setStandard(4);
+        roomRepository.save(newRoom);
+
+        User newUser = new User();
+        newUser.setFirstName("Poul");
+        newUser.setLastName("Smith");
+        newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        userRepository.save(newUser);
+
+        Booking newBooking = new Booking();
+        newBooking.setUserId(newUser.getId());
+        newBooking.setRoomId(newRoom.getId());
+        newBooking.setStart_date(LocalDate.of(2023,07,10));
+        newBooking.setEnd_date(LocalDate.of(2023,07,12));
+        bookingRepository.save(newBooking);
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/bookings/"+newBooking.getId()))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        //then
+        Booking booking = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Booking.class);
+        assertEquals(newBooking.getId(), booking.getId());
+        assertEquals(newBooking.getUserId(), booking.getUserId());
+        assertEquals(newBooking.getRoomId(), booking.getRoomId());
+        assertEquals(newBooking.getStart_date(), booking.getStart_date());
+        assertEquals(newBooking.getEnd_date(), booking.getEnd_date());
+
+        bookingRepository.delete(newBooking);
+        roomRepository.delete(newRoom);
+        userRepository.delete(newUser);
+    }
+
+    @Test
+    public void shouldGetMultipleBookings() throws Exception {
+
+        //given
+        Room newRoom = new Room();
+        newRoom.setRoomNumber(15);
+        newRoom.setNumberOfPersons(2);
+        newRoom.setStandard(4);
+        roomRepository.save(newRoom);
+
+        User newUser = new User();
+        newUser.setFirstName("Poul");
+        newUser.setLastName("Smith");
+        newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        userRepository.save(newUser);
+
+        Booking newBooking1 = new Booking();
+        newBooking1.setUserId(newUser.getId());
+        newBooking1.setRoomId(newRoom.getId());
+        newBooking1.setStart_date(LocalDate.of(2023,07,10));
+        newBooking1.setEnd_date(LocalDate.of(2023,07,12));
+        Booking newBooking2 = new Booking();
+        newBooking2.setUserId(newUser.getId());
+        newBooking2.setRoomId(newRoom.getId());
+        newBooking2.setStart_date(LocalDate.of(2023,07,15));
+        newBooking2.setEnd_date(LocalDate.of(2023,07,18));
+        Booking newBooking3 = new Booking();
+        newBooking3.setUserId(newUser.getId());
+        newBooking3.setRoomId(newRoom.getId());
+        newBooking3.setStart_date(LocalDate.of(2023,07,20));
+        newBooking3.setEnd_date(LocalDate.of(2023,07,23));
+        bookingRepository.save(newBooking1);
+        bookingRepository.save(newBooking2);
+        bookingRepository.save(newBooking3);
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/bookings"))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        //then
+        Booking[] bookingsArray=objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Booking[].class);
+        List<Booking> bookings =new ArrayList<>((Arrays.asList(bookingsArray)));
+
+        assertEquals(3, bookings.size());
+        assertEquals(newBooking3.getId(), bookings.get(2).getId());
+        assertEquals(newBooking3.getUserId(), bookings.get(2).getUserId());
+        assertEquals(newBooking3.getRoomId(), bookings.get(2).getRoomId());
+        assertEquals(newBooking3.getStart_date(), bookings.get(2).getStart_date());
+        assertEquals(newBooking3.getEnd_date(), bookings.get(2).getEnd_date());
+
+        bookingRepository.delete(newBooking1);
+        bookingRepository.delete(newBooking2);
+        bookingRepository.delete(newBooking3);
+        roomRepository.delete(newRoom);
+        userRepository.delete(newUser);
+    }
+
+    @Test
+    public void shouldEditBooking() throws Exception {
+
+        //given
+        Room newRoom = new Room();
+        newRoom.setRoomNumber(15);
+        newRoom.setNumberOfPersons(2);
+        newRoom.setStandard(4);
+        roomRepository.save(newRoom);
+
+        User newUser = new User();
+        newUser.setFirstName("Poul");
+        newUser.setLastName("Smith");
+        newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        userRepository.save(newUser);
+
+        Booking newBooking = new Booking();
+        newBooking.setUserId(newUser.getId());
+        newBooking.setRoomId(newRoom.getId());
+        newBooking.setStart_date(LocalDate.of(2023,07,10));
+        newBooking.setEnd_date(LocalDate.of(2023,07,12));
+        bookingRepository.save(newBooking);
+
+        Booking bookingEdited = new Booking();
+        bookingEdited.setId(newBooking.getId());
+        bookingEdited.setUserId(newUser.getId());
+        bookingEdited.setRoomId(newRoom.getId());
+        bookingEdited.setStart_date(LocalDate.of(2023,07,12));
+        bookingEdited.setEnd_date(LocalDate.of(2023,07,15));
+        final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/v1/bookings")
+                        .content(jsonContentBookingEdited)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        Booking bookingGet = bookingRepository.findById(bookingEdited.getId()).orElseThrow();
+
+        //then
+        Booking booking = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Booking.class);
+        assertEquals(bookingEdited.getId(), booking.getId());
+        assertEquals(bookingEdited.getUserId(), booking.getUserId());
+        assertEquals(bookingEdited.getRoomId(), booking.getRoomId());
+        assertEquals(bookingEdited.getStart_date(), booking.getStart_date());
+        assertEquals(bookingEdited.getEnd_date(), booking.getEnd_date());
+
+        bookingRepository.delete(booking);
+        roomRepository.delete(newRoom);
+        userRepository.delete(newUser);
+    }
+
+    @Test
+    public void shouldDeleteBooking() throws Exception {
+
+        //given
+        Room newRoom = new Room();
+        newRoom.setRoomNumber(15);
+        newRoom.setNumberOfPersons(2);
+        newRoom.setStandard(4);
+        roomRepository.save(newRoom);
+
+        User newUser = new User();
+        newUser.setFirstName("Poul");
+        newUser.setLastName("Smith");
+        newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        userRepository.save(newUser);
+
+        Booking newBooking = new Booking();
+        newBooking.setUserId(newUser.getId());
+        newBooking.setRoomId(newRoom.getId());
+        newBooking.setStart_date(LocalDate.of(2023,07,10));
+        newBooking.setEnd_date(LocalDate.of(2023,07,12));
+        bookingRepository.save(newBooking);
+        int bookingsNumberBefore=bookingRepository.findAllBookings(Pageable.unpaged()).size();
+
+        //when
+        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/bookings/"+newBooking.getId()))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200));
+
+        int bookingsNumberAfter=bookingRepository.findAllBookings(Pageable.unpaged()).size();
+
+        //then
+        assertEquals(bookingsNumberBefore-1, bookingsNumberAfter);
+
+        roomRepository.delete(newRoom);
+        userRepository.delete(newUser);
     }
 
 }

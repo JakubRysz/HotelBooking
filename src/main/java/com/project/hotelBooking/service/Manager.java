@@ -31,8 +31,8 @@ public class Manager {
         User userSaved1 = dbService.saveUser(user1);
         User userSaved2 = dbService.saveUser(user2);
 
-        Booking booking1 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.of(2022, 11, 17), LocalDate.of(2022, 11, 21));
-        Booking booking2 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.of(2022, 12, 11), LocalDate.of(2022, 12, 15));
+        Booking booking1 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.of(2023, 02, 17), LocalDate.of(2023, 02, 21));
+        Booking booking2 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.of(2023, 02, 11), LocalDate.of(2023, 02, 15));
 
         dbService.saveBooking(booking1);
         dbService.saveBooking(booking2);

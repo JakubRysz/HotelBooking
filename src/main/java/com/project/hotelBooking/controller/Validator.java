@@ -8,6 +8,7 @@ import com.project.hotelBooking.service.DbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 @Component
 public class Validator {
@@ -117,6 +118,7 @@ public class Validator {
 
     private void validateBookingData(Booking booking) {
         if (booking==null
+           || booking.getStart_date().isBefore(LocalDate.now())
            || booking.getStart_date().isAfter(booking.getEnd_date())
            ||booking.getStart_date().equals(booking.getEnd_date())) throw new BadRequestException("Bad booking date");
     }
