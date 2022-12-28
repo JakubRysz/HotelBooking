@@ -3,6 +3,7 @@ package com.project.hotelBooking.mapper;
 import com.project.hotelBooking.domain.Room;
 import com.project.hotelBooking.domain.RoomDto;
 import com.project.hotelBooking.domain.RoomWithBookingsDto;
+import com.project.hotelBooking.domain.RoomWithBookingsWithoutUsersDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +53,17 @@ public class RoomMapper {
                 roomWithBookingsDto.getStandard(),
                 roomWithBookingsDto.getHotelId(),
                 null
+        );
+    }
+
+    public RoomWithBookingsWithoutUsersDto mapToRoomWithBookingsWithoutUsersDto(Room room) {
+        return new RoomWithBookingsWithoutUsersDto(
+                room.getId(),
+                room.getRoomNumber(),
+                room.getNumberOfPersons(),
+                room.getStandard(),
+                room.getHotelId(),
+                room.getBookings().stream().map(booking -> bookingMapper.mapToBookingWithoutUserDto(booking)).collect(Collectors.toList())
         );
     }
 }

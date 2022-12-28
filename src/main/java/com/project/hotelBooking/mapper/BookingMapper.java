@@ -2,6 +2,7 @@ package com.project.hotelBooking.mapper;
 
 import com.project.hotelBooking.domain.Booking;
 import com.project.hotelBooking.domain.BookingDto;
+import com.project.hotelBooking.domain.BookingWithoutUserDto;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,6 +17,7 @@ public class BookingMapper {
 
         );
     }
+
     public Booking mapToBooking(BookingDto bookingDto) {
         return new Booking(
                 bookingDto.getId(),
@@ -24,6 +26,15 @@ public class BookingMapper {
                 bookingDto.getStart_date(),
                 bookingDto.getEnd_date()
 
+        );
+    }
+
+    public BookingWithoutUserDto mapToBookingWithoutUserDto(Booking booking) {
+        return new BookingWithoutUserDto(
+                booking.getId(),
+                booking.getRoomId(),
+                booking.getStart_date(),
+                booking.getEnd_date()
         );
     }
 }

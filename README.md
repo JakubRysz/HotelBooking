@@ -327,7 +327,7 @@ Sample body:
 ```bash
 Method: GET   URL: http://localhost:8080/v1/bookings?page=0&sort=ASC
 ```
-5.3 Get one booking by ID
+5.3 Get one booking by Id
 ```bash
 Method: GET   URL: http://localhost:8080/v1/bookings/{id}
 ```

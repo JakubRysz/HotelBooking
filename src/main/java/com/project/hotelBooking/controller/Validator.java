@@ -4,7 +4,7 @@ import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementAlreadyExistException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
-import com.project.hotelBooking.service.DbService;
+import com.project.hotelBooking.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +14,20 @@ import java.util.List;
 public class Validator {
 
     @Autowired
-    DbService dbService;
+    private LocalizationService localizationService;
+    @Autowired
+    private HotelService hotelService;
+    @Autowired
+    private RoomService roomService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BookingService bookingService;
 
     //Localization
     public void validateLocalization(Localization localization) {
         validateLocalizationData(localization);
-        Localization l = dbService.getLocalization(localization);
+        Localization l = localizationService.getLocalization(localization);
         if (l!=null) throw new ElementAlreadyExistException("Localization already exist");
     }
     public void validateLocalizationEdit(Localization localization) {
@@ -32,13 +40,13 @@ public class Validator {
                 || localization.getCountry().length()<2) throw new BadRequestException("Bad localization data");
     }
     private void validateIfLocalizationExistById(Long id) {
-        dbService.getLocalizationById(id).orElseThrow(()->new ElementNotFoundException("No such localization"));
+        localizationService.getLocalizationById(id).orElseThrow(()->new ElementNotFoundException("No such localization"));
     }
 
     //Hotel
     public void validateHotel(Hotel hotel) {
         validateHotelData(hotel);
-        Hotel h = dbService.getHotel(hotel);
+        Hotel h = hotelService.getHotel(hotel);
         if (h!=null) throw new ElementAlreadyExistException("Hotel already exist");
         validateIfLocalizationExistById(hotel.getLocalizationId());
 
@@ -56,13 +64,13 @@ public class Validator {
     }
 
     private void validateIfHotelExistById(Long id) {
-        dbService.getHotelById(id).orElseThrow(()->new ElementNotFoundException("No such hotel"));
+        hotelService.getHotelById(id).orElseThrow(()->new ElementNotFoundException("No such hotel"));
     }
 
     //Room
     public void validateRoom(Room room) {
         validateRoomData(room);
-        Room r = dbService.getRoom(room);
+        Room r = roomService.getRoom(room);
         if (r!=null) throw new ElementAlreadyExistException("Room already exist");
         validateIfHotelExistById(room.getHotelId());
     }
@@ -78,13 +86,15 @@ public class Validator {
                 || room.getStandard()>5) throw new BadRequestException("Bad room data");
     }
     private void validateIfRoomExistById(Long id) {
-        Room r = dbService.getRoomById(id).orElseThrow(()->new ElementNotFoundException("No such room"));
+        Room r = roomService.getRoomById(id).orElseThrow(()->new ElementNotFoundException("No such room"));
     }
 
     //User
     public void validateUser(User user) {
         validateUserData(user);
-        User u = dbService.getUser(user);
+        User u = userService.getUser(user);
+        if (u!=null) throw new ElementAlreadyExistException("User already exist");
+        u = userService.getUserByUsername(user.getUsername());
         if (u!=null) throw new ElementAlreadyExistException("User already exist");
     }
     public void validateUserEdit(User user) {
@@ -95,11 +105,15 @@ public class Validator {
         if (user==null
                 || user.getDateOfBirth()==null
                 || user.getFirstName().length()<2
-                ||user.getLastName().length()<2) throw new BadRequestException("Bad user data");
+                || user.getLastName().length()<2
+                || user.getUsername().length()<2
+                || user.getPassword().length()<2
+                || user.getRole().length()<2)  throw new BadRequestException("Bad user data");
     }
     private void  validateIfUserExistById(Long id) {
-        User u = dbService.getUserById(id).orElseThrow(()->new ElementNotFoundException("No such user"));
+        User u = userService.getUserById(id).orElseThrow(()->new ElementNotFoundException("No such user"));
     }
+
 
     //Booking
     public void validateBooking(Booking booking) {
@@ -116,6 +130,11 @@ public class Validator {
         validateIfBookingExistById(booking.getId());
     }
 
+    public void validateBookingEditUser(Booking booking, Long userId) {
+        validateBookingEdit(booking);
+        if (userId!=booking.getUserId()) throw new BadRequestException("No privileges to change user id");
+    }
+
     private void validateBookingData(Booking booking) {
         if (booking==null
            || booking.getStart_date().isBefore(LocalDate.now())
@@ -125,7 +144,7 @@ public class Validator {
 
     private void validateIfRoomIsFree(Booking booking) {
         Long roomId = booking.getRoomId();
-        Room room = dbService.getRoomById(roomId)
+        Room room = roomService.getRoomById(roomId)
                 .orElseThrow(() -> new ElementNotFoundException("No such room"));
         List<Booking> roomBookings = room.getBookings();
         boolean roomIsFree = false;
@@ -139,6 +158,6 @@ public class Validator {
         }
     }
     private void validateIfBookingExistById(Long id) {
-        dbService.getBookingById(id).orElseThrow(()->new ElementNotFoundException("No such booking"));
+        bookingService.getBookingById(id).orElseThrow(()->new ElementNotFoundException("No such booking"));
     }
 }

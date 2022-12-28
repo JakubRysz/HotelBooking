@@ -1,18 +1,24 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.hotelBooking.config.SecurityConfig;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.repository.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import springfox.documentation.swagger.web.SecurityConfiguration;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+//@WebMvcTest(HotelBookingController.class)
+//@Import(SecurityConfiguration.class)
 class HotelBookingControllerTestSuite {
 
     @Autowired
@@ -43,6 +51,7 @@ class HotelBookingControllerTestSuite {
 
     //Localization
     @Test
+    @WithMockUser(roles={"ADMIN"})
     public void shouldCreateLocalization() throws Exception {
 
         //given
@@ -607,6 +616,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         final String jsonContentNewUser = objectMapper.writeValueAsString(newUser);
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
 
@@ -638,6 +650,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
 
         //when
@@ -665,14 +680,23 @@ class HotelBookingControllerTestSuite {
         newUser1.setFirstName("Poul");
         newUser1.setLastName("Smith");
         newUser1.setDateOfBirth(LocalDate.of(1991,2,15));
+        newUser1.setUsername("poulsmith");
+        newUser1.setPassword("poulsmith123");
+        newUser1.setRole("USER");
         User newUser2 = new User();
         newUser2.setFirstName("Jan");
         newUser2.setLastName("Kowalski");
         newUser2.setDateOfBirth(LocalDate.of(1992,3,15));
+        newUser2.setUsername("jankowalski");
+        newUser2.setPassword("jankowalski123");
+        newUser2.setRole("USER");
         User newUser3 = new User();
         newUser3.setFirstName("Cris");
         newUser3.setLastName("Brown");
         newUser3.setDateOfBirth(LocalDate.of(1993,4,15));
+        newUser3.setUsername("crisbrown");
+        newUser3.setPassword("crisbrown123");
+        newUser3.setRole("USER");
         userRepository.save(newUser1);
         userRepository.save(newUser2);
         userRepository.save(newUser3);
@@ -706,6 +730,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
 
         User userEdited = new User();
@@ -713,6 +740,9 @@ class HotelBookingControllerTestSuite {
         userEdited.setFirstName("Poul");
         userEdited.setLastName("Smith");
         userEdited.setDateOfBirth(LocalDate.of(1982,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
 
         //when
@@ -744,6 +774,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Paul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
         int usersNumberBefore=userRepository.findAllUsers(Pageable.unpaged()).size();
 
@@ -773,6 +806,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
 
         Booking newBooking = new Booking();
@@ -821,6 +857,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
 
         Booking newBooking = new Booking();
@@ -863,6 +902,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
 
         Booking newBooking1 = new Booking();
@@ -922,6 +964,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
 
         Booking newBooking = new Booking();
@@ -977,6 +1022,9 @@ class HotelBookingControllerTestSuite {
         newUser.setFirstName("Poul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
+        newUser.setUsername("poulsmith");
+        newUser.setPassword("poulsmith123");
+        newUser.setRole("USER");
         userRepository.save(newUser);
 
         Booking newBooking = new Booking();
