@@ -77,6 +77,7 @@ public class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/rooms/{id}")
     public void deleteRoom(@PathVariable Long id) {
+        validator.validateIfRoomExistById(id);
         roomService.deleteRoomById(id);
     }
 

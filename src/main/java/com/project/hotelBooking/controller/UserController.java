@@ -50,7 +50,6 @@ public class UserController {
     @GetMapping("/users/own/Bookings/")
     public UserWithBookingDto getSingleUserOwner() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getName());
         return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()));
     }
     @PreAuthorize("hasRole('ADMIN')")
@@ -81,6 +80,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
+        validator.validateIfUserExistById(id);
         userService.deleteUserById(id);
     }
 

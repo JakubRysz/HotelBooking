@@ -40,7 +40,6 @@ public class BookingController {
     @PostMapping("/bookings/own")
     public BookingDto createOwnBooking(@RequestBody BookingDto bookingDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getName());
         User user = userService.getUserByUsername(auth.getName());
         bookingDto.setUserId(user.getId());
         Booking booking = bookingMapper.mapToBooking(bookingDto);
@@ -65,7 +64,6 @@ public class BookingController {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getName());
         User user = userService.getUserByUsername(auth.getName());
         return (bookingService.getBookingsByUserId(user.getId(),page, sort).stream().map(k -> bookingMapper.mapToBookingDto(k)).collect(Collectors.toList()));
     }
@@ -73,23 +71,38 @@ public class BookingController {
     @PutMapping("/bookings")
     public BookingDto editBooking(@RequestBody BookingDto bookingDto) {
         Booking booking = bookingMapper.mapToBooking(bookingDto);
-        validator.validateBookingEdit(booking);
+        Booking oldBooking = bookingService.getBookingById(booking.getId())
+                .orElseThrow(() -> new ElementNotFoundException("No such booking"));
+        validator.validateBookingEdit(booking, oldBooking);
+        booking.setId(oldBooking.getId());
         return bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
     }
+
     @PutMapping("/bookings/own")
     public BookingDto editOwnBooking(@RequestBody BookingDto bookingDto) {
         Booking booking = bookingMapper.mapToBooking(bookingDto);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getName());
         User user = userService.getUserByUsername(auth.getName());
-        validator.validateBookingEditUser(booking, user.getId());
+        Booking oldBooking = bookingService.getBookingById(booking.getId())
+                .orElseThrow(() -> new ElementNotFoundException("No such booking"));
+        validator.validateBookingEditUser(booking, oldBooking, user.getId());
+        booking.setId(oldBooking.getId());
         return bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
     }
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/bookings/{id}")
     public void deleteBooking(@PathVariable Long id) {
+        validator.validateIfBookingExistById(id);
         bookingService.deleteBookingById(id);
     }
-
-
+    @DeleteMapping("/bookings/own/{id}")
+    public void deleteOwnBooking(@PathVariable Long id) {
+        validator.validateIfBookingExistById(id);
+        Booking booking = bookingService.getBookingById(id)
+                .orElseThrow(()->new ElementNotFoundException("No such booking"));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.getUserByUsername(auth.getName());
+        validator.validateIfUserIsOwnerOfBooking(booking, user.getId());
+        bookingService.deleteBookingById(id);
+    }
 }

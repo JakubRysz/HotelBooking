@@ -39,7 +39,7 @@ public class Validator {
                 || localization.getCity().length()<2
                 || localization.getCountry().length()<2) throw new BadRequestException("Bad localization data");
     }
-    private void validateIfLocalizationExistById(Long id) {
+    protected void validateIfLocalizationExistById(Long id) {
         localizationService.getLocalizationById(id).orElseThrow(()->new ElementNotFoundException("No such localization"));
     }
 
@@ -63,7 +63,7 @@ public class Validator {
                 || hotel.getHotelChain().length()<2) throw new BadRequestException("Bad hotel data");
     }
 
-    private void validateIfHotelExistById(Long id) {
+    protected void validateIfHotelExistById(Long id) {
         hotelService.getHotelById(id).orElseThrow(()->new ElementNotFoundException("No such hotel"));
     }
 
@@ -85,7 +85,7 @@ public class Validator {
                 || room.getStandard()<1
                 || room.getStandard()>5) throw new BadRequestException("Bad room data");
     }
-    private void validateIfRoomExistById(Long id) {
+    protected void validateIfRoomExistById(Long id) {
         Room r = roomService.getRoomById(id).orElseThrow(()->new ElementNotFoundException("No such room"));
     }
 
@@ -110,7 +110,7 @@ public class Validator {
                 || user.getPassword().length()<2
                 || user.getRole().length()<2)  throw new BadRequestException("Bad user data");
     }
-    private void  validateIfUserExistById(Long id) {
+    protected void  validateIfUserExistById(Long id) {
         User u = userService.getUserById(id).orElseThrow(()->new ElementNotFoundException("No such user"));
     }
 
@@ -122,16 +122,24 @@ public class Validator {
         validateIfRoomExistById(booking.getRoomId());
         validateIfRoomIsFree(booking);
     }
-    public void validateBookingEdit(Booking booking) {
+    public void validateBookingEdit(Booking booking, Booking oldBooking) {
+        validateIfBookingExistById(booking.getId());
         validateBookingData(booking);
         validateIfUserExistById(booking.getUserId());
         validateIfRoomExistById(booking.getRoomId());
-        validateIfRoomIsFree(booking);
-        validateIfBookingExistById(booking.getId());
+        Booking oldBookingEdit=oldBooking;
+        oldBookingEdit.setStart_date(LocalDate.now().minusDays(2));
+        oldBookingEdit.setEnd_date(LocalDate.now().minusDays(1));
+        bookingService.editBooking(oldBookingEdit);
+        try {
+            validateIfRoomIsFree(booking);
+        } catch (Exception e) {
+            bookingService.editBooking(oldBooking);
+            throw e;
+        }
     }
-
-    public void validateBookingEditUser(Booking booking, Long userId) {
-        validateBookingEdit(booking);
+    public void validateBookingEditUser(Booking booking, Booking oldBooking, Long userId) {
+        validateBookingEdit(booking, oldBooking);
         if (userId!=booking.getUserId()) throw new BadRequestException("No privileges to change user id");
     }
 
@@ -157,7 +165,11 @@ public class Validator {
             }
         }
     }
-    private void validateIfBookingExistById(Long id) {
+    protected void validateIfBookingExistById(Long id) {
         bookingService.getBookingById(id).orElseThrow(()->new ElementNotFoundException("No such booking"));
+    }
+    protected void validateIfUserIsOwnerOfBooking(Booking booking, Long userId) {
+        if (booking.getUserId()!=userId)
+            throw new BadRequestException("User is not owner of booking with id:"+booking.getId());
     }
 }

@@ -63,6 +63,7 @@ public class HotelController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/hotels/{id}")
     public void deleteHotel(@PathVariable Long id) {
+        validator.validateIfHotelExistById(id);
         hotelService.deleteHotelById(id);
     }
 }

@@ -34,7 +34,7 @@ public class Manager {
         Room roomSaved1 = roomService.saveRoom(room1);
         Room roomSaved2 = roomService.saveRoom(room2);
 
-        User user1 = new User(null, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","crisbrown123","ROLE_USER",null);
+        User user1 = new User(null, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER",null);
         User user2 = new User(null, "Cris", "Brown", LocalDate.of(1984, 2, 15),"crisbrown","crisbrown123","ROLE_ADMIN",null);
         User userSaved1 = userService.saveUser(user1);
         User userSaved2 = userService.saveUser(user2);

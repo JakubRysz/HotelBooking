@@ -63,6 +63,7 @@ public class LocalizationController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/localizations/{id}")
     public void deleteSingleLocalization(@PathVariable Long id) {
+        validator.validateIfLocalizationExistById(id);
         localizationService.deleteLocalizationById(id);
     }
 
