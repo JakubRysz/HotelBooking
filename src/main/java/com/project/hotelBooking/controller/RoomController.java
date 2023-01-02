@@ -7,6 +7,7 @@ import com.project.hotelBooking.domain.RoomWithBookingsDto;
 import com.project.hotelBooking.domain.RoomWithBookingsWithoutUsersDto;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.service.RoomService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,14 +18,12 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 public class RoomController {
 
-    @Autowired
-    private RoomService roomService;
-    @Autowired
-    private RoomMapper roomMapper;
-    @Autowired
-    private Validator validator;
+    private final RoomService roomService;
+    private final RoomMapper roomMapper;
+    private final Validator validator;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/rooms")
@@ -53,7 +52,7 @@ public class RoomController {
                 .map(k -> roomMapper.mapToRoomWithBookingsDto(k))
                 .collect(Collectors.toList()));
     }
-    @GetMapping("/rooms/BookingsWithoutUsers")
+    @GetMapping("/rooms/Bookings/WithoutUsers")
     public List<RoomWithBookingsWithoutUsersDto> getRoomsWithBookingsWithoutUsers(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;

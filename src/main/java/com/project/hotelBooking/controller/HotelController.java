@@ -6,6 +6,7 @@ import com.project.hotelBooking.domain.HotelDto;
 import com.project.hotelBooking.domain.HotelWithRoomsDto;
 import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.service.HotelService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,14 +17,12 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 public class HotelController {
 
-    @Autowired
-    private HotelService hotelService;
-    @Autowired
-    private Validator validator;
-    @Autowired
-    private HotelMapper hotelMapper;
+    private final HotelService hotelService;
+    private final Validator validator;
+    private final HotelMapper hotelMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/hotels")

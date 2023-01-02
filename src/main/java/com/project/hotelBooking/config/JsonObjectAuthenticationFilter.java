@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.config.LoginCredentials;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,8 +16,10 @@ import java.io.IOException;
 
 public class JsonObjectAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
-    public JsonObjectAuthenticationFilter(ObjectMapper objectMapper) {
+    private  final AuthenticationManager authenticationManager;
+    public JsonObjectAuthenticationFilter(ObjectMapper objectMapper, AuthenticationManager authenticationManager) {
         this.objectMapper = objectMapper;
+        this.authenticationManager=authenticationManager;
     }
 
     @Override
@@ -37,12 +40,6 @@ public class JsonObjectAuthenticationFilter extends UsernamePasswordAuthenticati
         } catch (IOException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
-
-/*
-        String password = "123";
-        PasswordEncoder passwordEncoder = (PasswordEncoder) new BCryptPasswordEncoder();
-        String encodedPassword = ((BCryptPasswordEncoder) passwordEncoder).encode(password);
-        return new MyUserPrincipal(grantedAuths,encodedPassword,userName);*/
 
     }
 }

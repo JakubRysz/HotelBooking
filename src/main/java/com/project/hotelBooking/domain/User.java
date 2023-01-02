@@ -35,6 +35,8 @@ public class User implements UserDetails {
     private String password;
     @Column(name="ROLE")
     private String role;
+    @Column(name="EMAIL")
+    private String email;
 
 
     @OneToMany(cascade = CascadeType.REMOVE)

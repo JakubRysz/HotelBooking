@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.regex.Pattern;
+
 @Component
 public class Validator {
 
@@ -102,18 +104,34 @@ public class Validator {
         validateIfUserExistById(user.getId());
     }
     private void validateUserData(User user) {
-        if (user==null
-                || user.getDateOfBirth()==null
-                || user.getFirstName().length()<2
-                || user.getLastName().length()<2
-                || user.getUsername().length()<2
-                || user.getPassword().length()<2
-                || user.getRole().length()<2)  throw new BadRequestException("Bad user data");
+        if (user == null
+                || user.getDateOfBirth() == null
+                || user.getFirstName().length() < 2
+                || user.getLastName().length() < 2
+                || user.getUsername().length() < 2
+                || user.getPassword().length() < 2
+                || user.getRole().length() < 2) throw new BadRequestException("Bad user data");
+
+        validateEmail(user.getEmail());
+        validateIfEmailAlreadyExist(user.getEmail());
     }
+
     protected void  validateIfUserExistById(Long id) {
         User u = userService.getUserById(id).orElseThrow(()->new ElementNotFoundException("No such user"));
     }
 
+    private void validateEmail(String emailAddress) {
+        String regexPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*"
+                +"@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+        if(!Pattern.compile(regexPattern)
+                .matcher(emailAddress)
+                .matches()) throw new BadRequestException("Bad e-mail data");
+    }
+
+    private void validateIfEmailAlreadyExist(String email) {
+        User u = userService.getUserByEmail(email).orElse(null);
+        if (u!=null) throw new ElementAlreadyExistException("User with e-mail: "+u.getEmail()+" already exist");
+    }
 
     //Booking
     public void validateBooking(Booking booking) {

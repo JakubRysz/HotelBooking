@@ -13,5 +13,9 @@ public class UserWithBookingDto {
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
+    private String username;
+    private String password;
+    private String role;
+    private String email;
     private List<Booking> bookings;
 }

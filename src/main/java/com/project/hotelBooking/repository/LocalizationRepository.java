@@ -13,6 +13,7 @@ import java.util.List;
 public interface LocalizationRepository extends JpaRepository<Localization, Long> {
     @Query("SELECT l from Localization l")
     List<Localization> findAllLocalizations(Pageable page);
+
     Localization findLocalizationByCityAndCountry(String cityName, String CountryName);
 }
 

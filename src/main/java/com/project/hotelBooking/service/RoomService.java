@@ -5,6 +5,7 @@ import com.project.hotelBooking.domain.Room;
 import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -15,12 +16,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RoomService {
 
-    @Autowired
-    private RoomRepository roomRepository;
-    @Autowired
-    private BookingRepository bookingRepository;
+    private final RoomRepository roomRepository;
+    private final BookingRepository bookingRepository;
     private static final int PAGE_SIZE=5;
 
     public Room getRoom(Room room) { return roomRepository.findRoomByRoomNumberAndHotelId(

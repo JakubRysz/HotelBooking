@@ -6,6 +6,7 @@ import com.project.hotelBooking.domain.User;
 import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,20 +21,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private static final int PAGE_SIZE=5;
 
     public User getUser(User user) { return userRepository.findUserByFirstNameAndLastNameAndDateOfBirth(
             user.getFirstName(), user.getLastName(), user.getDateOfBirth());}
 
     public User getUserByUsername(String username) { return userRepository.findByUsername(username).orElse(null);}
+    public Optional<User> getUserByEmail(String email) { return userRepository.findByEmail(email);}
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -59,7 +59,7 @@ public class UserService {
                 .filter(booking -> booking.getUserId()==id).collect(Collectors.toList());
     }
     public User editUser(User user) {
-        return userRepository.save(user);
+        return saveUser(user);
     }
     public void deleteAllUsers() {
         userRepository.deleteAll();

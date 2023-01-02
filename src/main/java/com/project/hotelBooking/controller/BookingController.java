@@ -1,13 +1,10 @@
 package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.domain.Booking;
-import com.project.hotelBooking.domain.BookingDto;
-import com.project.hotelBooking.domain.User;
+import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.mapper.BookingMapper;
-import com.project.hotelBooking.service.BookingService;
-import com.project.hotelBooking.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.project.hotelBooking.service.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -19,24 +16,29 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 public class BookingController {
 
-    @Autowired
-    private BookingService bookingService;
-    @Autowired
-    private BookingMapper bookingMapper;
-    @Autowired
-    private Validator validator;
-    @Autowired
-    private UserService userService;
+    private final BookingService bookingService;
+    private final BookingMapper bookingMapper;
+    private final Validator validator;
+    private final UserService userService;
+    private final RoomService roomService;
+    private final HotelService hotelService;
+    private final LocalizationService localizationService;
+    private final SimpleEmailService emailService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/bookings")
     public BookingDto createBooking(@RequestBody BookingDto bookingDto) {
         Booking booking = bookingMapper.mapToBooking(bookingDto);
         validator.validateBooking(booking);
-        return bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
+        BookingInfo bookingInfo = getInfoFromBooking(booking);
+        BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
+        emailService.sendMailCreatedBooking(bookingInfo);
+        return createdBooking;
     }
+
     @PostMapping("/bookings/own")
     public BookingDto createOwnBooking(@RequestBody BookingDto bookingDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -44,7 +46,10 @@ public class BookingController {
         bookingDto.setUserId(user.getId());
         Booking booking = bookingMapper.mapToBooking(bookingDto);
         validator.validateBooking(booking);
-        return bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
+        BookingInfo bookingInfo = getInfoFromBooking(booking);
+        BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
+        emailService.sendMailCreatedBooking(bookingInfo);
+        return createdBooking;
     }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/bookings/{id}")
@@ -57,7 +62,7 @@ public class BookingController {
     public List<BookingDto> getBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
-        return (bookingService.getBookings(page, sort).stream().map(k -> bookingMapper.mapToBookingDto(k)).collect(Collectors.toList()));
+        return (bookingService.getBookings(page, sort).stream().map(bookingMapper::mapToBookingDto).collect(Collectors.toList()));
     }
     @GetMapping("/bookings/own")
     public List<BookingDto> getOwnBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
@@ -65,7 +70,7 @@ public class BookingController {
         if (sort==null) sort=Sort.Direction.ASC;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
-        return (bookingService.getBookingsByUserId(user.getId(),page, sort).stream().map(k -> bookingMapper.mapToBookingDto(k)).collect(Collectors.toList()));
+        return (bookingService.getBookingsByUserId(user.getId(),page, sort).stream().map(bookingMapper::mapToBookingDto).collect(Collectors.toList()));
     }
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/bookings")
@@ -75,9 +80,11 @@ public class BookingController {
                 .orElseThrow(() -> new ElementNotFoundException("No such booking"));
         validator.validateBookingEdit(booking, oldBooking);
         booking.setId(oldBooking.getId());
-        return bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
+        BookingInfo bookingInfo = getInfoFromBooking(booking);
+        BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
+        emailService.sendMailEditedBooking(bookingInfo);
+        return editedBooking;
     }
-
     @PutMapping("/bookings/own")
     public BookingDto editOwnBooking(@RequestBody BookingDto bookingDto) {
         Booking booking = bookingMapper.mapToBooking(bookingDto);
@@ -87,22 +94,39 @@ public class BookingController {
                 .orElseThrow(() -> new ElementNotFoundException("No such booking"));
         validator.validateBookingEditUser(booking, oldBooking, user.getId());
         booking.setId(oldBooking.getId());
-        return bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
+        BookingInfo bookingInfo = getInfoFromBooking(booking);
+        BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
+        emailService.sendMailEditedBooking(bookingInfo);
+        return editedBooking;
     }
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/bookings/{id}")
     public void deleteBooking(@PathVariable Long id) {
         validator.validateIfBookingExistById(id);
+        Booking bookingToDelete = bookingService.getBookingById(id).orElseThrow(()->new ElementNotFoundException("No such booking"));
+        BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
         bookingService.deleteBookingById(id);
+        emailService.sendMailDeletedBooking(bookingInfo);
     }
     @DeleteMapping("/bookings/own/{id}")
     public void deleteOwnBooking(@PathVariable Long id) {
         validator.validateIfBookingExistById(id);
-        Booking booking = bookingService.getBookingById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such booking"));
+        Booking bookingToDelete = bookingService.getBookingById(id).orElseThrow(()->new ElementNotFoundException("No such booking"));
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
-        validator.validateIfUserIsOwnerOfBooking(booking, user.getId());
+        validator.validateIfUserIsOwnerOfBooking(bookingToDelete, user.getId());
+        BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
         bookingService.deleteBookingById(id);
+        emailService.sendMailDeletedBooking(bookingInfo);
+    }
+
+    public BookingInfo getInfoFromBooking(Booking booking) {
+        BookingInfo bookingInfo = new BookingInfo();
+        bookingInfo.setBooking(booking);
+        bookingInfo.setRoom(roomService.getRoomById(booking.getRoomId()).orElseThrow(()->new ElementNotFoundException("No such room")));
+        bookingInfo.setHotel(hotelService.getHotelById(bookingInfo.getRoom().getHotelId()).orElseThrow(()->new ElementNotFoundException("No such hotel")));
+        bookingInfo.setLocalization(localizationService.getLocalizationById(bookingInfo.getHotel().getLocalizationId()).orElseThrow(()->new ElementNotFoundException("No such Localization")));
+        bookingInfo.setUser(userService.getUserById(booking.getUserId()).orElseThrow(()->new ElementNotFoundException("No such user")));
+        return bookingInfo;
     }
 }

@@ -15,9 +15,10 @@ public class UserMapper {
                 userWithBookingDto.getFirstName(),
                 userWithBookingDto.getLastName(),
                 userWithBookingDto.getDateOfBirth(),
-                null,
-                null,
-                null,
+                userWithBookingDto.getUsername(),
+                userWithBookingDto. getPassword(),
+                userWithBookingDto.getRole(),
+                userWithBookingDto.getEmail(),
                 userWithBookingDto.getBookings()
         );
     }
@@ -27,6 +28,10 @@ public class UserMapper {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getDateOfBirth(),
+                user.getUsername(),
+                user.getPassword(),
+                user.getRole(),
+                user.getEmail(),
                 user.getBookings()
         );
     }
@@ -39,7 +44,8 @@ public class UserMapper {
                     user.getDateOfBirth(),
                     user.getUsername(),
                     user.getPassword(),
-                    user.getRole()
+                    user.getRole(),
+                    user.getEmail()
             );
     }
     public User mapToUser(UserDto userDto) {
@@ -51,6 +57,7 @@ public class UserMapper {
                 userDto.getUsername(),
                 userDto.getPassword(),
                 userDto.getRole(),
+                userDto.getEmail(),
                 null
         );
     }

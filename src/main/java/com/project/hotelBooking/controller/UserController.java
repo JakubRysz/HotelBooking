@@ -5,8 +5,9 @@ import com.project.hotelBooking.domain.User;
 import com.project.hotelBooking.domain.UserDto;
 import com.project.hotelBooking.domain.UserWithBookingDto;
 import com.project.hotelBooking.mapper.UserMapper;
+import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,28 +19,31 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private Validator validator;
+    private final UserService userService;
+    private final UserMapper userMapper;
+    private final Validator validator;
+    private final SimpleEmailService emailService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
     public UserDto createUser(@RequestBody UserDto userDto) {
         User user = userMapper.mapToUser(userDto);
         validator.validateUser(user);
-        return userMapper.mapToUserDto(userService.saveUser(userMapper.mapToUser(userDto)));
+        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(userMapper.mapToUser(userDto)));
+        emailService.sendMailCreatedUser(user);
+        return userCreated;
     };
     @PostMapping("/users/registration")
     public UserDto createUserRegistration(@RequestBody UserDto userDto) {
         userDto.setRole("ROLE_USER");
         User user = userMapper.mapToUser(userDto);
         validator.validateUser(user);
-        return userMapper.mapToUserDto(userService.saveUser(userMapper.mapToUser(userDto)));
+        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(userMapper.mapToUser(userDto)));
+        emailService.sendMailCreatedUser(user);
+        return userCreated;
     };
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/Bookings/{id}")
@@ -75,13 +79,17 @@ public class UserController {
     public UserDto editUser(@RequestBody UserDto userDto) {
         User user = userMapper.mapToUser(userDto);
         validator.validateUserEdit(user);
-        return userMapper.mapToUserDto(userService.editUser(user));
+        UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
+        emailService.sendMailEditedUser(user);
+        return editedUser;
     }
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
         validator.validateIfUserExistById(id);
+        User userToDelete = userService.getUserById(id).orElseThrow(()->new ElementNotFoundException("No such user"));
         userService.deleteUserById(id);
+        emailService.sendMailDeletedUser(userToDelete);
     }
 
 }

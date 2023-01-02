@@ -6,6 +6,7 @@ import com.project.hotelBooking.domain.Localization;
 import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -16,14 +17,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class LocalizationService {
 
-    @Autowired
-    private LocalizationRepository localizationRepository;
-    @Autowired
-    private HotelRepository hotelRepository;
-    @Autowired
-    private HotelMapper hotelMapper;
+    private final LocalizationRepository localizationRepository;
+    private final HotelRepository hotelRepository;
+    private final HotelMapper hotelMapper;
     private static final int PAGE_SIZE=5;
 
     public Localization getLocalization(Localization localization) { return localizationRepository.findLocalizationByCityAndCountry(

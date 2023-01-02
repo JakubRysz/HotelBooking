@@ -1,10 +1,12 @@
 package com.project.hotelBooking.config;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class LoginCredentials {
-    private String Username;
-    private String Password;
+    private String username;
+    private String password;
 
 }

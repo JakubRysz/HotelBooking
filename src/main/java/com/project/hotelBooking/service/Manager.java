@@ -1,24 +1,27 @@
 package com.project.hotelBooking.service;
 
 import com.project.hotelBooking.domain.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 @Component
+@RequiredArgsConstructor
 public class Manager {
 
-    @Autowired
-    private LocalizationService localizationService;
-    @Autowired
-    private HotelService hotelService;
-    @Autowired
-    private RoomService roomService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private BookingService bookingService;
+    private final LocalizationService localizationService;
+    private final HotelService hotelService;
+    private final RoomService roomService;
+    private final UserService userService;
+    private final BookingService bookingService;
+    private final SimpleEmailService simpleEmailService;
+
+    @Value("${email_test}")
+    private String EMAIL_TEST;
+
 
     public void initializeDb() {
         Localization localization1 = new Localization(null, "Krakow", "Poland",null);
@@ -34,8 +37,8 @@ public class Manager {
         Room roomSaved1 = roomService.saveRoom(room1);
         Room roomSaved2 = roomService.saveRoom(room2);
 
-        User user1 = new User(null, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER",null);
-        User user2 = new User(null, "Cris", "Brown", LocalDate.of(1984, 2, 15),"crisbrown","crisbrown123","ROLE_ADMIN",null);
+        User user1 = new User(null, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER", EMAIL_TEST, null);
+        User user2 = new User(null, "Cris", "Brown", LocalDate.of(1984, 2, 15),"crisbrown","crisbrown123","ROLE_ADMIN",EMAIL_TEST,null);
         User userSaved1 = userService.saveUser(user1);
         User userSaved2 = userService.saveUser(user2);
 
@@ -44,6 +47,8 @@ public class Manager {
 
         bookingService.saveBooking(booking1);
         bookingService.saveBooking(booking2);
+
+        //simpleEmailService.send("kuba.rysz10@gmail.com", "Test", "Test message");
     }
 
     public void clearDb() {

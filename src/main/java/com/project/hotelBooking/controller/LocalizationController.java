@@ -6,6 +6,7 @@ import com.project.hotelBooking.domain.LocalizationDto;
 import com.project.hotelBooking.domain.LocalizationWithHotelsDto;
 import com.project.hotelBooking.mapper.LocalizationMapper;
 import com.project.hotelBooking.service.LocalizationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,14 +17,12 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 public class LocalizationController {
 
-    @Autowired
-    private LocalizationService localizationService;
-    @Autowired
-    private LocalizationMapper localizationMapper;
-    @Autowired
-    private Validator validator;
+    private final LocalizationService localizationService;
+    private final LocalizationMapper localizationMapper;
+    private final Validator validator;
 
     @PostMapping("/localizations")
     @PreAuthorize("hasRole('ADMIN')")
