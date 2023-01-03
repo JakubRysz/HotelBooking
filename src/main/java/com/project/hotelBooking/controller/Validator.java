@@ -5,7 +5,7 @@ import com.project.hotelBooking.controller.exceptions.ElementAlreadyExistExcepti
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -13,49 +13,66 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Component
+@RequiredArgsConstructor
 public class Validator {
 
-    @Autowired
-    private LocalizationService localizationService;
-    @Autowired
-    private HotelService hotelService;
-    @Autowired
-    private RoomService roomService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private BookingService bookingService;
+    private final LocalizationService localizationService;
+
+    private final HotelService hotelService;
+
+    private final RoomService roomService;
+
+    private final UserService userService;
+
+    private final BookingService bookingService;
+
 
     //Localization
     public void validateLocalization(Localization localization) {
         validateLocalizationData(localization);
-        Localization l = localizationService.getLocalization(localization);
-        if (l!=null) throw new ElementAlreadyExistException("Localization already exist");
+        validateIfLocalizationNotExistByCityAndCountry(localization);
     }
     public void validateLocalizationEdit(Localization localization) {
         validateLocalizationData(localization);
-        validateIfLocalizationExistById(localization.getId());
+        Localization localizationFromDatabase = validateIfLocalizationExistById(localization.getId());
+
+        if (!localization.getCity().equals(localizationFromDatabase.getCity())
+            || !localization.getCountry().equals(localizationFromDatabase.getCountry())) {
+            validateIfLocalizationNotExistByCityAndCountry(localization);
+        }
     }
     private void validateLocalizationData(Localization localization){
         if (localization==null
                 || localization.getCity().length()<2
                 || localization.getCountry().length()<2) throw new BadRequestException("Bad localization data");
     }
-    protected void validateIfLocalizationExistById(Long id) {
-        localizationService.getLocalizationById(id).orElseThrow(()->new ElementNotFoundException("No such localization"));
+    protected Localization validateIfLocalizationExistById(Long id) {
+        Localization localization =localizationService.getLocalizationById(id).orElseThrow(
+                ()->new ElementNotFoundException("No such localization"));
+        return localization;
     }
+
+    protected void validateIfLocalizationNotExistByCityAndCountry(Localization localization){
+        Localization l = localizationService.getLocalizationByCityAndCountry(localization);
+        if (l!=null) throw new ElementAlreadyExistException("Localization already exist");
+    }
+
 
     //Hotel
     public void validateHotel(Hotel hotel) {
         validateHotelData(hotel);
-        Hotel h = hotelService.getHotel(hotel);
-        if (h!=null) throw new ElementAlreadyExistException("Hotel already exist");
+        validateIfHotelNotExistByNameAndHotelChain(hotel);
         validateIfLocalizationExistById(hotel.getLocalizationId());
-
     }
     public void validateHotelEdit(Hotel hotel) {
         validateHotelData(hotel);
-        validateIfHotelExistById(hotel.getId());
+        Hotel hotelFromDatabase = validateIfHotelExistById(hotel.getId());
+        validateIfLocalizationExistById(hotel.getLocalizationId());
+
+        if(!hotel.getName().equals(hotelFromDatabase.getName())
+            ||!hotel.getHotelChain().equals(hotelFromDatabase.getHotelChain())) {
+            validateIfHotelNotExistByNameAndHotelChain(hotel);
+        }
     }
     private void validateHotelData(Hotel hotel) {
         if (hotel==null
@@ -65,20 +82,32 @@ public class Validator {
                 || hotel.getHotelChain().length()<2) throw new BadRequestException("Bad hotel data");
     }
 
-    protected void validateIfHotelExistById(Long id) {
-        hotelService.getHotelById(id).orElseThrow(()->new ElementNotFoundException("No such hotel"));
+    protected Hotel validateIfHotelExistById(Long id) {
+        Hotel hotel = hotelService.getHotelById(id).orElseThrow(
+                ()->new ElementNotFoundException("No such hotel"));
+        return hotel;
     }
+    protected void validateIfHotelNotExistByNameAndHotelChain(Hotel hotel) {
+        Hotel h = hotelService.getHotelByNameAndHotelChain(hotel);
+        if (h != null) throw new ElementAlreadyExistException("Hotel already exist");
+    }
+
 
     //Room
     public void validateRoom(Room room) {
         validateRoomData(room);
-        Room r = roomService.getRoom(room);
-        if (r!=null) throw new ElementAlreadyExistException("Room already exist");
+        validateIfRoomNotExistByRoomNumberAndHotelId(room);
         validateIfHotelExistById(room.getHotelId());
     }
     public void validateRoomEdit(Room room) {
         validateRoomData(room);
-        validateIfRoomExistById(room.getId());
+        Room roomFromDatabase = validateIfRoomExistById(room.getId());
+        validateIfHotelExistById(room.getHotelId());
+
+        if(room.getRoomNumber()!=roomFromDatabase.getRoomNumber()
+                ||room.getHotelId()!=roomFromDatabase.getHotelId()) {
+            validateIfRoomNotExistByRoomNumberAndHotelId(room);
+        }
     }
     private void validateRoomData(Room room) {
         if (room==null
@@ -87,21 +116,31 @@ public class Validator {
                 || room.getStandard()<1
                 || room.getStandard()>5) throw new BadRequestException("Bad room data");
     }
-    protected void validateIfRoomExistById(Long id) {
-        Room r = roomService.getRoomById(id).orElseThrow(()->new ElementNotFoundException("No such room"));
+    protected Room validateIfRoomExistById(Long id) {
+        Room room = roomService.getRoomById(id).orElseThrow(()->new ElementNotFoundException("No such room"));
+        return room;
     }
+    protected void validateIfRoomNotExistByRoomNumberAndHotelId(Room room) {
+        Room r = roomService.getRoomByRoomNumberAndHotelId(room);
+        if (r!=null) throw new ElementAlreadyExistException("Room already exist");
+    }
+
 
     //User
     public void validateUser(User user) {
         validateUserData(user);
-        User u = userService.getUser(user);
-        if (u!=null) throw new ElementAlreadyExistException("User already exist");
-        u = userService.getUserByUsername(user.getUsername());
-        if (u!=null) throw new ElementAlreadyExistException("User already exist");
+        validateIfUserNotExistByUsername(user.getUsername());
+        validateIfEmailNotExist(user.getEmail());
     }
     public void validateUserEdit(User user) {
         validateUserData(user);
-        validateIfUserExistById(user.getId());
+        User userFromDatabase = validateIfUserExistById(user.getId());
+        if (!user.getEmail().equals(userFromDatabase.getEmail())) {
+            validateIfEmailNotExist(user.getEmail());
+        }
+        if (!user.getUsername().equals(userFromDatabase.getUsername())) {
+            validateIfUserNotExistByUsername(user.getUsername());
+        }
     }
     private void validateUserData(User user) {
         if (user == null
@@ -113,11 +152,16 @@ public class Validator {
                 || user.getRole().length() < 2) throw new BadRequestException("Bad user data");
 
         validateEmail(user.getEmail());
-        validateIfEmailAlreadyExist(user.getEmail());
     }
 
-    protected void  validateIfUserExistById(Long id) {
+    protected User validateIfUserExistById(Long id) {
         User u = userService.getUserById(id).orElseThrow(()->new ElementNotFoundException("No such user"));
+        return u;
+    }
+
+    protected void validateIfUserNotExistByUsername (String username) {
+        User u = userService.getUserByUsername(username).orElse(null);
+        if (u!=null) throw new ElementAlreadyExistException("User with username: "+username+" already exist");
     }
 
     private void validateEmail(String emailAddress) {
@@ -128,10 +172,11 @@ public class Validator {
                 .matches()) throw new BadRequestException("Bad e-mail data");
     }
 
-    private void validateIfEmailAlreadyExist(String email) {
+    private void validateIfEmailNotExist(String email) {
         User u = userService.getUserByEmail(email).orElse(null);
         if (u!=null) throw new ElementAlreadyExistException("User with e-mail: "+u.getEmail()+" already exist");
     }
+
 
     //Booking
     public void validateBooking(Booking booking) {
@@ -190,4 +235,5 @@ public class Validator {
         if (booking.getUserId()!=userId)
             throw new BadRequestException("User is not owner of booking with id:"+booking.getId());
     }
+
 }

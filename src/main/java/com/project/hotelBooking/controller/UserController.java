@@ -54,7 +54,8 @@ public class UserController {
     @GetMapping("/users/own/Bookings/")
     public UserWithBookingDto getSingleUserOwner() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()));
+        return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()).orElseThrow(
+                ()-> new ElementNotFoundException("No such user")));
     }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/Bookings")

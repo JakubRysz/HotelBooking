@@ -42,7 +42,8 @@ public class BookingController {
     @PostMapping("/bookings/own")
     public BookingDto createOwnBooking(@RequestBody BookingDto bookingDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName());
+        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
+                ()-> new ElementNotFoundException("No such user"));
         bookingDto.setUserId(user.getId());
         Booking booking = bookingMapper.mapToBooking(bookingDto);
         validator.validateBooking(booking);
@@ -69,7 +70,8 @@ public class BookingController {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName());
+        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
+                ()-> new ElementNotFoundException("No such user"));
         return (bookingService.getBookingsByUserId(user.getId(),page, sort).stream().map(bookingMapper::mapToBookingDto).collect(Collectors.toList()));
     }
     @PreAuthorize("hasRole('ADMIN')")
@@ -89,7 +91,8 @@ public class BookingController {
     public BookingDto editOwnBooking(@RequestBody BookingDto bookingDto) {
         Booking booking = bookingMapper.mapToBooking(bookingDto);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName());
+        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
+                ()-> new ElementNotFoundException("No such user"));
         Booking oldBooking = bookingService.getBookingById(booking.getId())
                 .orElseThrow(() -> new ElementNotFoundException("No such booking"));
         validator.validateBookingEditUser(booking, oldBooking, user.getId());
@@ -113,7 +116,8 @@ public class BookingController {
         validator.validateIfBookingExistById(id);
         Booking bookingToDelete = bookingService.getBookingById(id).orElseThrow(()->new ElementNotFoundException("No such booking"));
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName());
+        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
+                ()-> new ElementNotFoundException("No such user"));
         validator.validateIfUserIsOwnerOfBooking(bookingToDelete, user.getId());
         BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
         bookingService.deleteBookingById(id);

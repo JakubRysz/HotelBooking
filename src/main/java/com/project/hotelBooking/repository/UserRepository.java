@@ -13,9 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u")
     List<User> findAllUsers(Pageable path);
-
-    User findUserByFirstNameAndLastNameAndDateOfBirth(String firstName, String lastName, LocalDate dateOfBirth);
-
     Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
+    Optional<User> findTopByEmail(String email);
 }

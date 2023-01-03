@@ -3,11 +3,9 @@ package com.project.hotelBooking.service;
 import com.project.hotelBooking.domain.Hotel;
 import com.project.hotelBooking.domain.Room;
 import com.project.hotelBooking.domain.RoomDto;
-import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,7 @@ public class HotelService {
     private final RoomMapper roomMapper;
     private static final int PAGE_SIZE=5;
 
-    public Hotel getHotel(Hotel hotel) { return hotelRepository.findHotelByNameAndHotelChain(
+    public Hotel getHotelByNameAndHotelChain(Hotel hotel) { return hotelRepository.findHotelByNameAndHotelChain(
             hotel.getName(), hotel.getHotelChain());}
     public Hotel saveHotel(Hotel hotel) {
         return hotelRepository.save(hotel);

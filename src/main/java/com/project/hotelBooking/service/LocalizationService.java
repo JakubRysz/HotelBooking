@@ -4,10 +4,8 @@ import com.project.hotelBooking.domain.Hotel;
 import com.project.hotelBooking.domain.HotelDto;
 import com.project.hotelBooking.domain.Localization;
 import com.project.hotelBooking.mapper.HotelMapper;
-import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,7 @@ public class LocalizationService {
     private final HotelMapper hotelMapper;
     private static final int PAGE_SIZE=5;
 
-    public Localization getLocalization(Localization localization) { return localizationRepository.findLocalizationByCityAndCountry(
+    public Localization getLocalizationByCityAndCountry(Localization localization) { return localizationRepository.findLocalizationByCityAndCountry(
             localization.getCity(), localization.getCountry());}
     public Localization saveLocalization(Localization localization) {
         return localizationRepository.save(localization);

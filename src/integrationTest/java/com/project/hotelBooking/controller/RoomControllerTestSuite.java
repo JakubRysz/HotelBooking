@@ -1,9 +1,12 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.*;
-import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.domain.Hotel;
+import com.project.hotelBooking.domain.Room;
+import com.project.hotelBooking.repository.HotelRepository;
+import com.project.hotelBooking.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,11 +18,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
@@ -32,23 +36,29 @@ public class RoomControllerTestSuite {
     private final RoomRepository roomRepository;
     private final MockMvc mockMvc;
 
-    @Test
-    @WithMockUser(roles = {"ADMIN"})
-    public void shouldCreateRoom() throws Exception {
+    private final Hotel newHotel = new Hotel();
+    private  final Room newRoom = new Room();
 
-        //given
-        Hotel newHotel = new Hotel();
+    @BeforeEach
+    public void initialize() {
         newHotel.setName("Hilton1");
         newHotel.setNumberOfStars(3);
         newHotel.setHotelChain("Hilton");
         hotelRepository.save(newHotel);
 
-        Room newRoom = new Room();
         newRoom.setRoomNumber(15);
         newRoom.setNumberOfPersons(2);
         newRoom.setStandard(4);
         newRoom.setHotelId(newHotel.getId());
+        roomRepository.save(newRoom);
+    }
 
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    public void shouldCreateRoom() throws Exception {
+
+        //given
+        roomRepository.delete(newRoom);
         final String jsonContentNewRoom = objectMapper.writeValueAsString(newRoom);
         int roomsNumberBefore = roomRepository.findAllRooms(Pageable.unpaged()).size();
 
@@ -79,18 +89,6 @@ public class RoomControllerTestSuite {
     public void shouldCreateRoomUser() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-
         final String jsonContentNewRoom = objectMapper.writeValueAsString(newRoom);
 
         //when & then
@@ -110,18 +108,6 @@ public class RoomControllerTestSuite {
     public void shouldGetSingleRoom() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-        roomRepository.save(newRoom);
 
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings/" + newRoom.getId()))
@@ -147,18 +133,6 @@ public class RoomControllerTestSuite {
     public void shouldGetSingleRoomUser() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-        roomRepository.save(newRoom);
 
         //when & then
         mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings/" + newRoom.getId()))
@@ -174,18 +148,6 @@ public class RoomControllerTestSuite {
     public void shouldGetSingleRoomWithoutUsersUser() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-        roomRepository.save(newRoom);
 
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings/WithoutUsers/" + newRoom.getId()))
@@ -211,17 +173,6 @@ public class RoomControllerTestSuite {
     public void shouldGetMultipleRooms() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom1 = new Room();
-        newRoom1.setRoomNumber(15);
-        newRoom1.setNumberOfPersons(2);
-        newRoom1.setStandard(4);
-        newRoom1.setHotelId(newHotel.getId());
         Room newRoom2 = new Room();
         newRoom2.setRoomNumber(16);
         newRoom2.setNumberOfPersons(3);
@@ -233,7 +184,6 @@ public class RoomControllerTestSuite {
         newRoom3.setStandard(5);
         newRoom3.setHotelId(newHotel.getId());
 
-        roomRepository.save(newRoom1);
         roomRepository.save(newRoom2);
         roomRepository.save(newRoom3);
 
@@ -254,7 +204,7 @@ public class RoomControllerTestSuite {
         assertEquals(newRoom3.getStandard(), rooms.get(2).getStandard());
         assertEquals(newRoom3.getHotelId(), rooms.get(2).getHotelId());
 
-        roomRepository.delete(newRoom1);
+        roomRepository.delete(newRoom);
         roomRepository.delete(newRoom2);
         roomRepository.delete(newRoom3);
         hotelRepository.delete(newHotel);
@@ -264,18 +214,7 @@ public class RoomControllerTestSuite {
     @WithMockUser(roles = {"USER"})
     public void shouldGetMultipleRoomsUser() throws Exception {
 
-        //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom1 = new Room();
-        newRoom1.setRoomNumber(15);
-        newRoom1.setNumberOfPersons(2);
-        newRoom1.setStandard(4);
-        newRoom1.setHotelId(newHotel.getId());
+        //given;
         Room newRoom2 = new Room();
         newRoom2.setRoomNumber(16);
         newRoom2.setNumberOfPersons(3);
@@ -287,7 +226,6 @@ public class RoomControllerTestSuite {
         newRoom3.setStandard(5);
         newRoom3.setHotelId(newHotel.getId());
 
-        roomRepository.save(newRoom1);
         roomRepository.save(newRoom2);
         roomRepository.save(newRoom3);
 
@@ -296,7 +234,7 @@ public class RoomControllerTestSuite {
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
 
-        roomRepository.delete(newRoom1);
+        roomRepository.delete(newRoom);
         roomRepository.delete(newRoom2);
         roomRepository.delete(newRoom3);
         hotelRepository.delete(newHotel);
@@ -307,17 +245,6 @@ public class RoomControllerTestSuite {
     public void shouldGetMultipleRoomsWithoutUsersUser() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom1 = new Room();
-        newRoom1.setRoomNumber(15);
-        newRoom1.setNumberOfPersons(2);
-        newRoom1.setStandard(4);
-        newRoom1.setHotelId(newHotel.getId());
         Room newRoom2 = new Room();
         newRoom2.setRoomNumber(16);
         newRoom2.setNumberOfPersons(3);
@@ -329,7 +256,6 @@ public class RoomControllerTestSuite {
         newRoom3.setStandard(5);
         newRoom3.setHotelId(newHotel.getId());
 
-        roomRepository.save(newRoom1);
         roomRepository.save(newRoom2);
         roomRepository.save(newRoom3);
 
@@ -350,7 +276,7 @@ public class RoomControllerTestSuite {
         assertEquals(newRoom3.getStandard(), rooms.get(2).getStandard());
         assertEquals(newRoom3.getHotelId(), rooms.get(2).getHotelId());
 
-        roomRepository.delete(newRoom1);
+        roomRepository.delete(newRoom);
         roomRepository.delete(newRoom2);
         roomRepository.delete(newRoom3);
         hotelRepository.delete(newHotel);
@@ -361,19 +287,6 @@ public class RoomControllerTestSuite {
     public void shouldEditRoom() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-        roomRepository.save(newRoom);
-
         Room roomEdited = new Room();
         roomEdited.setId(newRoom.getId());
         roomEdited.setRoomNumber(20);
@@ -410,19 +323,6 @@ public class RoomControllerTestSuite {
     public void shouldEditRoomUser() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-        roomRepository.save(newRoom);
-
         Room roomEdited = new Room();
         roomEdited.setId(newRoom.getId());
         roomEdited.setRoomNumber(20);
@@ -448,18 +348,6 @@ public class RoomControllerTestSuite {
     public void shouldDeleteRoom() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-        roomRepository.save(newRoom);
         int roomsNumberBefore = roomRepository.findAllRooms(Pageable.unpaged()).size();
 
         //when
@@ -471,6 +359,7 @@ public class RoomControllerTestSuite {
 
         //then
         assertEquals(roomsNumberBefore - 1, roomsNumberAfter);
+        hotelRepository.delete(newHotel);
     }
 
     @Test
@@ -478,18 +367,6 @@ public class RoomControllerTestSuite {
     public void shouldDeleteRoomUser() throws Exception {
 
         //given
-        Hotel newHotel = new Hotel();
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        hotelRepository.save(newHotel);
-
-        Room newRoom = new Room();
-        newRoom.setRoomNumber(15);
-        newRoom.setNumberOfPersons(2);
-        newRoom.setStandard(4);
-        newRoom.setHotelId(newHotel.getId());
-        roomRepository.save(newRoom);
         int roomsNumberBefore = roomRepository.findAllRooms(Pageable.unpaged()).size();
 
         //when

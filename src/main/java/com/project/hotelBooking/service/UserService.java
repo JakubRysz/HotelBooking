@@ -29,11 +29,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private static final int PAGE_SIZE=5;
 
-    public User getUser(User user) { return userRepository.findUserByFirstNameAndLastNameAndDateOfBirth(
-            user.getFirstName(), user.getLastName(), user.getDateOfBirth());}
-
-    public User getUserByUsername(String username) { return userRepository.findByUsername(username).orElse(null);}
-    public Optional<User> getUserByEmail(String email) { return userRepository.findByEmail(email);}
+    public Optional<User> getUserByUsername(String username) { return userRepository.findByUsername(username);}
+    public Optional<User> getUserByEmail(String email) { return userRepository.findTopByEmail(email);}
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
