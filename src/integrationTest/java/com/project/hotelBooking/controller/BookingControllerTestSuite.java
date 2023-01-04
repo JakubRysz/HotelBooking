@@ -44,11 +44,11 @@ public class BookingControllerTestSuite {
     @Value("${email_test}")
     private String EMAIL_TEST;
 
-    private Localization newLocalization= new Localization();
-    private Hotel newHotel = new Hotel();
-    private Room newRoom = new Room();
-    private User newUser = new User();
-    private Booking newBooking= new Booking();
+    private final Localization newLocalization= new Localization();
+    private final Hotel newHotel = new Hotel();
+    private final Room newRoom = new Room();
+    private final User newUser = new User();
+    private final Booking newBooking= new Booking();
 
     @BeforeEach
     public void initialize() {

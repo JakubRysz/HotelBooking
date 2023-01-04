@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
@@ -20,6 +21,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     @Query("select h from Hotel h where h.localizationId in :ids")
     List<Hotel> findAllByLocalizationIdIn(@Param("ids") List<Long> list);
 
-    Hotel findHotelByNameAndHotelChain(String name, String hotelChain);
+    Optional<Hotel> findHotelByNameAndHotelChain(String name, String hotelChain);
 
 }

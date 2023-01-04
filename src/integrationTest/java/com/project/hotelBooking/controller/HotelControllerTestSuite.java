@@ -36,8 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     private final HotelRepository hotelRepository;
     private final MockMvc mockMvc;
 
-    private Localization newLocalization = new Localization();
-    private Hotel newHotel = new Hotel();
+    private final Localization newLocalization = new Localization();
+    private final Hotel newHotel = new Hotel();
 
     @BeforeEach
     public void initialize() {

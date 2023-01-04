@@ -23,7 +23,7 @@ public class HotelService {
     private final RoomMapper roomMapper;
     private static final int PAGE_SIZE=5;
 
-    public Hotel getHotelByNameAndHotelChain(Hotel hotel) { return hotelRepository.findHotelByNameAndHotelChain(
+    public Optional<Hotel> getHotelByNameAndHotelChain(Hotel hotel) { return hotelRepository.findHotelByNameAndHotelChain(
             hotel.getName(), hotel.getHotelChain());}
     public Hotel saveHotel(Hotel hotel) {
         return hotelRepository.save(hotel);

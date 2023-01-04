@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
 public interface LocalizationRepository extends JpaRepository<Localization, Long> {
     @Query("SELECT l from Localization l")
     List<Localization> findAllLocalizations(Pageable page);
-    Localization findLocalizationByCityAndCountry(String cityName, String CountryName);
+    Optional<Localization> findLocalizationByCityAndCountry(String cityName, String CountryName);
 }
 

@@ -6,9 +6,13 @@ import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -17,14 +21,12 @@ import java.util.regex.Pattern;
 public class Validator {
 
     private final LocalizationService localizationService;
-
     private final HotelService hotelService;
-
     private final RoomService roomService;
-
     private final UserService userService;
-
     private final BookingService bookingService;
+    String[] roles = new String[]{"ROLE_USER", "ROLE_ADMIN"};
+    private final List<String> possibleUserRoles = Arrays.asList(roles);
 
 
     //Localization
@@ -53,7 +55,7 @@ public class Validator {
     }
 
     protected void validateIfLocalizationNotExistByCityAndCountry(Localization localization){
-        Localization l = localizationService.getLocalizationByCityAndCountry(localization);
+        Localization l = localizationService.getLocalizationByCityAndCountry(localization).orElse(null);
         if (l!=null) throw new ElementAlreadyExistException("Localization already exist");
     }
 
@@ -88,7 +90,7 @@ public class Validator {
         return hotel;
     }
     protected void validateIfHotelNotExistByNameAndHotelChain(Hotel hotel) {
-        Hotel h = hotelService.getHotelByNameAndHotelChain(hotel);
+        Hotel h = hotelService.getHotelByNameAndHotelChain(hotel).orElse(null);
         if (h != null) throw new ElementAlreadyExistException("Hotel already exist");
     }
 
@@ -121,7 +123,7 @@ public class Validator {
         return room;
     }
     protected void validateIfRoomNotExistByRoomNumberAndHotelId(Room room) {
-        Room r = roomService.getRoomByRoomNumberAndHotelId(room);
+        Room r = roomService.getRoomByRoomNumberAndHotelId(room).orElse(null);
         if (r!=null) throw new ElementAlreadyExistException("Room already exist");
     }
 
@@ -144,14 +146,15 @@ public class Validator {
     }
     private void validateUserData(User user) {
         if (user == null
-                || user.getDateOfBirth() == null
+                || user.getDateOfBirth().isAfter(LocalDate.now().minusYears(18))
+                || user.getDateOfBirth().isBefore(LocalDate.now().minusYears(100))
                 || user.getFirstName().length() < 2
                 || user.getLastName().length() < 2
                 || user.getUsername().length() < 2
-                || user.getPassword().length() < 2
-                || user.getRole().length() < 2) throw new BadRequestException("Bad user data");
+                || user.getPassword().length() < 2) throw new BadRequestException("Bad user data");
 
         validateEmail(user.getEmail());
+        validateUserRole(user.getRole());
     }
 
     protected User validateIfUserExistById(Long id) {
@@ -170,6 +173,9 @@ public class Validator {
         if(!Pattern.compile(regexPattern)
                 .matcher(emailAddress)
                 .matches()) throw new BadRequestException("Bad e-mail data");
+    }
+    private void validateUserRole(String role) {
+        if (!possibleUserRoles.contains(role)) throw new BadRequestException("Bad user role");
     }
 
     private void validateIfEmailNotExist(String email) {
@@ -223,7 +229,7 @@ public class Validator {
             for (Booking bookingDatabase : roomBookings) {
                 if (bookingDatabase.getEnd_date().isAfter(booking.getStart_date())) {
                     if (bookingDatabase.getStart_date().isBefore(booking.getEnd_date()))
-                        throw new ElementAlreadyExistException("Room occupied at this time ");
+                        throw new ElementAlreadyExistException("Room occupied at this time");
                 }
             }
         }

@@ -23,7 +23,7 @@ public class LocalizationService {
     private final HotelMapper hotelMapper;
     private static final int PAGE_SIZE=5;
 
-    public Localization getLocalizationByCityAndCountry(Localization localization) { return localizationRepository.findLocalizationByCityAndCountry(
+    public Optional<Localization> getLocalizationByCityAndCountry(Localization localization) { return localizationRepository.findLocalizationByCityAndCountry(
             localization.getCity(), localization.getCountry());}
     public Localization saveLocalization(Localization localization) {
         return localizationRepository.save(localization);

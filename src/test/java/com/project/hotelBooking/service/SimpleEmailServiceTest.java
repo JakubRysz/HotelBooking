@@ -26,9 +26,7 @@ public class SimpleEmailServiceTest {
     private SimpleEmailService simpleEmailService;
     @Mock
     private JavaMailSender javaMailSender;
-
-    @Value("${email_test}")
-    String EMAIL_TEST;
+    String EMAIL_TEST="application.test1010@gmail.com";
 
     @Test
     public void shouldSendEmail() {

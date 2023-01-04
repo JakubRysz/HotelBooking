@@ -20,7 +20,7 @@ public class RoomService {
     private final BookingRepository bookingRepository;
     private static final int PAGE_SIZE=5;
 
-    public Room getRoomByRoomNumberAndHotelId(Room room) { return roomRepository.findRoomByRoomNumberAndHotelId(
+    public Optional<Room> getRoomByRoomNumberAndHotelId(Room room) { return roomRepository.findRoomByRoomNumberAndHotelId(
             room.getRoomNumber(),room.getHotelId());}
     public Room saveRoom(Room room) {
         return roomRepository.save(room);
