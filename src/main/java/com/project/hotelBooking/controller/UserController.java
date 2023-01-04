@@ -1,5 +1,6 @@
 package com.project.hotelBooking.controller;
 
+import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.User;
 import com.project.hotelBooking.domain.UserDto;
@@ -46,19 +47,19 @@ public class UserController {
         return userCreated;
     };
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users/Bookings/{id}")
+    @GetMapping("/users/bookings/{id}")
     public UserWithBookingDto getSingleUser(@PathVariable Long id) {
         return userMapper.mapToUserWithBookingDto(userService.getUserById(id)
                 .orElseThrow(()->new ElementNotFoundException("No such user")));
     }
-    @GetMapping("/users/own/Bookings/")
+    @GetMapping("/users/own/bookings")
     public UserWithBookingDto getSingleUserOwner() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()).orElseThrow(
                 ()-> new ElementNotFoundException("No such user")));
     }
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users/Bookings")
+    @GetMapping("/users/bookings")
     public List<UserWithBookingDto> getUsersWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
@@ -79,6 +80,18 @@ public class UserController {
     @PutMapping("/users")
     public UserDto editUser(@RequestBody UserDto userDto) {
         User user = userMapper.mapToUser(userDto);
+        validator.validateUserEdit(user);
+        UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
+        emailService.sendMailEditedUser(user);
+        return editedUser;
+    }
+    @PutMapping("/users/own")
+    public UserDto editUserUser(@RequestBody UserDto userDto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User userAuth = userService.getUserByUsername(auth.getName()).orElseThrow(
+                ()-> new ElementNotFoundException("No such user"));
+        User user = userMapper.mapToUser(userDto);
+        if(user.getId()!=userAuth.getId()) throw new BadRequestException("Given user Id is not Id of current authenticated user");
         validator.validateUserEdit(user);
         UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
         emailService.sendMailEditedUser(user);

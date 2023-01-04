@@ -33,18 +33,18 @@ public class RoomController {
         return roomMapper.mapToRoomDto(roomService.saveRoom(room));
     }
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/rooms/Bookings/{id}")
+    @GetMapping("/rooms/bookings/{id}")
     public RoomWithBookingsDto getSingleRoomwithBookings(@PathVariable Long id) {
         return roomMapper.mapToRoomWithBookingsDto(roomService.getRoomById(id)
                 .orElseThrow(()->new ElementNotFoundException("No such room")));
     }
-    @GetMapping("/rooms/Bookings/WithoutUsers/{id}")
+    @GetMapping("/rooms/bookings/withoutUsers/{id}")
     public RoomWithBookingsWithoutUsersDto getSingleRoomWithBookingsWithoutUsers(@PathVariable Long id) {
         return roomMapper.mapToRoomWithBookingsWithoutUsersDto(roomService.getRoomById(id)
                 .orElseThrow(()->new ElementNotFoundException("No such room")));
     }
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/rooms/Bookings")
+    @GetMapping("/rooms/bookings")
     public List<RoomWithBookingsDto> getRoomsWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
@@ -52,7 +52,7 @@ public class RoomController {
                 .map(k -> roomMapper.mapToRoomWithBookingsDto(k))
                 .collect(Collectors.toList()));
     }
-    @GetMapping("/rooms/Bookings/WithoutUsers")
+    @GetMapping("/rooms/bookings/withoutUsers")
     public List<RoomWithBookingsWithoutUsersDto> getRoomsWithBookingsWithoutUsers(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;

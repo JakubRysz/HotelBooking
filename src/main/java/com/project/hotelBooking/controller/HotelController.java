@@ -31,12 +31,12 @@ public class HotelController {
         validator.validateHotel(hotel);
         return hotelMapper.mapToHotelDto(hotelService.saveHotel(hotel));
     }
-    @GetMapping("/hotels/Rooms/{id}")
+    @GetMapping("/hotels/rooms/{id}")
     public HotelWithRoomsDto getSingleHotelWithRooms(@PathVariable Long id) {
         return hotelMapper.mapToHotelWithRoomsDto(hotelService.getHotelById(id)
                 .orElseThrow(()->new ElementNotFoundException("No such hotel")));
     }
-    @GetMapping("/hotels/Rooms")
+    @GetMapping("/hotels/rooms")
     public List<HotelWithRoomsDto> getHotelsWithRooms(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;

@@ -1,24 +1,19 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mock;;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//@RunWith(MockitoJUnitRunner.class)
+
 @ExtendWith(MockitoExtension.class)
 public class SimpleEmailServiceTest {
 

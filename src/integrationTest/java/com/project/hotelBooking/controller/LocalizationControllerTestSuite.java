@@ -93,7 +93,7 @@ public class LocalizationControllerTestSuite {
 
         //given
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/localizations/Hotels/" + newLocalization.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/localizations/hotels/" + newLocalization.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -123,7 +123,7 @@ public class LocalizationControllerTestSuite {
         localizationRepository.save(newLocalization3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/localizations/Hotels/"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/localizations/hotels/"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();

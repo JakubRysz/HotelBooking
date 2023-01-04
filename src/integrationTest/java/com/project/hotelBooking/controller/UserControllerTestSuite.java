@@ -137,7 +137,7 @@ public class UserControllerTestSuite {
         //given
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/Bookings/"+newUser.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"+newUser.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -163,7 +163,7 @@ public class UserControllerTestSuite {
         //given
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/Bookings/"+newUser.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"+newUser.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
 
@@ -195,7 +195,7 @@ public class UserControllerTestSuite {
         userRepository.save(newUser3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/Bookings/"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -243,7 +243,7 @@ public class UserControllerTestSuite {
         userRepository.save(newUser3);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/Bookings/"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
 

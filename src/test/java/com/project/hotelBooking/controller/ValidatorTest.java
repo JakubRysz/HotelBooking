@@ -39,8 +39,6 @@ class ValidatorTest {
     private RoomService roomService;
     @Mock
     private UserService userService;
-    @Mock
-    private BookingService bookingService;
 
     protected static final String EMAIL_TEST = "application.test1010@gmail.com";
 

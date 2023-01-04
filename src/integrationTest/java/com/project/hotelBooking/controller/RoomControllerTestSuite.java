@@ -110,7 +110,7 @@ public class RoomControllerTestSuite {
         //given
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings/" + newRoom.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/bookings/" + newRoom.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -135,7 +135,7 @@ public class RoomControllerTestSuite {
         //given
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings/" + newRoom.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/bookings/" + newRoom.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
 
@@ -150,7 +150,7 @@ public class RoomControllerTestSuite {
         //given
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings/WithoutUsers/" + newRoom.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/bookings/withoutUsers/" + newRoom.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -188,7 +188,7 @@ public class RoomControllerTestSuite {
         roomRepository.save(newRoom3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/bookings"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -230,7 +230,7 @@ public class RoomControllerTestSuite {
         roomRepository.save(newRoom3);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/bookings"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
 
@@ -260,7 +260,7 @@ public class RoomControllerTestSuite {
         roomRepository.save(newRoom3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/Bookings/WithoutUsers"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/rooms/bookings/withoutUsers"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();

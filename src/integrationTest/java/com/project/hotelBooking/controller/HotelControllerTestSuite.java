@@ -35,7 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
     private final MockMvc mockMvc;
-
     private final Localization newLocalization = new Localization();
     private final Hotel newHotel = new Hotel();
 
@@ -110,7 +109,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
         //given
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/hotels/Rooms/" + newHotel.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/hotels/rooms/" + newHotel.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -146,7 +145,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         hotelRepository.save(newHotel3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/hotels/Rooms"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/hotels/rooms"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();

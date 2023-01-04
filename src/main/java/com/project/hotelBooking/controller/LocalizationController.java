@@ -31,12 +31,12 @@ public class LocalizationController {
         validator.validateLocalization(localization);
         return localizationMapper.mapToLocalizationDto(localizationService.saveLocalization(localizationMapper.mapToLocalization(localizationDto)));
     }
-    @GetMapping("/localizations/Hotels/{id}")
+    @GetMapping("/localizations/hotels/{id}")
     public LocalizationWithHotelsDto getSingleLocalizationWithHotels(@PathVariable Long id) {
         return localizationMapper.mapToLocalizationWithHotelsDto(localizationService.getLocalizationById(id)
                 .orElseThrow(()->new ElementNotFoundException("No such localization")));
     }
-    @GetMapping("/localizations/Hotels")
+    @GetMapping("/localizations/hotels")
     public List<LocalizationWithHotelsDto> getLocalizationsWithHotels(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
