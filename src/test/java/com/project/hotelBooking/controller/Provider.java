@@ -15,17 +15,17 @@ public class Provider {
     static Stream<Localization> localizationProvider() {
         List<Localization> localizations = new ArrayList<>();
         localizations.add(new Localization(1L, "K", "Poland", null)); //bad city
-        localizations.add(new Localization(1L, "Krakow", "P", null)); //bad country
+        localizations.add(new Localization(1L, "Cracow", "P", null)); //bad country
         return localizations.stream();
     }
 
     //Hotel
     protected static Stream<Hotel> hotelProvider() {
         List<Hotel> hotels = new ArrayList<>();
-        hotels.add(new Hotel(1L, "hotel1", 0, "Mariot", 2L, null)); //bad numberOfStars
-        hotels.add(new Hotel(1L, "hotel1", 6, "Mariot", 2L, null)); //bad numberOfStars
-        hotels.add(new Hotel(1L, "h", 2, "Mariot", 2L, null)); //bad name
-        hotels.add(new Hotel(1L, "hotel1", 3, "M", 2L, null)); //bad hotelChain
+        hotels.add(new Hotel(1L, "Hotel1", 0, "Mariot", 2L, null)); //bad numberOfStars
+        hotels.add(new Hotel(1L, "Hotel1", 6, "Mariot", 2L, null)); //bad numberOfStars
+        hotels.add(new Hotel(1L, "H", 2, "Mariot", 2L, null)); //bad name
+        hotels.add(new Hotel(1L, "Hotel1", 3, "M", 2L, null)); //bad hotelChain
         return hotels.stream();
     }
 

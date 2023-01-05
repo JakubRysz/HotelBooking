@@ -46,7 +46,7 @@ class ValidatorTest {
     @Test
     public void shouldNotReturnBadRequestExceptionValidateLocalization() {
         //given
-        Localization localization = new Localization(1L, "Krakow", "Poland",null);
+        Localization localization = new Localization(1L, "Cracow", "Poland",null);
         //when &then
         assertDoesNotThrow(()->validatorMock.validateLocalization(localization));
     }
@@ -63,7 +63,7 @@ class ValidatorTest {
     @Test
     public void shouldNotReturnBadRequestExceptionValidateHotel() {
         //given
-        Hotel hotel = new Hotel(1L, "hotel1", 2, "Mariot", 2L,null);
+        Hotel hotel = new Hotel(1L, "Hotel1", 2, "Mariot", 2L,null);
         when(localizationService.getLocalizationById(any(Long.class))).thenReturn(Optional.of(new Localization()));
         //when &then
         assertDoesNotThrow(()->validatorMock.validateHotel(hotel));

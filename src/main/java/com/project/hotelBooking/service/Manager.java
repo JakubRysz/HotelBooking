@@ -24,11 +24,11 @@ public class Manager {
 
 
     public void initializeDb() {
-        Localization localization1 = new Localization(null, "Krakow", "Poland",null);
+        Localization localization1 = new Localization(null, "Cracow", "Poland",null);
         Localization localizationSaved1 = localizationService.saveLocalization(localization1);
 
-        Hotel hotel1 = new Hotel(null, "hotel1", 2, "Mariot", localizationSaved1.getId(),null);
-        Hotel hotel2 = new Hotel(null, "hotel2", 3, "Mariot2", localizationSaved1.getId(),null);
+        Hotel hotel1 = new Hotel(null, "Hotel1", 2, "hotelChain1", localizationSaved1.getId(),null);
+        Hotel hotel2 = new Hotel(null, "Hotel2", 3, "hotelChain2", localizationSaved1.getId(),null);
         Hotel hotelSaved1 = hotelService.saveHotel(hotel1);
         Hotel hotelSaved2 = hotelService.saveHotel(hotel2);
 
@@ -37,8 +37,8 @@ public class Manager {
         Room roomSaved1 = roomService.saveRoom(room1);
         Room roomSaved2 = roomService.saveRoom(room2);
 
-        User user1 = new User(null, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER", EMAIL_TEST, null);
-        User user2 = new User(null, "Cris", "Brown", LocalDate.of(1984, 2, 15),"crisbrown","crisbrown123","ROLE_ADMIN",EMAIL_TEST,null);
+        User user1 = new User(null, "user_firstname", "user_lastname", LocalDate.of(2000, 1, 1),"user_role_user","user123","ROLE_USER", EMAIL_TEST, null);
+        User user2 = new User(null, "admin_firstname", "admin_lastname", LocalDate.of(2000, 1, 1),"user_role_admin","admin123","ROLE_ADMIN", EMAIL_TEST, null);
         User userSaved1 = userService.saveUser(user1);
         User userSaved2 = userService.saveUser(user2);
 
