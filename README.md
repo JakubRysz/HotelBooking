@@ -489,7 +489,7 @@ in chapter 2. When we initialize database, there are two default users according
 On the picture below there is an example of log in user with ROLE_ADMIN using endpoint `/login` with `POST` method in Postman tool.
 Application response contains JSON Web Token in Header `Authorization`. We should copy value of that header.
 
-![Drag Racing](src/main/resources/README pictures/server_response_JWT.PNG)
+<img src="src/main/resources/README pictures/server_response_JWT.PNG" width="1100"/>
 
 #### 4.1.2 Copy JWT from application response to specific request
 
@@ -497,7 +497,7 @@ When we already have JWT from server, we need to send it with any request witch 
 
 On the picture below there is an example of adding `Authorization` header in request send from Postman to our application.
 
-![Drag Racing](src/main/resources/README pictures/request_with_JWT.PNG)
+<img src="src/main/resources/README pictures/request_with_JWT.PNG" />
 
 #### 4.1.3 Automatically copy JWT into the request
 
@@ -507,16 +507,15 @@ by doing the following steps:
 
 a) create global variable `token` in Postman:
 
-![Drag Racing](src/main/resources/README pictures/create_global_variable_Postman.PNG)
+<img src="src/main/resources/README pictures/create_global_variable_Postman.PNG" />
 
 b) type script in `Tests` of request for log user, to copy value from application response `Authorization` header to previously created global variable `token`
 
-![Drag Racing](src/main/resources/README pictures/copy_JWT_to_global_variable.PNG)
+<img src="src/main/resources/README pictures/copy_JWT_to_global_variable.PNG" />
 
 c) insert global variable `token` in header `Authorization` of any request witch require authentication
 
-![Drag Racing](src/main/resources/README pictures/request_with_JWT_variable_token.PNG)
-
+<img src="src/main/resources/README pictures/request_with_JWT_variable_token.PNG"/>
 
 ## 5. Using Swagger 2 tool
 
@@ -530,25 +529,24 @@ Swagger 2 is handled through a web browser using URL `http://localhost:8080/swag
 
 Bellow there are example of view with booking controller endpoints from Swagger 2:
 
-![swagger2_view](src/main/resources/README pictures/swagger2_view.PNG)
+<img src="src/main/resources/README pictures/swagger2_view.PNG" />
 
 ### 5.2 Initialize database
 
 To initialize database, go to the manager controller execute the `/v1/initializeDb` endpoint like on the picture bellow
 
-![swagger2_initialize_database](src/main/resources/README pictures/swagger2_initialize_database.PNG)
+<img src="src/main/resources/README pictures/swagger2_initialize_database.PNG" />
 
 ### 5.3 Log in user using Swagger 2
 
 To log in user go to the login controller and execute the `/login` endpoint with username and password in request body like bellow
 
-![swagger2_log_in_user](src/main/resources/README pictures/swagger2_log_in_user.PNG)
+<img src="src/main/resources/README pictures/swagger2_log_in_user.PNG" />
 
 Copy token return in application response `Authorization` header
 
-![swagger2_log_in_user_response](src/main/resources/README pictures/swagger2_log_in_user_response.PNG)
 
 Past copied token in Swagger authorization window which shows after click the `Authorize` button marked on the picture bellow.
 After positive authorization Swagger keeps token in memory and token will be added to any request
 
-![swagger2_authorize](src/main/resources/README pictures/swagger2_authorize.PNG)
+<img src="src/main/resources/README pictures/swagger2_authorize.PNG"/>
