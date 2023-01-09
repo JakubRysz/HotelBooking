@@ -6,7 +6,7 @@ In the application authenticated user depends of his role are able to:
 - save / edit / delete localization of hotel
 - save / edit / delete hotels with connection to specific localization
 - save / edit / delete rooms with connection to specific hotel
-- save / edit / delete users with will be able to booking room
+- save / edit / delete users which will be able to booking room
 - save / edit / delete room bookings made by specific user for given period of time
 
 E-mail with information is send to specific user after creating, editing or deleting user and after creating, editing or deleting booking owned by user. 
@@ -35,7 +35,7 @@ E-mail with information is send to specific user after creating, editing or dele
 
 Without authentication we are able to:
 
-- initialize database - `/v1/initializeDb` with `POST` method - watch chapter 2
+- initialize database - `/v1/initializeDb` with `POST` method - described in chapter 2
 - register new user with default role ROLE_USER - `/v1/users/registration` with `POST` method
 - log in a user that exists in the database - `/login`  with `POST` method
 
@@ -66,7 +66,7 @@ Users:
 Bookings:
 
 - add bookings for currently authenticated user - `/v1/bookings/own` with `POST` method
-- get bookings owned by currently authenticated user - `/v1//bookings/own` with `GET` method
+- get bookings owned by currently authenticated user - `/v1/bookings/own` with `GET` method
 - edit specific booking owned by currently authenticated user - `/v1/bookings/own` with `PUT` method
 - delete specific booking owned by currently authenticated user - `/v1/bookings/own/{id}` with `DELETE` method
 
@@ -98,16 +98,16 @@ Users:
 - get all users without bookings `/v1/users` with `GET` method with params `page` and `sort`
 - get all users with bookings `/v1/users/bookings` with `GET` method with params `page` and `sort`
 - get specific user with bookings `/v1/users/bookings/{id}` with `GET` method
-- edit specific user - `/v1/users`with `PUT` method
-- delete specific user - `/v1/users/{id}`with `DELETE` method
+- edit specific user - `/v1/users` with `PUT` method
+- delete specific user - `/v1/users/{id}` with `DELETE` method
 
 Bookings:
 
-- add booking with - `/v1/bookings` with `POST` method
+- add booking - `/v1/bookings` with `POST` method
 - get all bookings - `/v1/bookings` with `GET` method with params `page` and `sort`
 - get specific booking - `/v1/bookings/{id}` with `GET` method
-- edit specific booking - `/v1/bookings`with `PUT` method
-- delete specific booking - `/v1/bookings/{id}`with `DELETE` method
+- edit specific booking - `/v1/bookings` with `PUT` method
+- delete specific booking - `/v1/bookings/{id}` with `DELETE` method
 
 Database:
 - clear database - `v1/clearDb` with method `DELETE`
@@ -167,10 +167,10 @@ H2 memory database is used in application, which gives opportunity to run applic
 
 ### 2.1 Access to database via console
 
-H2 database after configuration provides option to access database via webbrowser using url `http://localhost:8080/h2-console`. We might tog to console 
+H2 database after configuration provides option to access database via web browser using URL `http://localhost:8080/h2-console`. We might tog to console 
 using logging credentials like below:
 
-![img.png](src/main/resources/README%20pictures/H2_console_logging.png)
+<img src="src/main/resources/README pictures/H2_console_logging.PNG" width=449>
 
 ### 2.2 Initialize and clear database
 
@@ -489,11 +489,11 @@ in chapter 2. When we initialize database, there are two default users according
 On the picture below there is an example of log in user with ROLE_ADMIN using endpoint `/login` with `POST` method in Postman tool.
 Application response contains JSON Web Token in Header `Authorization`. We should copy value of that header.
 
-<img src="src/main/resources/README pictures/server_response_JWT.PNG" width="1100"/>
+<img src="src/main/resources/README pictures/server_response_JWT.PNG"/>
 
 #### 4.1.2 Copy JWT from application response to specific request
 
-When we already have JWT from server, we need to send it with any request witch require user authentication.
+When we already have JWT from server, we need to send it with any request which require user authentication.
 
 On the picture below there is an example of adding `Authorization` header in request send from Postman to our application.
 
@@ -501,7 +501,7 @@ On the picture below there is an example of adding `Authorization` header in req
 
 #### 4.1.3 Automatically copy JWT into the request
 
-Using approach described in subsection 1.3.1 and 1.3.2 there is a need of copy token manually
+Using approach described in subsection 4.1.1 and 4.1.2 there is a need of copy token manually
 to every request after receiving new JWT from application. We can automate the copying of the token
 by doing the following steps:
 
@@ -513,7 +513,7 @@ b) type script in `Tests` of request for log user, to copy value from applicatio
 
 <img src="src/main/resources/README pictures/copy_JWT_to_global_variable.PNG" />
 
-c) insert global variable `token` in header `Authorization` of any request witch require authentication
+c) insert global variable `token` in header `Authorization` of any request which require authentication
 
 <img src="src/main/resources/README pictures/request_with_JWT_variable_token.PNG"/>
 
@@ -527,9 +527,9 @@ created to dynamically and automatically create documentation for our REST API.
 
 Swagger 2 is handled through a web browser using URL `http://localhost:8080/swagger-ui.html`
 
-Bellow there are example of view with booking controller endpoints from Swagger 2:
+Bellow there is an example of view with booking controller endpoints from Swagger 2:
 
-<img src="src/main/resources/README pictures/swagger2_view.PNG" />
+<img src="src/main/resources/README pictures/swagger2_view.PNG"/>
 
 ### 5.2 Initialize database
 
@@ -543,10 +543,10 @@ To log in user go to the login controller and execute the `/login` endpoint with
 
 <img src="src/main/resources/README pictures/swagger2_log_in_user.PNG" />
 
-Copy token return in application response `Authorization` header
+Copy token returned in application response `Authorization` header
 
 
 Past copied token in Swagger authorization window which shows after click the `Authorize` button marked on the picture bellow.
 After positive authorization Swagger keeps token in memory and token will be added to any request
 
-<img src="src/main/resources/README pictures/swagger2_authorize.PNG"/>
+<img src="src/main/resources/README pictures/swagger2_authorize.png"/>
