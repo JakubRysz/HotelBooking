@@ -86,7 +86,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldCreateHotelUser() throws Exception {
+    public void shouldReturnStatus403CreateHotelUser() throws Exception {
 
         //given
         final String jsonContentNewHotel = objectMapper.writeValueAsString(newHotel);
@@ -205,7 +205,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldEditHotelUser() throws Exception {
+    public void shouldReturnStatus403EditHotelUser() throws Exception {
 
         //given
         Hotel hotelEdited = new Hotel();
@@ -250,7 +250,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldDeleteHotelUser() throws Exception {
+    public void shouldReturnStatus403DeleteHotelUser() throws Exception {
 
         //given
 

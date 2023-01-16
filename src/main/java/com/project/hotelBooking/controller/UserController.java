@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -64,7 +65,7 @@ public class UserController {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
         return (userService.getUsersWithBookings(page, sort)
-                .stream().map(k -> userMapper.mapToUserWithBookingDto(k))
+                .stream().map(userMapper::mapToUserWithBookingDto)
                 .collect(Collectors.toList()));
     }
     @PreAuthorize("hasRole('ADMIN')")
@@ -73,7 +74,7 @@ public class UserController {
         if(page==null||page<0) page=0;
         if (sort==null) sort=Sort.Direction.ASC;
         return (userService.getUsers(page, sort)
-                .stream().map(k -> userMapper.mapToUserDto(k))
+                .stream().map(userMapper::mapToUserDto)
                 .collect(Collectors.toList()));
     }
     @PreAuthorize("hasRole('ADMIN')")
@@ -91,7 +92,7 @@ public class UserController {
         User userAuth = userService.getUserByUsername(auth.getName()).orElseThrow(
                 ()-> new ElementNotFoundException("No such user"));
         User user = userMapper.mapToUser(userDto);
-        if(user.getId()!=userAuth.getId()) throw new BadRequestException("Given user Id is not Id of current authenticated user");
+        if(!Objects.equals(user.getId(), userAuth.getId())) throw new BadRequestException("Given user Id is not Id of current authenticated user");
         validator.validateUserEdit(user);
         UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
         emailService.sendMailEditedUser(user);

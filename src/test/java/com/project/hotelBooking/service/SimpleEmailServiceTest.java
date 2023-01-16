@@ -41,7 +41,6 @@ public class SimpleEmailServiceTest {
     @Test
             public void shouldSendEmailCreatedBooking() {
         //Given
-        // Mail mail = new Mail(EMAIL_TEST, "Test", "Test message");
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(EMAIL_TEST);

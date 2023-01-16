@@ -6,12 +6,9 @@ import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.service.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -25,8 +22,8 @@ public class Validator {
     private final RoomService roomService;
     private final UserService userService;
     private final BookingService bookingService;
-    String[] roles = new String[]{"ROLE_USER", "ROLE_ADMIN"};
-    private final List<String> possibleUserRoles = Arrays.asList(roles);
+    private static final String[]  ROLES = new String[]{"ROLE_USER", "ROLE_ADMIN"};
+    private final List<String> possibleUserRoles = Arrays.asList(ROLES);
 
 
     //Localization

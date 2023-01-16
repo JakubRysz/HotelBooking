@@ -71,7 +71,7 @@ public class LocalizationControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldCreateLocalizationUser() throws Exception {
+    public void shouldReturnStatus403CreateLocalizationUser() throws Exception {
 
         //given
         final String jsonContentNewLocalization = objectMapper.writeValueAsString(newLocalization);
@@ -175,7 +175,7 @@ public class LocalizationControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldEditLocalizationUser() throws Exception {
+    public void shouldReturnStatus403EditLocalizationUser() throws Exception {
 
         //given
         Localization localizationEdited = new Localization();
@@ -215,7 +215,7 @@ public class LocalizationControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldDeleteLocalizationUser() throws Exception {
+    public void shouldReturnStatus403DeleteLocalizationUser() throws Exception {
 
         //given
 

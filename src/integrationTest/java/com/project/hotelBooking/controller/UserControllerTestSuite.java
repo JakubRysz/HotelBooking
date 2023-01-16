@@ -3,6 +3,8 @@ package com.project.hotelBooking.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.domain.User;
 import com.project.hotelBooking.repository.UserRepository;
+import com.project.hotelBooking.service.Mail;
+import com.project.hotelBooking.service.SimpleEmailService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -24,6 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
@@ -37,7 +42,8 @@ public class UserControllerTestSuite {
     private final User newUser = new User();
     @Value("${email_test}")
     private String EMAIL_TEST;
-
+    @MockBean
+    private SimpleEmailService emailService;
 
     @BeforeEach
     private void initialize() {
@@ -49,6 +55,7 @@ public class UserControllerTestSuite {
         newUser.setRole("ROLE_USER");
         newUser.setEmail(EMAIL_TEST);
         userRepository.save(newUser);
+        doNothing().when(emailService).send(any(Mail.class));
     }
 
     @Test
@@ -59,7 +66,6 @@ public class UserControllerTestSuite {
         userRepository.delete(newUser);
         final String jsonContentNewUser = objectMapper.writeValueAsString(newUser);
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
-
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/v1/users")
                         .content(jsonContentNewUser)
@@ -85,7 +91,7 @@ public class UserControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldCreateUserUser() throws Exception {
+    public void shouldReturnStatus403CreateUserUser() throws Exception {
 
         //given
         final String jsonContentNewUser = objectMapper.writeValueAsString(newUser);
@@ -158,7 +164,7 @@ public class UserControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldGetSingleUserUser() throws Exception {
+    public void shouldReturnStatus403GetSingleUserUser() throws Exception {
 
         //given
 
@@ -220,7 +226,7 @@ public class UserControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldGetMultipleUsersUser() throws Exception {
+    public void shouldReturnStatus403GetMultipleUsersUser() throws Exception {
 
         //given
         User newUser2 = new User();
@@ -267,7 +273,6 @@ public class UserControllerTestSuite {
         userEdited.setRole("ROLE_USER");
         userEdited.setEmail(EMAIL_TEST);
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
-
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/v1/users")
                         .content(jsonContentUserEdited)
@@ -294,7 +299,7 @@ public class UserControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldEditUserUser() throws Exception {
+    public void shouldEReturnStatus403ditUserUser() throws Exception {
 
         //given
         User userEdited = new User();
@@ -307,7 +312,6 @@ public class UserControllerTestSuite {
         userEdited.setRole("ROLE_USER");
         userEdited.setEmail(EMAIL_TEST);
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
-
         //when
         mockMvc.perform(MockMvcRequestBuilders.put("/v1/users")
                         .content(jsonContentUserEdited)
@@ -325,7 +329,6 @@ public class UserControllerTestSuite {
 
         //given
         int usersNumberBefore=userRepository.findAllUsers(Pageable.unpaged()).size();
-
         //when
         mockMvc.perform(MockMvcRequestBuilders.delete("/v1/users/"+newUser.getId()))
                 .andDo(print())
@@ -339,7 +342,7 @@ public class UserControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldDeleteUserUser() throws Exception {
+    public void shouldReturnStatus403DeleteUserUser() throws Exception {
 
         //given
 

@@ -3,6 +3,8 @@ package com.project.hotelBooking.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.service.Mail;
+import com.project.hotelBooking.service.SimpleEmailService;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -24,8 +27,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
@@ -43,6 +49,9 @@ public class BookingControllerTestSuite {
     private final MockMvc mockMvc;
     @Value("${email_test}")
     private String EMAIL_TEST;
+
+    @MockBean
+    private SimpleEmailService emailService;
 
     private final Localization newLocalization= new Localization();
     private final Hotel newHotel = new Hotel();
@@ -82,6 +91,8 @@ public class BookingControllerTestSuite {
         newBooking.setStart_date(LocalDate.of(2023,07,10));
         newBooking.setEnd_date(LocalDate.of(2023,07,12));
         bookingRepository.save(newBooking);
+
+        doNothing().when(emailService).send(any(Mail.class));
     }
 
 
@@ -122,7 +133,7 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldReturnStatus409WhileCreatingBookingWhenRoomAlreadyOccupied() throws Exception {
+    public void shouldReturnStatus409CreateBookingWhenRoomAlreadyOccupied() throws Exception {
 
         //given
         Booking newBooking2 = new Booking();
@@ -152,7 +163,7 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldReturnStatus400WhileCreatingBookingWithWrongDate() throws Exception {
+    public void shouldReturnStatus400WCreateBookingWithWrongDate() throws Exception {
 
         //given
         Booking newBooking2 = new Booking();
@@ -182,7 +193,7 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldCreateBookingUser() throws Exception {
+    public void shouldReturnStatus403CreateBookingUser() throws Exception {
 
         //given
         final String jsonContentNewBooking = objectMapper.writeValueAsString(newBooking);
@@ -231,7 +242,7 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldGetSingleBookingUser() throws Exception {
+    public void shouldReturnStatus403GetSingleBookingUser() throws Exception {
 
         //given
         //when & then
@@ -293,7 +304,7 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldGetMultipleBookingsUser() throws Exception {
+    public void shouldReturnStatus403GetMultipleBookingsUser() throws Exception {
 
         //given
         Booking newBooking2 = new Booking();
@@ -334,6 +345,7 @@ public class BookingControllerTestSuite {
         bookingEdited.setRoomId(newRoom.getId());
         bookingEdited.setStart_date(LocalDate.of(2023,07,12));
         bookingEdited.setEnd_date(LocalDate.of(2023,07,15));
+
         final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
 
         //when
@@ -364,7 +376,7 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldReturnStatus409WhileEditingBookingWhenRoomAlreadyOccupied() throws Exception {
+    public void shouldReturnStatus409EditBookingWhenRoomAlreadyOccupied() throws Exception {
 
         //given
         Booking newBooking2 = new Booking();
@@ -401,7 +413,7 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldEditBookingUser() throws Exception {
+    public void shouldReturnStatus403EditBookingUser() throws Exception {
 
         //given
         Booking bookingEdited = new Booking();
@@ -452,10 +464,11 @@ public class BookingControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldDeleteBookingUser() throws Exception {
+    public void shouldReturnStatus403DeleteBookingUser() throws Exception {
 
         //given
         int bookingsNumberBefore=bookingRepository.findAllBookings(Pageable.unpaged()).size();
+
         //when
         mockMvc.perform(MockMvcRequestBuilders.delete("/v1/bookings/"+newBooking.getId()))
                 .andDo(print())

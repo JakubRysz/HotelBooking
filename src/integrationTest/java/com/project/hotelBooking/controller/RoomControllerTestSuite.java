@@ -86,7 +86,7 @@ public class RoomControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldCreateRoomUser() throws Exception {
+    public void shouldReturnStatus403CreateRoomUser() throws Exception {
 
         //given
         final String jsonContentNewRoom = objectMapper.writeValueAsString(newRoom);
@@ -130,7 +130,7 @@ public class RoomControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldGetSingleRoomUser() throws Exception {
+    public void shouldReturnStatus403GetSingleRoomUser() throws Exception {
 
         //given
 
@@ -212,7 +212,7 @@ public class RoomControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldGetMultipleRoomsUser() throws Exception {
+    public void shouldReturnStatus403GetMultipleRoomsUser() throws Exception {
 
         //given;
         Room newRoom2 = new Room();
@@ -320,7 +320,7 @@ public class RoomControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldEditRoomUser() throws Exception {
+    public void shouldReturnStatus403EditRoomUser() throws Exception {
 
         //given
         Room roomEdited = new Room();
@@ -364,7 +364,7 @@ public class RoomControllerTestSuite {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldDeleteRoomUser() throws Exception {
+    public void shouldReturnStatus403DeleteRoomUser() throws Exception {
 
         //given
         int roomsNumberBefore = roomRepository.findAllRooms(Pageable.unpaged()).size();

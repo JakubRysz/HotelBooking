@@ -47,8 +47,6 @@ public class Manager {
 
         bookingService.saveBooking(booking1);
         bookingService.saveBooking(booking2);
-
-        //simpleEmailService.send("kuba.rysz10@gmail.com", "Test", "Test message");
     }
 
     public void clearDb() {
