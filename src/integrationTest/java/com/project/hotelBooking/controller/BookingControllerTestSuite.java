@@ -52,7 +52,8 @@ public class BookingControllerTestSuite {
 
     @MockBean
     private SimpleEmailService emailService;
-
+    private static final LocalDate BOOKING_START_DATE = LocalDate.now().plusDays(2);
+    private static final LocalDate BOOKING_END_DATE = LocalDate.now().plusDays(4);
     private final Localization newLocalization= new Localization();
     private final Hotel newHotel = new Hotel();
     private final Room newRoom = new Room();
@@ -88,8 +89,10 @@ public class BookingControllerTestSuite {
 
         newBooking.setUserId(newUser.getId());
         newBooking.setRoomId(newRoom.getId());
-        newBooking.setStart_date(LocalDate.of(2023,07,10));
-        newBooking.setEnd_date(LocalDate.of(2023,07,12));
+//        newBooking.setStart_date(LocalDate.of(2023,07,10));
+//        newBooking.setEnd_date(LocalDate.of(2023,07,12));
+        newBooking.setStart_date(BOOKING_START_DATE);
+        newBooking.setEnd_date(BOOKING_END_DATE);
         bookingRepository.save(newBooking);
 
         doNothing().when(emailService).send(any(Mail.class));
@@ -139,8 +142,8 @@ public class BookingControllerTestSuite {
         Booking newBooking2 = new Booking();
         newBooking2.setUserId(newUser.getId());
         newBooking2.setRoomId(newRoom.getId());
-        newBooking2.setStart_date(LocalDate.of(2023,07,11));
-        newBooking2.setEnd_date(LocalDate.of(2023,07,13));
+        newBooking2.setStart_date(BOOKING_START_DATE.plusDays(1));
+        newBooking2.setEnd_date(BOOKING_END_DATE.plusDays(1));
 
         final String jsonContentNewBooking = objectMapper.writeValueAsString(newBooking2);
         int bookingsNumberBefore = bookingRepository.findAllBookings(Pageable.unpaged()).size();
@@ -169,8 +172,8 @@ public class BookingControllerTestSuite {
         Booking newBooking2 = new Booking();
         newBooking2.setUserId(newUser.getId());
         newBooking2.setRoomId(newRoom.getId());
-        newBooking2.setStart_date(LocalDate.of(2023,07,11));
-        newBooking2.setEnd_date(LocalDate.of(2023,07,3));
+        newBooking2.setStart_date(BOOKING_END_DATE);
+        newBooking2.setEnd_date(BOOKING_START_DATE);
 
         final String jsonContentNewBooking = objectMapper.writeValueAsString(newBooking2);
         int bookingsNumberBefore = bookingRepository.findAllBookings(Pageable.unpaged()).size();
@@ -266,13 +269,13 @@ public class BookingControllerTestSuite {
         Booking newBooking2 = new Booking();
         newBooking2.setUserId(newUser.getId());
         newBooking2.setRoomId(newRoom.getId());
-        newBooking2.setStart_date(LocalDate.of(2023,07,15));
-        newBooking2.setEnd_date(LocalDate.of(2023,07,18));
+        newBooking2.setStart_date(BOOKING_START_DATE.plusDays(10));
+        newBooking2.setEnd_date(BOOKING_END_DATE.plusDays(12));
         Booking newBooking3 = new Booking();
         newBooking3.setUserId(newUser.getId());
         newBooking3.setRoomId(newRoom.getId());
-        newBooking3.setStart_date(LocalDate.of(2023,07,20));
-        newBooking3.setEnd_date(LocalDate.of(2023,07,23));
+        newBooking3.setStart_date(BOOKING_START_DATE.plusDays(20));
+        newBooking3.setEnd_date(BOOKING_END_DATE.plusDays(22));
         bookingRepository.save(newBooking2);
         bookingRepository.save(newBooking3);
 
@@ -310,13 +313,13 @@ public class BookingControllerTestSuite {
         Booking newBooking2 = new Booking();
         newBooking2.setUserId(newUser.getId());
         newBooking2.setRoomId(newRoom.getId());
-        newBooking2.setStart_date(LocalDate.of(2023,07,15));
-        newBooking2.setEnd_date(LocalDate.of(2023,07,18));
+        newBooking2.setStart_date(BOOKING_START_DATE.plusDays(10));
+        newBooking2.setEnd_date(BOOKING_END_DATE.plusDays(12));
         Booking newBooking3 = new Booking();
         newBooking3.setUserId(newUser.getId());
         newBooking3.setRoomId(newRoom.getId());
-        newBooking3.setStart_date(LocalDate.of(2023,07,20));
-        newBooking3.setEnd_date(LocalDate.of(2023,07,23));
+        newBooking3.setStart_date(BOOKING_START_DATE.plusDays(20));
+        newBooking3.setEnd_date(BOOKING_END_DATE.plusDays(22));
         bookingRepository.save(newBooking2);
         bookingRepository.save(newBooking3);
 
@@ -343,8 +346,8 @@ public class BookingControllerTestSuite {
         bookingEdited.setId(newBooking.getId());
         bookingEdited.setUserId(newUser.getId());
         bookingEdited.setRoomId(newRoom.getId());
-        bookingEdited.setStart_date(LocalDate.of(2023,07,12));
-        bookingEdited.setEnd_date(LocalDate.of(2023,07,15));
+        bookingEdited.setStart_date(BOOKING_START_DATE.plusDays(1));
+        bookingEdited.setEnd_date(BOOKING_END_DATE.plusDays(1));
 
         final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
 
@@ -382,16 +385,16 @@ public class BookingControllerTestSuite {
         Booking newBooking2 = new Booking();
         newBooking2.setUserId(newUser.getId());
         newBooking2.setRoomId(newRoom.getId());
-        newBooking2.setStart_date(LocalDate.of(2023,07,15));
-        newBooking2.setEnd_date(LocalDate.of(2023,07,17));
+        newBooking2.setStart_date(BOOKING_END_DATE.plusDays(2));
+        newBooking2.setEnd_date(BOOKING_END_DATE.plusDays(4));
         bookingRepository.save(newBooking2);
 
         Booking bookingEdited = new Booking();
         bookingEdited.setId(newBooking.getId());
         bookingEdited.setUserId(newUser.getId());
         bookingEdited.setRoomId(newRoom.getId());
-        bookingEdited.setStart_date(LocalDate.of(2023,07,12));
-        bookingEdited.setEnd_date(LocalDate.of(2023,07,18));
+        bookingEdited.setStart_date(BOOKING_END_DATE.plusDays(3));
+        bookingEdited.setEnd_date(BOOKING_END_DATE.plusDays(5));
         final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
 
         //when
@@ -420,8 +423,8 @@ public class BookingControllerTestSuite {
         bookingEdited.setId(newBooking.getId());
         bookingEdited.setUserId(newUser.getId());
         bookingEdited.setRoomId(newRoom.getId());
-        bookingEdited.setStart_date(LocalDate.of(2023,07,12));
-        bookingEdited.setEnd_date(LocalDate.of(2023,07,15));
+        bookingEdited.setStart_date(BOOKING_START_DATE.plusDays(1));
+        bookingEdited.setEnd_date(BOOKING_END_DATE.plusDays(1));
         final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
 
         //when
