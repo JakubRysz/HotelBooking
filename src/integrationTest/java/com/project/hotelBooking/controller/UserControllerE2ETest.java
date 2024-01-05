@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class UserControllerTestSuite {
+public class UserControllerE2ETest {
 
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
