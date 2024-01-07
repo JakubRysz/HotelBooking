@@ -46,7 +46,7 @@ public class UserControllerE2ETest {
     private SimpleEmailService emailService;
 
     @BeforeEach
-    private void initialize() {
+    public void initialize() {
         newUser.setFirstName("Paul");
         newUser.setLastName("Smith");
         newUser.setDateOfBirth(LocalDate.of(1991,2,16));
