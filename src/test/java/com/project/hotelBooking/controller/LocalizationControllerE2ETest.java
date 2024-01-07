@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class LocalizationControllerTestSuite {
+public class LocalizationControllerE2ETest {
 
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;

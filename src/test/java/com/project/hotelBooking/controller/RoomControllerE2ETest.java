@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class RoomControllerTestSuite {
+public class RoomControllerE2ETest {
 
     private final ObjectMapper objectMapper;
     private final HotelRepository hotelRepository;
