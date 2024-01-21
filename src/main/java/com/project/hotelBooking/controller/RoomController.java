@@ -7,11 +7,12 @@ import com.project.hotelBooking.domain.RoomWithBookingsDto;
 import com.project.hotelBooking.domain.RoomWithBookingsWithoutUsersDto;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.service.RoomService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class RoomController {
 
     private final RoomService roomService;
@@ -32,40 +34,46 @@ public class RoomController {
         validator.validateRoom(room);
         return roomMapper.mapToRoomDto(roomService.saveRoom(room));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/rooms/bookings/{id}")
     public RoomWithBookingsDto getSingleRoomwithBookings(@PathVariable Long id) {
         return roomMapper.mapToRoomWithBookingsDto(roomService.getRoomById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such room")));
+                .orElseThrow(() -> new ElementNotFoundException("No such room")));
     }
+
     @GetMapping("/rooms/bookings/withoutUsers/{id}")
     public RoomWithBookingsWithoutUsersDto getSingleRoomWithBookingsWithoutUsers(@PathVariable Long id) {
         return roomMapper.mapToRoomWithBookingsWithoutUsersDto(roomService.getRoomById(id)
-                .orElseThrow(()->new ElementNotFoundException("No such room")));
+                .orElseThrow(() -> new ElementNotFoundException("No such room")));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/rooms/bookings")
     public List<RoomWithBookingsDto> getRoomsWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
-        if(page==null||page<0) page=0;
-        if (sort==null) sort=Sort.Direction.ASC;
+        if (page == null || page < 0) page = 0;
+        if (sort == null) sort = Sort.Direction.ASC;
         return (roomService.getRoomsWithBookings(page, sort).stream()
                 .map(k -> roomMapper.mapToRoomWithBookingsDto(k))
                 .collect(Collectors.toList()));
     }
+
     @GetMapping("/rooms/bookings/withoutUsers")
     public List<RoomWithBookingsWithoutUsersDto> getRoomsWithBookingsWithoutUsers(@RequestParam(required = false) Integer page, Sort.Direction sort) {
-        if(page==null||page<0) page=0;
-        if (sort==null) sort=Sort.Direction.ASC;
+        if (page == null || page < 0) page = 0;
+        if (sort == null) sort = Sort.Direction.ASC;
         return (roomService.getRoomsWithBookings(page, sort).stream()
                 .map(k -> roomMapper.mapToRoomWithBookingsWithoutUsersDto(k))
                 .collect(Collectors.toList()));
     }
+
     @GetMapping("/rooms")
     public List<RoomDto> getRooms(@RequestParam(required = false) Integer page, Sort.Direction sort) {
-        if(page==null||page<0) page=0;
-        if (sort==null) sort=Sort.Direction.ASC;
+        if (page == null || page < 0) page = 0;
+        if (sort == null) sort = Sort.Direction.ASC;
         return (roomService.getRooms(page, sort).stream().map(k -> roomMapper.mapToRoomDto(k)).collect(Collectors.toList()));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/rooms")
     public RoomDto editRoom(@RequestBody RoomDto roomDto) {
@@ -73,6 +81,7 @@ public class RoomController {
         validator.validateRoomEdit(room);
         return roomMapper.mapToRoomDto(roomService.editRoom(room));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/rooms/{id}")
     public void deleteRoom(@PathVariable Long id) {
