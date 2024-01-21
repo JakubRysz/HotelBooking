@@ -27,6 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final RestAuthenticationSuccessHandler restAuthenticationSuccessHandler;
     private final RestAuthenticationFailureHandler restAuthenticationFailureHandler;
     private final String secret;
+
     public SecurityConfig(UserDetailsServiceImplementation userDetailsServiceImplementation,
                           ObjectMapper objectMapper,
                           RestAuthenticationSuccessHandler restAuthenticationSuccessHandler,
@@ -46,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-       auth.userDetailsService(userDetailsServiceImplementation).passwordEncoder(getPasswordEncoder());
+        auth.userDetailsService(userDetailsServiceImplementation).passwordEncoder(getPasswordEncoder());
     }
 
     @Override
@@ -54,8 +55,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http
                 .authorizeRequests()
-                .antMatchers("/swagger-ui**").permitAll()
-                .antMatchers("/v2/api-docs").permitAll()
+                .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers("/v3/api-docs/**").permitAll()
                 .antMatchers("/webjars/**").permitAll()
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
@@ -67,7 +68,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(authenticationFilter())
-                .addFilter(new JwtAuthorizationFilter(authenticationManager( ),userDetailsServiceImplementation,secret))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), userDetailsServiceImplementation, secret))
                 //.formLogin().permitAll()
                 //.and()
                 .headers().frameOptions().disable()
