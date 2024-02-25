@@ -1,14 +1,12 @@
 package com.project.hotelBooking.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 public class LocalizationDto {
     private Long id;
     private String city;
