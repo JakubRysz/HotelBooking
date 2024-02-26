@@ -1,5 +1,6 @@
 package com.project.hotelBooking.domain;
 
+import com.project.hotelBooking.repository.model.Booking;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

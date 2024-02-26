@@ -1,8 +1,8 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.Mail;
 import com.project.hotelBooking.service.SimpleEmailService;
 import lombok.RequiredArgsConstructor;

@@ -3,7 +3,7 @@ package com.project.hotelBooking.controller;
 import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementAlreadyExistException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.domain.*;
+import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

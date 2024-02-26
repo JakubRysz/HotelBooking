@@ -1,6 +1,6 @@
 package com.project.hotelBooking.mapper;
 
-import com.project.hotelBooking.domain.Localization;
+import com.project.hotelBooking.repository.model.Localization;
 import com.project.hotelBooking.domain.LocalizationDto;
 import com.project.hotelBooking.domain.LocalizationWithHotelsDto;
 import org.mapstruct.Mapper;

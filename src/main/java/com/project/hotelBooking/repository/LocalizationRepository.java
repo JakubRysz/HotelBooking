@@ -1,6 +1,6 @@
 package com.project.hotelBooking.repository;
 
-import com.project.hotelBooking.domain.Localization;
+import com.project.hotelBooking.repository.model.Localization;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

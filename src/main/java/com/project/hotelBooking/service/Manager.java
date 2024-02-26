@@ -1,8 +1,7 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.domain.*;
+import com.project.hotelBooking.repository.model.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

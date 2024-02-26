@@ -3,6 +3,7 @@ package com.project.hotelBooking.controller;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.mapper.BookingMapper;
+import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;

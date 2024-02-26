@@ -1,8 +1,7 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.*;
-import lombok.NoArgsConstructor;
+import com.project.hotelBooking.repository.model.User;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

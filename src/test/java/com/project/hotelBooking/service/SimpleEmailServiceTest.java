@@ -1,6 +1,7 @@
 package com.project.hotelBooking.service;
 
 import com.project.hotelBooking.domain.*;
+import com.project.hotelBooking.repository.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

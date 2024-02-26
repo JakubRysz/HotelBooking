@@ -1,8 +1,8 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.Hotel;
-import com.project.hotelBooking.domain.Room;
+import com.project.hotelBooking.repository.model.Hotel;
+import com.project.hotelBooking.repository.model.Room;
 import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.domain.Room;
+import com.project.hotelBooking.repository.model.Room;
 import com.project.hotelBooking.domain.RoomDto;
 import com.project.hotelBooking.domain.RoomWithBookingsDto;
 import com.project.hotelBooking.domain.RoomWithBookingsWithoutUsersDto;

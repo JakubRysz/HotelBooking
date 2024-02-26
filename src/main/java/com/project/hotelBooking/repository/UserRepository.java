@@ -1,11 +1,10 @@
 package com.project.hotelBooking.repository;
 
-import com.project.hotelBooking.domain.User;
+import com.project.hotelBooking.repository.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 

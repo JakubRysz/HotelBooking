@@ -1,6 +1,6 @@
 package com.project.hotelBooking.controller;
 
-import com.project.hotelBooking.domain.*;
+import com.project.hotelBooking.repository.model.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -147,10 +147,10 @@ public class Provider {
     static Stream<Booking> bookingProviderRoomOccupied() {
         List<Booking> bookings = new ArrayList<>();
 
-        bookings.add(new Booking(1L, 3L, 5L,
+        bookings.add(new Booking(2L, 3L, 5L,
                 LocalDate.now(), LocalDate.now().plusDays(6))); //booking room when already occupied
 
-        bookings.add(new Booking(1L, 3L, 5L,
+        bookings.add(new Booking(2L, 3L, 5L,
                 LocalDate.now().plusDays(8), LocalDate.now().plusDays(15))); ////booking room when already occupied
 
         return bookings.stream();

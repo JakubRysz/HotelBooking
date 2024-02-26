@@ -1,8 +1,8 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.domain.Hotel;
+import com.project.hotelBooking.repository.model.Hotel;
 import com.project.hotelBooking.domain.HotelDto;
-import com.project.hotelBooking.domain.Localization;
+import com.project.hotelBooking.repository.model.Localization;
 import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.repository.*;
 import lombok.RequiredArgsConstructor;

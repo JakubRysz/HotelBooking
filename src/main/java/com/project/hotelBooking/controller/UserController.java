@@ -2,7 +2,7 @@ package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.domain.User;
+import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.domain.UserDto;
 import com.project.hotelBooking.domain.UserWithBookingDto;
 import com.project.hotelBooking.mapper.UserMapper;

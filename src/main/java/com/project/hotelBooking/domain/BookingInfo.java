@@ -1,5 +1,6 @@
 package com.project.hotelBooking.domain;
 
+import com.project.hotelBooking.repository.model.*;
 import lombok.*;
 
 @Getter
