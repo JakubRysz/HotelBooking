@@ -44,10 +44,6 @@ public class BookingController {
 
     @PostMapping("/bookings/own")
     public BookingDto createOwnBooking(@RequestBody BookingDto bookingDto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
-                () -> new ElementNotFoundException("No such user"));
-        bookingDto.setUserId(user.getId());
         Booking booking = bookingMapper.mapToBooking(bookingDto);
         validator.validateBooking(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
@@ -88,7 +84,6 @@ public class BookingController {
         Booking oldBooking = bookingService.getBookingById(booking.getId())
                 .orElseThrow(() -> new ElementNotFoundException("No such booking"));
         validator.validateBookingEdit(booking, oldBooking);
-        booking.setId(oldBooking.getId());
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
         emailService.sendMailEditedBooking(bookingInfo);
@@ -104,7 +99,6 @@ public class BookingController {
         Booking oldBooking = bookingService.getBookingById(booking.getId())
                 .orElseThrow(() -> new ElementNotFoundException("No such booking"));
         validator.validateBookingEditUser(booking, oldBooking, user.getId());
-        booking.setId(oldBooking.getId());
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
         emailService.sendMailEditedBooking(bookingInfo);
@@ -135,12 +129,18 @@ public class BookingController {
     }
 
     public BookingInfo getInfoFromBooking(Booking booking) {
-        BookingInfo bookingInfo = new BookingInfo();
-        bookingInfo.setBooking(booking);
-        bookingInfo.setRoom(roomService.getRoomById(booking.getRoomId()).orElseThrow(() -> new ElementNotFoundException("No such room")));
-        bookingInfo.setHotel(hotelService.getHotelById(bookingInfo.getRoom().getHotelId()).orElseThrow(() -> new ElementNotFoundException("No such hotel")));
-        bookingInfo.setLocalization(localizationService.getLocalizationById(bookingInfo.getHotel().getLocalizationId()).orElseThrow(() -> new ElementNotFoundException("No such Localization")));
-        bookingInfo.setUser(userService.getUserById(booking.getUserId()).orElseThrow(() -> new ElementNotFoundException("No such user")));
-        return bookingInfo;
+
+        Room room = roomService.getRoomById(booking.getRoomId()).orElseThrow(() -> new ElementNotFoundException("No such room"));
+        Hotel hotel = hotelService.getHotelById(room.getHotelId()).orElseThrow(() -> new ElementNotFoundException("No such hotel"));
+        Localization localization = localizationService.getLocalizationById(hotel.getLocalizationId()).orElseThrow(() -> new ElementNotFoundException("No such Localization"));
+        User user = userService.getUserById(booking.getUserId()).orElseThrow(() -> new ElementNotFoundException("No such user"));
+
+        return BookingInfo.builder()
+                .booking(booking)
+                .room(room)
+                .hotel(hotel)
+                .localization(localization)
+                .user(user)
+                .build();
     }
 }

@@ -165,7 +165,7 @@ public class BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldReturnStatus400WCreateBookingWithWrongDate() throws Exception {
+    public void shouldReturnStatus400WhenCreateBookingWithWrongDate() throws Exception {
 
         //given
         Booking newBooking2 = new Booking();

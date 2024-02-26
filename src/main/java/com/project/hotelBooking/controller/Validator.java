@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Component
@@ -193,17 +194,9 @@ public class Validator {
         validateBookingData(booking);
         validateIfUserExistById(booking.getUserId());
         validateIfRoomExistById(booking.getRoomId());
-        Booking oldBookingEdit=oldBooking;
-        oldBookingEdit.setStart_date(LocalDate.now().minusDays(2));
-        oldBookingEdit.setEnd_date(LocalDate.now().minusDays(1));
-        bookingService.editBooking(oldBookingEdit);
-        try {
-            validateIfRoomIsFree(booking);
-        } catch (Exception e) {
-            bookingService.editBooking(oldBooking);
-            throw e;
-        }
+        validateIfRoomIsFree(booking);
     }
+
     public void validateBookingEditUser(Booking booking, Booking oldBooking, Long userId) {
         validateBookingEdit(booking, oldBooking);
         if (userId!=booking.getUserId()) throw new BadRequestException("No privileges to change user id");
@@ -221,9 +214,11 @@ public class Validator {
         Room room = roomService.getRoomById(roomId)
                 .orElseThrow(() -> new ElementNotFoundException("No such room"));
         List<Booking> roomBookings = room.getBookings();
-        boolean roomIsFree = false;
-        if (roomBookings.size() > 0) {
+        if (!roomBookings.isEmpty()) {
             for (Booking bookingDatabase : roomBookings) {
+                if (Objects.equals(bookingDatabase.getId(), booking.getId())) {
+                    continue;
+                }
                 if (bookingDatabase.getEnd_date().isAfter(booking.getStart_date())) {
                     if (bookingDatabase.getStart_date().isBefore(booking.getEnd_date()))
                         throw new ElementAlreadyExistException("Room occupied at this time");

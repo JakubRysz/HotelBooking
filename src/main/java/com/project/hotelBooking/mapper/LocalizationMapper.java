@@ -1,44 +1,14 @@
 package com.project.hotelBooking.mapper;
 
-import com.project.hotelBooking.domain.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.project.hotelBooking.domain.Localization;
+import com.project.hotelBooking.domain.LocalizationDto;
+import com.project.hotelBooking.domain.LocalizationWithHotelsDto;
+import org.mapstruct.Mapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+@Mapper(uses = HotelMapper.class, componentModel = "spring")
+public interface LocalizationMapper {
+    Localization mapToLocalization(LocalizationDto localizationDto);
+    LocalizationDto mapToLocalizationDto(Localization localization);
+    LocalizationWithHotelsDto mapToLocalizationWithHotelsDto(Localization localization);
 
-@Component
-public class LocalizationMapper {
-
-    @Autowired
-    HotelMapper hotelMapper;
-
-    public Localization mapToLocalization(LocalizationDto localizationDto){
-        return new Localization(
-                localizationDto.getId(),
-                localizationDto.getCity(),
-                localizationDto.getCountry(),
-                null
-        );
-    }
-
-
-    public LocalizationDto mapToLocalizationDto(Localization localization){
-        return new LocalizationDto(
-                localization.getId(),
-                localization.getCity(),
-                localization.getCountry()
-        );
-    }
-
-    public LocalizationWithHotelsDto mapToLocalizationWithHotelsDto(Localization localization) {
-        return new LocalizationWithHotelsDto(
-                localization.getId(),
-                localization.getCity(),
-                localization.getCountry(),
-                localization.getHotels().stream().
-                        map(hotel -> hotelMapper.mapToHotelDto(hotel))
-                                .collect(Collectors.toList()));
-    }
 }

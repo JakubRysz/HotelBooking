@@ -1,18 +1,11 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.domain.Booking;
 import com.project.hotelBooking.domain.User;
-import com.project.hotelBooking.mapper.HotelMapper;
-import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
