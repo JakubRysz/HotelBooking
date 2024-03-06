@@ -8,26 +8,26 @@ import java.util.List;
 
 @Entity
 @Table(name = "HOTELS")
-@Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
 @ToString
 @Builder
 public class Hotel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="ID")
-    private Long id;
+    Long id;
     @Column(name="Name")
-    private String name;
+    String name;
     @Column(name="NUMBER_OF_STARS")
-    private int numberOfStars;
+    int numberOfStars;
     @Column(name="HOTEL_CHAIN")
-    private String hotelChain;
+    String hotelChain;
     Long localizationId;
 
     @OneToMany(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "hotelId", updatable = false, insertable = false)
-    private List<Room> rooms;
+    @With
+    List<Room> rooms;
 }

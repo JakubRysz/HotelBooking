@@ -1,7 +1,8 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.repository.model.User;
+import com.project.hotelBooking.service.model.BookingInfo;
+import com.project.hotelBooking.service.model.Mail;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,69 +38,63 @@ public class SimpleEmailService {
     }
 
     public void sendMailCreatedUser(User user){
-        Mail mail = new Mail();
-        mail.setMailTo(user.getEmail());
-        mail.setSubject("Hotel booking - confirmation of creating a new user");
-        mail.setMessage(
-                "New user with data below has been created. \n\n"
-                 + getUserInformation(user)
-        );
+        Mail mail = Mail.builder()
+                .mailTo(user.getEmail())
+                .subject("Hotel booking - confirmation of creating a new user")
+                .message("New user with data below has been created. \n\n"
+                        + getUserInformation(user))
+                .build();
         send(mail);
     }
 
     public void sendMailEditedUser(User user){
-        Mail mail = new Mail();
-        mail.setMailTo(user.getEmail());
-        mail.setSubject("Hotel booking - confirmation of editing a user");
-        mail.setMessage(
-                "User data after editing: \n\n"
-                        + getUserInformation(user)
-        );
+        Mail mail = Mail.builder()
+                .mailTo(user.getEmail())
+                .subject("Hotel booking - confirmation of editing a user")
+                .message("User data after editing: \n\n"
+                        + getUserInformation(user))
+                .build();
         send(mail);
     }
 
     public void sendMailDeletedUser(User user){
-        Mail mail = new Mail();
-        mail.setMailTo(user.getEmail());
-        mail.setSubject("Hotel booking - confirmation of deleting a user");
-        mail.setMessage(
-                "User with data below has been deleted. \n\n"
-                        + getUserInformation(user)
-        );
+        Mail mail = Mail.builder()
+                .mailTo(user.getEmail())
+                .subject("Hotel booking - confirmation of deleting a user")
+                .message("User with data below has been deleted. \n\n"
+                        + getUserInformation(user))
+                .build();
         send(mail);
     }
 
 
     public void sendMailCreatedBooking(BookingInfo bookingInfo) {
-        Mail mail = new Mail();
-        mail.setMailTo(bookingInfo.getUser().getEmail());
-        mail.setSubject("Hotel booking - confirmation of creating a new booking");
-        mail.setMessage(
-                "New booking with data below has been created. \n\n"
-                        + getBookingMainInformation(bookingInfo)
-        );
+        Mail mail = Mail.builder()
+                .mailTo(bookingInfo.getUser().getEmail())
+                .subject("Hotel booking - confirmation of creating a new booking")
+                .message("New booking with data below has been created. \n\n"
+                        + getBookingMainInformation(bookingInfo))
+                .build();
         send(mail);
     }
 
     public void sendMailEditedBooking(BookingInfo bookingInfo) {
-        Mail mail = new Mail();
-        mail.setMailTo(bookingInfo.getUser().getEmail());
-        mail.setSubject("Hotel booking - confirmation of editing a booking");
-        mail.setMessage(
-                "Booking data after editing: \n\n"
-                        + getBookingMainInformation(bookingInfo)
-        );
+        Mail mail = Mail.builder()
+                .mailTo(bookingInfo.getUser().getEmail())
+                .subject("Hotel booking - confirmation of editing a booking")
+                .message("Booking data after editing: \n\n"
+                        + getBookingMainInformation(bookingInfo))
+                .build();
         send(mail);
     }
 
     public void sendMailDeletedBooking(BookingInfo bookingInfo) {
-        Mail mail = new Mail();
-        mail.setMailTo(bookingInfo.getUser().getEmail());
-        mail.setSubject("Hotel booking - confirmation of deleting a booking");
-        mail.setMessage(
-                "Booking with data below has been deleted. \n\n"
-                        + getBookingMainInformation(bookingInfo)
-        );
+        Mail mail = Mail.builder()
+                .mailTo(bookingInfo.getUser().getEmail())
+                .subject("Hotel booking - confirmation of deleting a booking")
+                .message("Booking with data below has been deleted. \n\n"
+                        + getBookingMainInformation(bookingInfo))
+                .build();
         send(mail);
     }
 

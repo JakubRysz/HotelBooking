@@ -2,8 +2,8 @@ package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.repository.model.Hotel;
-import com.project.hotelBooking.domain.HotelDto;
-import com.project.hotelBooking.domain.HotelWithRoomsDto;
+import com.project.hotelBooking.controller.model.HotelDto;
+import com.project.hotelBooking.controller.model.HotelWithRoomsDto;
 import com.project.hotelBooking.mapper.HotelMapper;
 import com.project.hotelBooking.service.HotelService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

@@ -1,11 +1,13 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.repository.model.*;
+import com.project.hotelBooking.service.model.BookingInfo;
+//import com.project.hotelBooking.service.model.Mail;
+import com.project.hotelBooking.service.model.Mail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +29,11 @@ public class SimpleEmailServiceTest {
     @Test
     public void shouldSendEmail() {
         //Given
-        Mail mail = new Mail(EMAIL_TEST, "Test", "Test message");
+        Mail mail = Mail.builder()
+                .mailTo(EMAIL_TEST)
+                .subject("Test")
+                .message("Test message")
+                .build();
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(EMAIL_TEST);
@@ -40,7 +46,7 @@ public class SimpleEmailServiceTest {
     }
 
     @Test
-            public void shouldSendEmailCreatedBooking() {
+    public void shouldSendEmailCreatedBooking() {
         //Given
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -63,12 +69,13 @@ public class SimpleEmailServiceTest {
         User user = new User(1L, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER", EMAIL_TEST, null);
         Booking booking = new Booking(1L, 1L, 1L, LocalDate.of(2023, 02, 17), LocalDate.of(2023, 02, 21));
 
-        BookingInfo bookingInfo = new BookingInfo();
-        bookingInfo.setBooking(booking);
-        bookingInfo.setRoom(room);
-        bookingInfo.setHotel(hotel);
-        bookingInfo.setLocalization(localization);
-        bookingInfo.setUser(user);
+        BookingInfo bookingInfo = BookingInfo.builder()
+                .booking(booking)
+                .room(room)
+                .hotel(hotel)
+                .localization(localization)
+                .user(user)
+                .build();
 
         //when
         simpleEmailService.sendMailCreatedBooking(bookingInfo);

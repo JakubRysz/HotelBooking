@@ -1,16 +1,15 @@
-package com.project.hotelBooking.domain;
+package com.project.hotelBooking.controller.model;
 
-import lombok.*;
+import com.project.hotelBooking.repository.model.Booking;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import javax.persistence.Column;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
-@Setter
 @AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class UserDto {
+public class UserWithBookingDto {
     private Long id;
     private String firstName;
     private String lastName;
@@ -19,4 +18,5 @@ public class UserDto {
     private String password;
     private String role;
     private String email;
+    private List<Booking> bookings;
 }

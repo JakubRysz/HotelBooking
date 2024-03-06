@@ -3,8 +3,8 @@ package com.project.hotelBooking.controller;
 import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.repository.model.User;
-import com.project.hotelBooking.domain.UserDto;
-import com.project.hotelBooking.domain.UserWithBookingDto;
+import com.project.hotelBooking.controller.model.UserDto;
+import com.project.hotelBooking.controller.model.UserWithBookingDto;
 import com.project.hotelBooking.mapper.UserMapper;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;
@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
+    private static final String USER_ROLE = "ROLE_USER";
+
     private final UserService userService;
     private final UserMapper userMapper;
     private final Validator validator;
@@ -44,10 +46,10 @@ public class UserController {
 
     @PostMapping("/users/registration")
     public UserDto createUserRegistration(@RequestBody UserDto userDto) {
-        userDto.setRole("ROLE_USER");
+        userDto = userDto.withRole(USER_ROLE);
         User user = userMapper.mapToUser(userDto);
         validator.validateUser(user);
-        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(userMapper.mapToUser(userDto)));
+        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(user));
         emailService.sendMailCreatedUser(user);
         return userCreated;
     }

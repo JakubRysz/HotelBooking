@@ -1,8 +1,8 @@
 package com.project.hotelBooking.mapper;
 
 import com.project.hotelBooking.repository.model.Booking;
-import com.project.hotelBooking.domain.BookingDto;
-import com.project.hotelBooking.domain.BookingWithoutUserDto;
+import com.project.hotelBooking.controller.model.BookingDto;
+import com.project.hotelBooking.controller.model.BookingWithoutUserDto;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

@@ -36,14 +36,16 @@ public class RoomControllerE2ETest {
     private final RoomRepository roomRepository;
     private final MockMvc mockMvc;
 
-    private final Hotel newHotel = new Hotel();
+    private Hotel newHotel;
     private  final Room newRoom = new Room();
 
     @BeforeEach
     public void initialize() {
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
+        newHotel = Hotel.builder()
+                .name("Hilton1")
+                .numberOfStars(3)
+                .hotelChain("Hilton")
+                .build();
         hotelRepository.save(newHotel);
 
         newRoom.setRoomNumber(15);

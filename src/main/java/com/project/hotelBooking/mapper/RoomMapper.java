@@ -1,9 +1,9 @@
 package com.project.hotelBooking.mapper;
 
 import com.project.hotelBooking.repository.model.Room;
-import com.project.hotelBooking.domain.RoomDto;
-import com.project.hotelBooking.domain.RoomWithBookingsDto;
-import com.project.hotelBooking.domain.RoomWithBookingsWithoutUsersDto;
+import com.project.hotelBooking.controller.model.RoomDto;
+import com.project.hotelBooking.controller.model.RoomWithBookingsDto;
+import com.project.hotelBooking.controller.model.RoomWithBookingsWithoutUsersDto;
 import org.mapstruct.Mapper;
 
 @Mapper(uses = BookingMapper.class, componentModel = "spring")

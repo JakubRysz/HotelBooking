@@ -1,5 +1,6 @@
-package com.project.hotelBooking.domain;
+package com.project.hotelBooking.controller.model;
 
+import com.project.hotelBooking.controller.model.HotelDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -2,7 +2,7 @@ package com.project.hotelBooking.mapper;
 
 import com.project.hotelBooking.repository.model.Booking;
 import com.project.hotelBooking.repository.model.Room;
-import com.project.hotelBooking.domain.RoomDto;
+import com.project.hotelBooking.controller.model.RoomDto;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

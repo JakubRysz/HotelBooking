@@ -2,7 +2,7 @@ package com.project.hotelBooking.service;
 
 import com.project.hotelBooking.repository.model.Hotel;
 import com.project.hotelBooking.repository.model.Room;
-import com.project.hotelBooking.domain.RoomDto;
+import com.project.hotelBooking.controller.model.RoomDto;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +40,9 @@ public class HotelService {
     public List<Hotel> getHotelsWithRooms(Integer page, Sort.Direction sort) {
         List<Hotel> hotels =  hotelRepository.findAllHotels(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")));
         List<Long> ids = hotels.stream().map(Hotel::getId).collect(Collectors.toList());
-        List<RoomDto> roomDtos = roomRepository.findAllByHotelIdIn(ids).stream().map(room -> roomMapper.mapToRoomDto(room)).toList();
-        List<Room> rooms =roomDtos.stream().map(roomDto ->roomMapper.mapToRoom(roomDto)).collect(Collectors.toList());
-        hotels.forEach(hotel -> hotel.setRooms(extractRooms(rooms, hotel.getId())));
+        List<RoomDto> roomDtos = roomRepository.findAllByHotelIdIn(ids).stream().map(roomMapper::mapToRoomDto).toList();
+        List<Room> rooms =roomDtos.stream().map(roomMapper::mapToRoom).collect(Collectors.toList());
+        hotels.forEach(hotel -> hotel.withRooms(extractRooms(rooms, hotel.getId())));
         return hotels;
     }
     private List<Room> extractRooms(List<Room> rooms, Long id) {
