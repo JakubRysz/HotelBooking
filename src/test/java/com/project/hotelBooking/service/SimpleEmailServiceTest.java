@@ -3,6 +3,8 @@ package com.project.hotelBooking.service;
 import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.model.BookingInfo;
 //import com.project.hotelBooking.service.model.Mail;
+import com.project.hotelBooking.service.model.BookingServ;
+import com.project.hotelBooking.service.model.HotelServ;
 import com.project.hotelBooking.service.model.Mail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,10 +66,24 @@ public class SimpleEmailServiceTest {
                 + "Maximum number of persons in room: 3\n");
 
         Localization localization = new Localization(null, "Krakow", "Poland",null);
-        Hotel hotel = new Hotel(1L, "hotel1", 2, "Mariot", 1L,null);
+        HotelServ hotel = HotelServ.builder()
+                .id(1L)
+                .name("hotel1")
+                .numberOfStars(2)
+                .hotelChain("Mariot")
+                .localizationId(1L)
+                .rooms(null)
+                .build();
+
         Room room = new Room(1L, 2, 3, 2, 1L,null);
         User user = new User(1L, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER", EMAIL_TEST, null);
-        Booking booking = new Booking(1L, 1L, 1L, LocalDate.of(2023, 02, 17), LocalDate.of(2023, 02, 21));
+        BookingServ booking = BookingServ.builder()
+                .id(1L)
+                .userId(1L)
+                .roomId(1L)
+                .start_date(LocalDate.of(2023, 02, 17))
+                .end_date(LocalDate.of(2023, 02, 21))
+                .build();
 
         BookingInfo bookingInfo = BookingInfo.builder()
                 .booking(booking)

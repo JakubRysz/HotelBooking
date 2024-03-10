@@ -5,6 +5,8 @@ import com.project.hotelBooking.controller.exceptions.ElementAlreadyExistExcepti
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.*;
+import com.project.hotelBooking.service.model.BookingServ;
+import com.project.hotelBooking.service.model.HotelServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -59,14 +61,14 @@ public class Validator {
 
 
     //Hotel
-    public void validateHotel(Hotel hotel) {
+    public void validateHotel(HotelServ hotel) {
         validateHotelData(hotel);
         validateIfHotelNotExistByNameAndHotelChain(hotel);
         validateIfLocalizationExistById(hotel.getLocalizationId());
     }
-    public void validateHotelEdit(Hotel hotel) {
+    public void validateHotelEdit(HotelServ hotel) {
         validateHotelData(hotel);
-        Hotel hotelFromDatabase = validateIfHotelExistById(hotel.getId());
+        HotelServ hotelFromDatabase = validateIfHotelExistById(hotel.getId());
         validateIfLocalizationExistById(hotel.getLocalizationId());
 
         if(!hotel.getName().equals(hotelFromDatabase.getName())
@@ -74,7 +76,7 @@ public class Validator {
             validateIfHotelNotExistByNameAndHotelChain(hotel);
         }
     }
-    private void validateHotelData(Hotel hotel) {
+    private void validateHotelData(HotelServ hotel) {
         if (hotel==null
                 || hotel.getName().length()<2
                 || hotel.getNumberOfStars()<1
@@ -82,14 +84,16 @@ public class Validator {
                 || hotel.getHotelChain().length()<2) throw new BadRequestException("Bad hotel data");
     }
 
-    protected Hotel validateIfHotelExistById(Long id) {
-        Hotel hotel = hotelService.getHotelById(id).orElseThrow(
-                ()->new ElementNotFoundException("No such hotel"));
-        return hotel;
+    protected HotelServ validateIfHotelExistById(Long id) {
+        return hotelService.getHotelById(id);
     }
-    protected void validateIfHotelNotExistByNameAndHotelChain(Hotel hotel) {
-        Hotel h = hotelService.getHotelByNameAndHotelChain(hotel).orElse(null);
-        if (h != null) throw new ElementAlreadyExistException("Hotel already exist");
+    //TODO delegate this exception throw do different layer
+    protected void validateIfHotelNotExistByNameAndHotelChain(HotelServ hotel) {
+        try {
+            hotelService.getHotelByNameAndHotelChain(hotel);
+            throw new ElementAlreadyExistException("Hotel already exist");
+        } catch (ElementNotFoundException ignored) {
+            }
     }
 
 
@@ -183,13 +187,13 @@ public class Validator {
 
 
     //Booking
-    public void validateBooking(Booking booking) {
+    public void validateBooking(BookingServ booking) {
         validateBookingData(booking);
         validateIfUserExistById(booking.getUserId());
         validateIfRoomExistById(booking.getRoomId());
         validateIfRoomIsFree(booking);
     }
-    public void validateBookingEdit(Booking booking, Booking oldBooking) {
+    public void validateBookingEdit(BookingServ booking, BookingServ oldBooking) {
         validateIfBookingExistById(booking.getId());
         validateBookingData(booking);
         validateIfUserExistById(booking.getUserId());
@@ -197,19 +201,19 @@ public class Validator {
         validateIfRoomIsFree(booking);
     }
 
-    public void validateBookingEditUser(Booking booking, Booking oldBooking, Long userId) {
+    public void validateBookingEditUser(BookingServ booking, BookingServ oldBooking, Long userId) {
         validateBookingEdit(booking, oldBooking);
         if (userId!=booking.getUserId()) throw new BadRequestException("No privileges to change user id");
     }
 
-    private void validateBookingData(Booking booking) {
+    private void validateBookingData(BookingServ booking) {
         if (booking==null
            || booking.getStart_date().isBefore(LocalDate.now())
            || booking.getStart_date().isAfter(booking.getEnd_date())
            ||booking.getStart_date().equals(booking.getEnd_date())) throw new BadRequestException("Bad booking date");
     }
 
-    private void validateIfRoomIsFree(Booking booking) {
+    private void validateIfRoomIsFree(BookingServ booking) {
         Long roomId = booking.getRoomId();
         Room room = roomService.getRoomById(roomId)
                 .orElseThrow(() -> new ElementNotFoundException("No such room"));
@@ -227,10 +231,10 @@ public class Validator {
         }
     }
     protected void validateIfBookingExistById(Long id) {
-        bookingService.getBookingById(id).orElseThrow(()->new ElementNotFoundException("No such booking"));
+        bookingService.getBookingById(id);
     }
-    protected void validateIfUserIsOwnerOfBooking(Booking booking, Long userId) {
-        if (booking.getUserId()!=userId)
+    protected void validateIfUserIsOwnerOfBooking(BookingServ booking, Long userId) {
+        if (!Objects.equals(booking.getUserId(), userId))
             throw new BadRequestException("User is not owner of booking with id:"+booking.getId());
     }
 

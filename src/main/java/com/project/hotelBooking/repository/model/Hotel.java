@@ -28,6 +28,5 @@ public class Hotel {
 
     @OneToMany(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "hotelId", updatable = false, insertable = false)
-    @With
     List<Room> rooms;
 }

@@ -1,9 +1,12 @@
 package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.repository.model.*;
+import com.project.hotelBooking.service.model.BookingServ;
+import com.project.hotelBooking.service.model.HotelServ;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,12 +23,50 @@ public class Provider {
     }
 
     //Hotel
-    protected static Stream<Hotel> hotelProvider() {
-        List<Hotel> hotels = new ArrayList<>();
-        hotels.add(new Hotel(1L, "Hotel1", 0, "Mariot", 2L, null)); //bad numberOfStars
-        hotels.add(new Hotel(1L, "Hotel1", 6, "Mariot", 2L, null)); //bad numberOfStars
-        hotels.add(new Hotel(1L, "H", 2, "Mariot", 2L, null)); //bad name
-        hotels.add(new Hotel(1L, "Hotel1", 3, "M", 2L, null)); //bad hotelChain
+    protected static Stream<HotelServ> hotelProvider() {
+        HotelServ hotelZeroStars = HotelServ.builder()
+                .id(1L)
+                .name("Hotel1")
+                .numberOfStars(0)
+                .hotelChain("Mariot")
+                .localizationId(2L)
+                .rooms(null)
+                .build();
+
+        HotelServ hotelSixStars = HotelServ.builder()
+                .id(1L)
+                .name("Hotel1")
+                .numberOfStars(6)
+                .hotelChain("Mariot")
+                .localizationId(2L)
+                .rooms(null)
+                .build();
+
+        HotelServ hotelNameToShort = HotelServ.builder()
+                .id(1L)
+                .name("H")
+                .numberOfStars(3)
+                .hotelChain("Mariot")
+                .localizationId(2L)
+                .rooms(null)
+                .build();
+
+        HotelServ hotelHotelChainNameToShort = HotelServ.builder()
+                .id(1L)
+                .name("Hotel1")
+                .numberOfStars(3)
+                .hotelChain("M")
+                .localizationId(2L)
+                .rooms(null)
+                .build();
+
+        List<HotelServ> hotels = new ArrayList<>(Arrays.asList(
+                hotelZeroStars,
+                hotelSixStars,
+                hotelNameToShort,
+                hotelHotelChainNameToShort
+        ));
+
         return hotels.stream();
     }
 
@@ -129,29 +170,63 @@ public class Provider {
     }
 
     //Booking
-    static Stream<Booking> bookingProviderBadDate() {
-        List<Booking> bookings = new ArrayList<>();
+    static Stream<BookingServ> bookingProviderBadDate() {
 
-        bookings.add(new Booking(1L, 3L, 5L,
-                LocalDate.of(2024, 01, 15), LocalDate.of(2024, 01, 12))); //booking room when already occupied
+        BookingServ bookingWithStartDateGreaterThenEndDate = BookingServ.builder()
+                .id(1L)
+                .userId(3L)
+                .roomId(5L)
+                .start_date(LocalDate.now().plusDays(4))
+                .end_date(LocalDate.now().plusDays(2))
+                .build();
 
-        bookings.add(new Booking(1L, 3L, 5L,
-                LocalDate.now().minusDays(1), LocalDate.now().plusDays(2))); ////booking room when already occupied
+        BookingServ bookingWithStartDateInPast = BookingServ.builder()
+                .id(1L)
+                .userId(3L)
+                .roomId(5L)
+                .start_date(LocalDate.now().minusDays(1))
+                .end_date(LocalDate.now().plusDays(2))
+                .build();
 
-        bookings.add(new Booking(1L, 3L, 5L,
-                LocalDate.now().plusDays(10), LocalDate.now().plusDays(10))); ////booking room when already occupied
+        BookingServ bookingWithStartDateEqualEndDate = BookingServ.builder()
+                .id(1L)
+                .userId(3L)
+                .roomId(5L)
+                .start_date(LocalDate.now().plusDays(2))
+                .end_date(LocalDate.now().plusDays(2))
+                .build();
+
+        List<BookingServ> bookings = new ArrayList<>(Arrays.asList(
+                bookingWithStartDateGreaterThenEndDate,
+                bookingWithStartDateInPast,
+                bookingWithStartDateEqualEndDate
+        ));
 
         return bookings.stream();
     }
 
-    static Stream<Booking> bookingProviderRoomOccupied() {
-        List<Booking> bookings = new ArrayList<>();
+    static Stream<BookingServ> bookingProviderRoomOccupied() {
 
-        bookings.add(new Booking(2L, 3L, 5L,
-                LocalDate.now(), LocalDate.now().plusDays(6))); //booking room when already occupied
+        BookingServ bookingRoomOccupied1 = BookingServ.builder()
+                .id(2L)
+                .userId(3L)
+                .roomId(5L)
+                .start_date(LocalDate.now())
+                .end_date(LocalDate.now().plusDays(6))
+                .build();
 
-        bookings.add(new Booking(2L, 3L, 5L,
-                LocalDate.now().plusDays(8), LocalDate.now().plusDays(15))); ////booking room when already occupied
+        BookingServ bookingRoomOccupied2 = BookingServ.builder()
+                .id(2L)
+                .userId(3L)
+                .roomId(5L)
+                .start_date(LocalDate.now().plusDays(8))
+                .end_date(LocalDate.now().plusDays(15))
+                .build();
+
+        List<BookingServ> bookings = new ArrayList<>(Arrays.asList(
+                bookingRoomOccupied1,
+                bookingRoomOccupied2
+        ));
 
         return bookings.stream();
     }
