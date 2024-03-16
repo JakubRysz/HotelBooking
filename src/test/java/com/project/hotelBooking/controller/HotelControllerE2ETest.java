@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     @BeforeEach
     public void initialize() {
         //given
-        newLocalization.setCity("Krakow");
+        newLocalization.setCity("Cracow");
         newLocalization.setCountry("Poland");
         localizationRepository.save(newLocalization);
 

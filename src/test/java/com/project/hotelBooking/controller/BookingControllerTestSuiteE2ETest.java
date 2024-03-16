@@ -61,7 +61,7 @@ public class BookingControllerTestSuiteE2ETest {
 
     @BeforeEach
     public void initialize() {
-        newLocalization.setCity("Krakow");
+        newLocalization.setCity("Cracow");
         newLocalization.setCountry("Poland");
         localizationRepository.save(newLocalization);
 

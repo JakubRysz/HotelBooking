@@ -3,6 +3,7 @@ package com.project.hotelBooking.controller;
 import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.model.BookingServ;
 import com.project.hotelBooking.service.model.HotelServ;
+import com.project.hotelBooking.service.model.LocalizationServ;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,10 +16,26 @@ import static com.project.hotelBooking.controller.ValidatorTest.EMAIL_TEST;
 public class Provider {
 
     //Localization
-    static Stream<Localization> localizationProvider() {
-        List<Localization> localizations = new ArrayList<>();
-        localizations.add(new Localization(1L, "K", "Poland", null)); //bad city
-        localizations.add(new Localization(1L, "Cracow", "P", null)); //bad country
+    static Stream<LocalizationServ> localizationProvider() {
+        LocalizationServ localizationBadCity = LocalizationServ.builder()
+                .id(1L)
+                .city("K")
+                .country("Poland")
+                .hotels(null)
+                .build();
+
+        LocalizationServ localizationBadCountry = LocalizationServ.builder()
+                .id(1L)
+                .city("Cracow")
+                .country("P")
+                .hotels(null)
+                .build();
+
+        List<LocalizationServ> localizations = new ArrayList<>(Arrays.asList(
+                localizationBadCity,
+                localizationBadCountry
+        ));
+
         return localizations.stream();
     }
 

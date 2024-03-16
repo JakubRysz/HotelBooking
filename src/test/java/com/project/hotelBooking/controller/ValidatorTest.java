@@ -7,6 +7,7 @@ import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.BookingServ;
 import com.project.hotelBooking.service.model.HotelServ;
+import com.project.hotelBooking.service.model.LocalizationServ;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,13 +45,19 @@ class ValidatorTest {
     @Test
     public void shouldNotReturnBadRequestExceptionValidateLocalization() {
         //given
-        Localization localization = new Localization(1L, "Cracow", "Poland",null);
+        when(localizationService.getLocalizationByCityAndCountry(any(LocalizationServ.class))).thenThrow(ElementNotFoundException.class);
+        LocalizationServ localization = LocalizationServ.builder()
+                .id(1L)
+                .city("Cracow")
+                .country("Poland")
+                .hotels(null)
+                .build();
         //when &then
         assertDoesNotThrow(()->validatorMock.validateLocalization(localization));
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.Provider#localizationProvider")
-    public void shouldReturnBadRequestExceptionValidateLocalizationWhenBadLocalizationData(Localization localization) {
+    public void shouldReturnBadRequestExceptionValidateLocalizationWhenBadLocalizationData(LocalizationServ localization) {
         //given
         //when &then
         assertThrows(BadRequestException.class,
@@ -71,7 +78,7 @@ class ValidatorTest {
                 .build();
 
         when(hotelService.getHotelByNameAndHotelChain(any(HotelServ.class))).thenThrow(ElementNotFoundException.class);
-        when(localizationService.getLocalizationById(any(Long.class))).thenReturn(Optional.of(new Localization()));
+        when(localizationService.getLocalizationById(any(Long.class))).thenReturn(LocalizationServ.builder().build());
         //when &then
         assertDoesNotThrow(()->validatorMock.validateHotel(hotel));
     }

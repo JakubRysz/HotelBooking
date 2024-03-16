@@ -1,11 +1,8 @@
 package com.project.hotelBooking.service;
 
 import com.project.hotelBooking.repository.model.*;
-import com.project.hotelBooking.service.model.BookingInfo;
+import com.project.hotelBooking.service.model.*;
 //import com.project.hotelBooking.service.model.Mail;
-import com.project.hotelBooking.service.model.BookingServ;
-import com.project.hotelBooking.service.model.HotelServ;
-import com.project.hotelBooking.service.model.Mail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,12 +57,18 @@ public class SimpleEmailServiceTest {
                 + "Booking owner: Jan Kowalski\n"
                 + "Hotel name: hotel1\n"
                 + "Hotel chain: Mariot\n"
-                + "Localization: Poland, Krakow\n"
+                + "Localization: Poland, Cracow\n"
                 + "Room number: 2\n"
                 + "Room standard: 2\n"
                 + "Maximum number of persons in room: 3\n");
 
-        Localization localization = new Localization(null, "Krakow", "Poland",null);
+        LocalizationServ localization = LocalizationServ.builder()
+                .id(1L)
+                .city("Cracow")
+                .country("Poland")
+                .hotels(null)
+                .build();
+
         HotelServ hotel = HotelServ.builder()
                 .id(1L)
                 .name("hotel1")

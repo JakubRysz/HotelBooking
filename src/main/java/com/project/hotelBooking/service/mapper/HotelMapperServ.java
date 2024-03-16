@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface HotelMapperServ {
     HotelServ mapToHotel(Hotel hotel);
-    List<HotelServ> mapToHotels(List<Hotel> hotel);
+    List<HotelServ> mapToHotels(List<Hotel> hotels);
     Hotel mapToRepositoryHotel(HotelServ hotel);
 
 }

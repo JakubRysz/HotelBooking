@@ -7,6 +7,7 @@ import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.BookingServ;
 import com.project.hotelBooking.service.model.HotelServ;
+import com.project.hotelBooking.service.model.LocalizationServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -30,33 +31,35 @@ public class Validator {
 
 
     //Localization
-    public void validateLocalization(Localization localization) {
+    public void validateLocalization(LocalizationServ localization) {
         validateLocalizationData(localization);
         validateIfLocalizationNotExistByCityAndCountry(localization);
     }
-    public void validateLocalizationEdit(Localization localization) {
+    public void validateLocalizationEdit(LocalizationServ localization) {
         validateLocalizationData(localization);
-        Localization localizationFromDatabase = validateIfLocalizationExistById(localization.getId());
+        LocalizationServ localizationFromDatabase = validateIfLocalizationExistById(localization.getId());
 
         if (!localization.getCity().equals(localizationFromDatabase.getCity())
             || !localization.getCountry().equals(localizationFromDatabase.getCountry())) {
             validateIfLocalizationNotExistByCityAndCountry(localization);
         }
     }
-    private void validateLocalizationData(Localization localization){
+    private void validateLocalizationData(LocalizationServ localization){
         if (localization==null
                 || localization.getCity().length()<2
                 || localization.getCountry().length()<2) throw new BadRequestException("Bad localization data");
     }
-    protected Localization validateIfLocalizationExistById(Long id) {
-        Localization localization =localizationService.getLocalizationById(id).orElseThrow(
-                ()->new ElementNotFoundException("No such localization"));
-        return localization;
+    protected LocalizationServ validateIfLocalizationExistById(Long id) {
+        return localizationService.getLocalizationById(id);
     }
 
-    protected void validateIfLocalizationNotExistByCityAndCountry(Localization localization){
-        Localization l = localizationService.getLocalizationByCityAndCountry(localization).orElse(null);
-        if (l!=null) throw new ElementAlreadyExistException("Localization already exist");
+    //TODO delegate this exception throw do different layer
+    protected void validateIfLocalizationNotExistByCityAndCountry(LocalizationServ localization){
+        try {
+            localizationService.getLocalizationByCityAndCountry(localization);
+            throw new ElementAlreadyExistException("Localization already exist");
+        } catch (ElementNotFoundException ignored) {
+        }
     }
 
 

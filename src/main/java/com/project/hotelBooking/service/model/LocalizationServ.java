@@ -10,7 +10,7 @@ public class LocalizationServ {
     Long id;
     String city;
     String country;
-    List<HotelServ> hotel;
-
+    @With
+    List<HotelServ> hotels;
 }
 

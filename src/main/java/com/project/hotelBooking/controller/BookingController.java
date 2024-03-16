@@ -131,7 +131,7 @@ public class BookingController {
 
         Room room = roomService.getRoomById(booking.getRoomId()).orElseThrow(() -> new ElementNotFoundException("No such room"));
         HotelServ hotel = hotelService.getHotelById(room.getHotelId());
-        Localization localization = localizationService.getLocalizationById(hotel.getLocalizationId()).orElseThrow(() -> new ElementNotFoundException("No such Localization"));
+        LocalizationServ localization = localizationService.getLocalizationById(hotel.getLocalizationId());
         User user = userService.getUserById(booking.getUserId()).orElseThrow(() -> new ElementNotFoundException("No such user"));
 
         return BookingInfo.builder()

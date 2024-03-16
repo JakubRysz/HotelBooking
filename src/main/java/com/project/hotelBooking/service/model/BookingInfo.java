@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 public class BookingInfo {
     BookingServ booking;
-    Localization localization;
+    LocalizationServ localization;
     HotelServ hotel;
     Room room;
     User user;
