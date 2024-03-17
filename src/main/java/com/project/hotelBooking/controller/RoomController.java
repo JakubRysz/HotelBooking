@@ -7,6 +7,7 @@ import com.project.hotelBooking.controller.model.RoomWithBookingsDto;
 import com.project.hotelBooking.controller.model.RoomWithBookingsWithoutUsersDto;
 import com.project.hotelBooking.mapper.RoomMapper;
 import com.project.hotelBooking.service.RoomService;
+import com.project.hotelBooking.service.model.RoomServ;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -30,7 +31,7 @@ public class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/rooms")
     public RoomDto createRoom(@RequestBody RoomWithBookingsDto roomWithBookingsDto) {
-        Room room = roomMapper.mapToRoom(roomWithBookingsDto);
+        RoomServ room = roomMapper.mapToRoom(roomWithBookingsDto);
         validator.validateRoom(room);
         return roomMapper.mapToRoomDto(roomService.saveRoom(room));
     }
@@ -38,14 +39,12 @@ public class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/rooms/bookings/{id}")
     public RoomWithBookingsDto getSingleRoomwithBookings(@PathVariable Long id) {
-        return roomMapper.mapToRoomWithBookingsDto(roomService.getRoomById(id)
-                .orElseThrow(() -> new ElementNotFoundException("No such room")));
+        return roomMapper.mapToRoomWithBookingsDto(roomService.getRoomById(id));
     }
 
     @GetMapping("/rooms/bookings/withoutUsers/{id}")
     public RoomWithBookingsWithoutUsersDto getSingleRoomWithBookingsWithoutUsers(@PathVariable Long id) {
-        return roomMapper.mapToRoomWithBookingsWithoutUsersDto(roomService.getRoomById(id)
-                .orElseThrow(() -> new ElementNotFoundException("No such room")));
+        return roomMapper.mapToRoomWithBookingsWithoutUsersDto(roomService.getRoomById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -54,7 +53,7 @@ public class RoomController {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         return (roomService.getRoomsWithBookings(page, sort).stream()
-                .map(k -> roomMapper.mapToRoomWithBookingsDto(k))
+                .map(room -> roomMapper.mapToRoomWithBookingsDto(room))
                 .collect(Collectors.toList()));
     }
 
@@ -63,7 +62,7 @@ public class RoomController {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         return (roomService.getRoomsWithBookings(page, sort).stream()
-                .map(k -> roomMapper.mapToRoomWithBookingsWithoutUsersDto(k))
+                .map(room -> roomMapper.mapToRoomWithBookingsWithoutUsersDto(room))
                 .collect(Collectors.toList()));
     }
 
@@ -71,13 +70,13 @@ public class RoomController {
     public List<RoomDto> getRooms(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
-        return (roomService.getRooms(page, sort).stream().map(k -> roomMapper.mapToRoomDto(k)).collect(Collectors.toList()));
+        return (roomService.getRooms(page, sort).stream().map(room -> roomMapper.mapToRoomDto(room)).collect(Collectors.toList()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/rooms")
     public RoomDto editRoom(@RequestBody RoomDto roomDto) {
-        Room room = roomMapper.mapToRoom(roomDto);
+        RoomServ room = roomMapper.mapToRoom(roomDto);
         validator.validateRoomEdit(room);
         return roomMapper.mapToRoomDto(roomService.editRoom(room));
     }

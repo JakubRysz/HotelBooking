@@ -12,6 +12,6 @@ public class BookingInfo {
     BookingServ booking;
     LocalizationServ localization;
     HotelServ hotel;
-    Room room;
+    RoomServ room;
     User user;
 }

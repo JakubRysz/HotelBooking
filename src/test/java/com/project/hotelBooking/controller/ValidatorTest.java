@@ -8,6 +8,7 @@ import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.BookingServ;
 import com.project.hotelBooking.service.model.HotelServ;
 import com.project.hotelBooking.service.model.LocalizationServ;
+import com.project.hotelBooking.service.model.RoomServ;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,14 +97,22 @@ class ValidatorTest {
     @Test
     public void shouldNotReturnBadRequestExceptionValidateRoom() {
         //given
-        Room room = new Room(1L, 2, 3, 2, 3L,null);
+        RoomServ room = RoomServ.builder()
+                .id(1L)
+                .roomNumber(2)
+                .numberOfPersons(3)
+                .standard(2)
+                .hotelId(3L)
+                .bookings(null)
+                .build();
         when(hotelService.getHotelById(any(Long.class))).thenReturn(HotelServ.builder().build());
+        when(roomService.getRoomByRoomNumberAndHotelId(any(RoomServ.class))).thenThrow(ElementNotFoundException.class);
         //when &then
         assertDoesNotThrow(()->validatorMock.validateRoom(room));
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.Provider#roomProvider")
-    public void shouldReturnBadRequestExceptionValidateRoomWhenBadRoomData(Room room) {
+    public void shouldReturnBadRequestExceptionValidateRoomWhenBadRoomData(RoomServ room) {
         //given
         //when & then
         assertThrows(BadRequestException.class,
@@ -149,7 +159,7 @@ class ValidatorTest {
     @Test
     public void shouldNotReturnBadRequestExceptionValidateBooking() {
         //given
-        List<Booking> bookings = provideBookingsList();
+        List<BookingServ> bookings = provideBookingsList();
 
         BookingServ booking = BookingServ.builder()
                 .id(2L)
@@ -159,22 +169,30 @@ class ValidatorTest {
                 .end_date(LocalDate.now().plusDays(15))
                 .build();
 
-
-        Room room = new Room(5L, 2, 3, 2, 3L,bookings);
+        RoomServ room = RoomServ.builder()
+                .id(5L)
+                .roomNumber(2)
+                .numberOfPersons(3)
+                .standard(2)
+                .hotelId(3L)
+                .bookings(bookings)
+                .build();
 
         when(userService.getUserById(any(Long.class))).thenReturn(Optional.of(new User()));
-        when(roomService.getRoomById(5L)).thenReturn(Optional.of(room));
+        when(roomService.getRoomById(5L)).thenReturn(room);
         //when &then
         assertDoesNotThrow(()->validatorMock.validateBooking(booking));
     }
 
-    //TODO: Change this to BookingServ when implementing RoomServ
-    private List<Booking> provideBookingsList(){
-        Booking bookingOld = new Booking(1L, 3L, 5L,
-                LocalDate.now().plusDays(5), LocalDate.now().plusDays(9));
-        List<Booking> bookings = new ArrayList<>();
-        bookings.add(bookingOld);
-        return bookings;
+    private List<BookingServ> provideBookingsList(){
+        BookingServ bookingOld = BookingServ.builder()
+                .id(1L)
+                .userId(3L)
+                .roomId(5L)
+                .start_date(LocalDate.now().plusDays(5))
+                .end_date(LocalDate.now().plusDays(9))
+                .build();
+        return new ArrayList<>(Arrays.asList(bookingOld));
     }
 
     @ParameterizedTest
@@ -189,10 +207,17 @@ class ValidatorTest {
     @MethodSource("com.project.hotelBooking.controller.Provider#bookingProviderRoomOccupied")
     public void shouldReturnElementAlreadyExistExceptionValidateBookingWhenRoomOccupied(BookingServ booking) {
         //given
-        List<Booking> bookings = provideBookingsList();
-        Room room = new Room(5L, 2, 3, 2, 3L,bookings);
+        List<BookingServ> bookings = provideBookingsList();
+        RoomServ room = RoomServ.builder()
+                .id(5L)
+                .roomNumber(2)
+                .numberOfPersons(3)
+                .standard(2)
+                .hotelId(3L)
+                .bookings(bookings)
+                .build();
         when(userService.getUserById(any(Long.class))).thenReturn(Optional.of(new User()));
-        when(roomService.getRoomById(5L)).thenReturn(Optional.of(room));
+        when(roomService.getRoomById(5L)).thenReturn(room);
         //when & then
         assertThrows(ElementAlreadyExistException.class,
                 ()->validatorMock.validateBooking(booking),"Room occupied at this time");

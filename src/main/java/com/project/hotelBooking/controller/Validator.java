@@ -8,6 +8,7 @@ import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.BookingServ;
 import com.project.hotelBooking.service.model.HotelServ;
 import com.project.hotelBooking.service.model.LocalizationServ;
+import com.project.hotelBooking.service.model.RoomServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -101,14 +102,14 @@ public class Validator {
 
 
     //Room
-    public void validateRoom(Room room) {
+    public void validateRoom(RoomServ room) {
         validateRoomData(room);
         validateIfRoomNotExistByRoomNumberAndHotelId(room);
         validateIfHotelExistById(room.getHotelId());
     }
-    public void validateRoomEdit(Room room) {
+    public void validateRoomEdit(RoomServ room) {
         validateRoomData(room);
-        Room roomFromDatabase = validateIfRoomExistById(room.getId());
+        RoomServ roomFromDatabase = validateIfRoomExistById(room.getId());
         validateIfHotelExistById(room.getHotelId());
 
         if(room.getRoomNumber()!=roomFromDatabase.getRoomNumber()
@@ -116,20 +117,24 @@ public class Validator {
             validateIfRoomNotExistByRoomNumberAndHotelId(room);
         }
     }
-    private void validateRoomData(Room room) {
+    private void validateRoomData(RoomServ room) {
         if (room==null
                 || room.getRoomNumber()<1
                 || room.getNumberOfPersons()<1
                 || room.getStandard()<1
                 || room.getStandard()>5) throw new BadRequestException("Bad room data");
     }
-    protected Room validateIfRoomExistById(Long id) {
-        Room room = roomService.getRoomById(id).orElseThrow(()->new ElementNotFoundException("No such room"));
-        return room;
+    protected RoomServ validateIfRoomExistById(Long id) {
+        return roomService.getRoomById(id);
     }
-    protected void validateIfRoomNotExistByRoomNumberAndHotelId(Room room) {
-        Room r = roomService.getRoomByRoomNumberAndHotelId(room).orElse(null);
-        if (r!=null) throw new ElementAlreadyExistException("Room already exist");
+
+    //TODO delegate this exception throw do different layer
+    protected void validateIfRoomNotExistByRoomNumberAndHotelId(RoomServ room) {
+        try {
+            roomService.getRoomByRoomNumberAndHotelId(room);
+            throw new ElementAlreadyExistException("Room already exist");
+        } catch (ElementNotFoundException ignored) {
+        }
     }
 
 
@@ -218,11 +223,10 @@ public class Validator {
 
     private void validateIfRoomIsFree(BookingServ booking) {
         Long roomId = booking.getRoomId();
-        Room room = roomService.getRoomById(roomId)
-                .orElseThrow(() -> new ElementNotFoundException("No such room"));
-        List<Booking> roomBookings = room.getBookings();
+        RoomServ room = roomService.getRoomById(roomId);
+        List<BookingServ> roomBookings = room.getBookings();
         if (!roomBookings.isEmpty()) {
-            for (Booking bookingDatabase : roomBookings) {
+            for (BookingServ bookingDatabase : roomBookings) {
                 if (Objects.equals(bookingDatabase.getId(), booking.getId())) {
                     continue;
                 }

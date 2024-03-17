@@ -10,6 +10,5 @@ import org.mapstruct.Mapper;
 public interface BookingMapper {
     BookingDto mapToBookingDto(BookingServ booking);
     BookingServ mapToBooking(BookingDto bookingDto);
-    //TODO - change this to accept BookingServ after add RoomServ
-    BookingWithoutUserDto mapToBookingWithoutUserDto(Booking booking);
+    BookingWithoutUserDto mapToBookingWithoutUserDto(BookingServ booking);
 }

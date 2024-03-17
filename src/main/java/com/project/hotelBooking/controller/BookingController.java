@@ -129,7 +129,7 @@ public class BookingController {
 
     public BookingInfo getInfoFromBooking(BookingServ booking) {
 
-        Room room = roomService.getRoomById(booking.getRoomId()).orElseThrow(() -> new ElementNotFoundException("No such room"));
+        RoomServ room = roomService.getRoomById(booking.getRoomId());
         HotelServ hotel = hotelService.getHotelById(room.getHotelId());
         LocalizationServ localization = localizationService.getLocalizationById(hotel.getLocalizationId());
         User user = userService.getUserById(booking.getUserId()).orElseThrow(() -> new ElementNotFoundException("No such user"));

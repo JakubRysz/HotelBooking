@@ -1,14 +1,20 @@
 package com.project.hotelBooking.service;
 
+import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.repository.model.Booking;
 import com.project.hotelBooking.repository.model.Room;
 import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.service.mapper.BookingMapperServ;
+import com.project.hotelBooking.service.mapper.RoomMapperServ;
+import com.project.hotelBooking.service.model.BookingServ;
+import com.project.hotelBooking.service.model.RoomServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,36 +24,67 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final BookingRepository bookingRepository;
-    private static final int PAGE_SIZE=5;
+    private final RoomMapperServ roomMapperServ;
+    private final BookingMapperServ bookingMapperServ;
+    private static final int PAGE_SIZE = 5;
 
-    public Optional<Room> getRoomByRoomNumberAndHotelId(Room room) { return roomRepository.findRoomByRoomNumberAndHotelId(
-            room.getRoomNumber(),room.getHotelId());}
-    public Room saveRoom(Room room) {
-        return roomRepository.save(room);
+    public RoomServ getRoomById(Long id) {
+
+        return roomMapperServ.mapToRoom(roomRepository.findById(id)
+                .orElseThrow(() -> new ElementNotFoundException("No such room"))
+        );
     }
-    public Optional<Room> getRoomById(Long id) {
-        return roomRepository.findById(id);
+
+    public RoomServ getRoomByRoomNumberAndHotelId(RoomServ room) {
+        return roomMapperServ.mapToRoom(
+                roomRepository.findRoomByRoomNumberAndHotelId(room.getRoomNumber(), room.getHotelId())
+                        .orElseThrow(() -> new ElementNotFoundException("No such room"))
+        );
     }
+
+    public RoomServ saveRoom(RoomServ room) {
+
+        return roomMapperServ.mapToRoom(
+                roomRepository.save(roomMapperServ.mapToRepositoryRoom(room))
+        );
+    }
+
     public void deleteRoomById(Long id) {
         roomRepository.deleteById(id);
     }
-    public List<Room> getRooms(Integer page, Sort.Direction sort) {
-        return roomRepository.findAllRooms(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")));
+
+    public List<RoomServ> getRooms(Integer page, Sort.Direction sort) {
+        return roomMapperServ.mapToRoms(
+                roomRepository.findAllRooms(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
+        );
     }
-    public List<Room> getRoomsWithBookings(Integer page, Sort.Direction sort) {
-        List<Room> rooms =  roomRepository.findAllRooms(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")));
-        List<Long> ids = rooms.stream().map(Room::getId).collect(Collectors.toList());
-        List<Booking> bookings = bookingRepository.findAllByRoomIdIn(ids);
-        rooms.forEach(room -> room.setBookings(extractBookings(bookings, room.getId())));
+
+    public List<RoomServ> getRoomsWithBookings(Integer page, Sort.Direction sort) {
+        List<RoomServ> rooms = roomMapperServ.mapToRoms(
+                roomRepository.findAllRooms(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
+        );
+        List<Long> roomsIds = rooms.stream()
+                .map(RoomServ::getId)
+                .collect(Collectors.toList());
+        List<BookingServ> bookings = bookingMapperServ.mapToServiceBookings(
+                bookingRepository.findAllByRoomIdIn(roomsIds)
+        );
+        rooms.forEach(room -> room.withBookings(extractBookings(bookings, room.getId())));
         return rooms;
     }
-    private List<Booking> extractBookings(List<Booking> bookings, Long id) {
+
+    private List<BookingServ> extractBookings(List<BookingServ> bookings, Long id) {
         return bookings.stream()
-                .filter(booking -> booking.getRoomId()==id).collect(Collectors.toList());
+                .filter(booking -> Objects.equals(booking.getRoomId(), id)).collect(Collectors.toList());
     }
-    public Room editRoom(Room room) {
-        return roomRepository.save(room);
+
+    public RoomServ editRoom(RoomServ room) {
+
+        return roomMapperServ.mapToRoom(
+                roomRepository.save(roomMapperServ.mapToRepositoryRoom(room))
+        );
     }
+
     public void deleteAllRooms() {
         roomRepository.deleteAll();
     }

@@ -12,6 +12,7 @@ public class RoomServ {
     int numberOfPersons;
     int standard;
     Long hotelId;
+    @With
     List<BookingServ> bookings;
 
 }

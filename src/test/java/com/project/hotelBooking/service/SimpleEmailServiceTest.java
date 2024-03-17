@@ -78,8 +78,17 @@ public class SimpleEmailServiceTest {
                 .rooms(null)
                 .build();
 
-        Room room = new Room(1L, 2, 3, 2, 1L,null);
+        RoomServ room = RoomServ.builder()
+                .id(1L)
+                .roomNumber(2)
+                .numberOfPersons(3)
+                .standard(2)
+                .hotelId(1L)
+                .bookings(null)
+                .build();
+
         User user = new User(1L, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER", EMAIL_TEST, null);
+
         BookingServ booking = BookingServ.builder()
                 .id(1L)
                 .userId(1L)

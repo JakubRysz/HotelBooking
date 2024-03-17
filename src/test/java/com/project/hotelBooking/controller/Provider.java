@@ -4,6 +4,7 @@ import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.model.BookingServ;
 import com.project.hotelBooking.service.model.HotelServ;
 import com.project.hotelBooking.service.model.LocalizationServ;
+import com.project.hotelBooking.service.model.RoomServ;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -88,12 +89,48 @@ public class Provider {
     }
 
     //Room
-    static Stream<Room> roomProvider() {
-        List<Room> rooms = new ArrayList<>();
-        rooms.add(new Room(1L, 0, 3, 2, 3L, null)); //bad room number
-        rooms.add(new Room(1L, 3, 0, 2, 3L, null)); //bad numberOfPersons
-        rooms.add(new Room(1L, 3, 3, 0, 3L, null)); //bad standard
-        rooms.add(new Room(1L, 3, 3, 6, 3L, null)); //bad standard
+    static Stream<RoomServ> roomProvider() {
+
+        RoomServ roomBadRoomNumber = RoomServ.builder()
+                .id(1L)
+                .roomNumber(0)
+                .numberOfPersons(3)
+                .standard(2)
+                .hotelId(3L)
+                .bookings(null)
+                .build();
+        RoomServ roomBadNumberOfPersons = RoomServ.builder()
+                .id(1L)
+                .roomNumber(3)
+                .numberOfPersons(0)
+                .standard(2)
+                .hotelId(3L)
+                .bookings(null)
+                .build();
+        RoomServ roomBadStandardToLow = RoomServ.builder()
+                .id(1L)
+                .roomNumber(3)
+                .numberOfPersons(3)
+                .standard(0)
+                .hotelId(3L)
+                .bookings(null)
+                .build();
+        RoomServ roomBadStandardToBig = RoomServ.builder()
+                .id(1L)
+                .roomNumber(3)
+                .numberOfPersons(3)
+                .standard(0)
+                .hotelId(3L)
+                .bookings(null)
+                .build();
+
+        List<RoomServ> rooms = new ArrayList<>(Arrays.asList(
+                roomBadRoomNumber,
+                roomBadNumberOfPersons,
+                roomBadStandardToLow,
+                roomBadStandardToBig
+        ));
+
         return rooms.stream();
     }
 
