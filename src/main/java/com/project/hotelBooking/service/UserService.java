@@ -1,7 +1,7 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.domain.Booking;
-import com.project.hotelBooking.domain.User;
+import com.project.hotelBooking.repository.model.Booking;
+import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

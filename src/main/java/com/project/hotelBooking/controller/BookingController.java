@@ -1,9 +1,11 @@
 package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.domain.*;
+import com.project.hotelBooking.controller.model.BookingDto;
 import com.project.hotelBooking.mapper.BookingMapper;
+import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.*;
+import com.project.hotelBooking.service.model.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -34,7 +36,7 @@ public class BookingController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/bookings")
     public BookingDto createBooking(@RequestBody BookingDto bookingDto) {
-        Booking booking = bookingMapper.mapToBooking(bookingDto);
+        BookingServ booking = bookingMapper.mapToBooking(bookingDto);
         validator.validateBooking(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
@@ -44,7 +46,7 @@ public class BookingController {
 
     @PostMapping("/bookings/own")
     public BookingDto createOwnBooking(@RequestBody BookingDto bookingDto) {
-        Booking booking = bookingMapper.mapToBooking(bookingDto);
+        BookingServ booking = bookingMapper.mapToBooking(bookingDto);
         validator.validateBooking(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
@@ -55,8 +57,7 @@ public class BookingController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/bookings/{id}")
     public BookingDto getSingleBooking(@PathVariable Long id) throws ElementNotFoundException {
-        return bookingMapper.mapToBookingDto(bookingService.getBookingById(id)
-                .orElseThrow(() -> new ElementNotFoundException("No such booking")));
+        return bookingMapper.mapToBookingDto(bookingService.getBookingById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -80,9 +81,8 @@ public class BookingController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/bookings")
     public BookingDto editBooking(@RequestBody BookingDto bookingDto) {
-        Booking booking = bookingMapper.mapToBooking(bookingDto);
-        Booking oldBooking = bookingService.getBookingById(booking.getId())
-                .orElseThrow(() -> new ElementNotFoundException("No such booking"));
+        BookingServ booking = bookingMapper.mapToBooking(bookingDto);
+        BookingServ oldBooking = bookingService.getBookingById(booking.getId());
         validator.validateBookingEdit(booking, oldBooking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
@@ -92,12 +92,11 @@ public class BookingController {
 
     @PutMapping("/bookings/own")
     public BookingDto editOwnBooking(@RequestBody BookingDto bookingDto) {
-        Booking booking = bookingMapper.mapToBooking(bookingDto);
+        BookingServ booking = bookingMapper.mapToBooking(bookingDto);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName()).orElseThrow(
                 () -> new ElementNotFoundException("No such user"));
-        Booking oldBooking = bookingService.getBookingById(booking.getId())
-                .orElseThrow(() -> new ElementNotFoundException("No such booking"));
+        BookingServ oldBooking = bookingService.getBookingById(booking.getId());
         validator.validateBookingEditUser(booking, oldBooking, user.getId());
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
@@ -109,7 +108,7 @@ public class BookingController {
     @DeleteMapping("/bookings/{id}")
     public void deleteBooking(@PathVariable Long id) {
         validator.validateIfBookingExistById(id);
-        Booking bookingToDelete = bookingService.getBookingById(id).orElseThrow(() -> new ElementNotFoundException("No such booking"));
+        BookingServ bookingToDelete = bookingService.getBookingById(id);
         BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
         bookingService.deleteBookingById(id);
         emailService.sendMailDeletedBooking(bookingInfo);
@@ -118,7 +117,7 @@ public class BookingController {
     @DeleteMapping("/bookings/own/{id}")
     public void deleteOwnBooking(@PathVariable Long id) {
         validator.validateIfBookingExistById(id);
-        Booking bookingToDelete = bookingService.getBookingById(id).orElseThrow(() -> new ElementNotFoundException("No such booking"));
+        BookingServ bookingToDelete = bookingService.getBookingById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName()).orElseThrow(
                 () -> new ElementNotFoundException("No such user"));
@@ -128,11 +127,11 @@ public class BookingController {
         emailService.sendMailDeletedBooking(bookingInfo);
     }
 
-    public BookingInfo getInfoFromBooking(Booking booking) {
+    public BookingInfo getInfoFromBooking(BookingServ booking) {
 
-        Room room = roomService.getRoomById(booking.getRoomId()).orElseThrow(() -> new ElementNotFoundException("No such room"));
-        Hotel hotel = hotelService.getHotelById(room.getHotelId()).orElseThrow(() -> new ElementNotFoundException("No such hotel"));
-        Localization localization = localizationService.getLocalizationById(hotel.getLocalizationId()).orElseThrow(() -> new ElementNotFoundException("No such Localization"));
+        RoomServ room = roomService.getRoomById(booking.getRoomId());
+        HotelServ hotel = hotelService.getHotelById(room.getHotelId());
+        LocalizationServ localization = localizationService.getLocalizationById(hotel.getLocalizationId());
         User user = userService.getUserById(booking.getUserId()).orElseThrow(() -> new ElementNotFoundException("No such user"));
 
         return BookingInfo.builder()

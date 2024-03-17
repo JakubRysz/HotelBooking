@@ -2,7 +2,7 @@ package com.project.hotelBooking.config;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.project.hotelBooking.domain.User;
+import com.project.hotelBooking.repository.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;

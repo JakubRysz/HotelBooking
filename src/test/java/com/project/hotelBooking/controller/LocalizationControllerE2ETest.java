@@ -1,7 +1,7 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.Localization;
+import com.project.hotelBooking.repository.model.Localization;
 import com.project.hotelBooking.repository.LocalizationRepository;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +36,7 @@ public class LocalizationControllerE2ETest {
 
     @BeforeEach
     public void initialize() {
-        newLocalization.setCity("Krakow");
+        newLocalization.setCity("Cracow");
         newLocalization.setCountry("Poland");
         localizationRepository.save(newLocalization);
     }

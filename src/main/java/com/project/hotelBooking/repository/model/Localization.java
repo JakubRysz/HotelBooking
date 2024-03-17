@@ -1,4 +1,4 @@
-package com.project.hotelBooking.domain;
+package com.project.hotelBooking.repository.model;
 
 import lombok.*;
 
