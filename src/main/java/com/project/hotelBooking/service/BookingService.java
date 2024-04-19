@@ -23,13 +23,13 @@ public class BookingService {
     BookingMapperServ bookingMapper;
 
     public BookingServ saveBooking(BookingServ booking) {
-        return bookingMapper.mapToServiceBooking(
+        return bookingMapper.mapToBooking(
         bookingRepository.save(bookingMapper.mapToRepositoryBooking(booking))
         );
     }
 
     public BookingServ getBookingById(Long id) {
-        return bookingMapper.mapToServiceBooking(bookingRepository.findById(id).orElseThrow(()
+        return bookingMapper.mapToBooking(bookingRepository.findById(id).orElseThrow(()
                 -> new ElementNotFoundException("No such booking")));
     }
 
@@ -38,19 +38,19 @@ public class BookingService {
     }
 
     public List<BookingServ> getBookings(Integer page, Sort.Direction sort) {
-        return bookingMapper.mapToServiceBookings(
+        return bookingMapper.mapToBookings(
                 bookingRepository.findAllBookings(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
         );
     }
 
     public List<BookingServ> getBookingsByUserId(Long id, Integer page, Sort.Direction sort) {
-        return bookingMapper.mapToServiceBookings(
+        return bookingMapper.mapToBookings(
                 bookingRepository.findAllByUserId(id, PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
         );
     }
 
     public BookingServ editBooking(BookingServ bookingServ) {
-        return bookingMapper.mapToServiceBooking(
+        return bookingMapper.mapToBooking(
                         bookingRepository.save(bookingMapper.mapToRepositoryBooking(bookingServ))
                 );
     }

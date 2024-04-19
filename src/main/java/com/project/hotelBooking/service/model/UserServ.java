@@ -1,6 +1,8 @@
 package com.project.hotelBooking.service.model;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Value;
+import lombok.With;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,9 +21,11 @@ public class UserServ implements UserDetails {
     String lastName;
     LocalDate dateOfBirth;
     String username;
+    @With
     String password;
     String role;
     String email;
+    @With
     List<BookingServ> bookings;
 
     @Override

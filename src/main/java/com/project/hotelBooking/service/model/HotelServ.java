@@ -2,7 +2,10 @@ package com.project.hotelBooking.service.model;
 
 
 import com.project.hotelBooking.repository.model.Room;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
+import lombok.With;
 
 import java.util.List;
 

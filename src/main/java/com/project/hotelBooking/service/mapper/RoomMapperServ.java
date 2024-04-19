@@ -1,8 +1,6 @@
 package com.project.hotelBooking.service.mapper;
 
-import com.project.hotelBooking.repository.model.Localization;
 import com.project.hotelBooking.repository.model.Room;
-import com.project.hotelBooking.service.model.LocalizationServ;
 import com.project.hotelBooking.service.model.RoomServ;
 import org.mapstruct.Mapper;
 

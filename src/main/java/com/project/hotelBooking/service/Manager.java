@@ -2,8 +2,6 @@ package com.project.hotelBooking.service;
 
 import com.project.hotelBooking.repository.*;
 import com.project.hotelBooking.repository.model.*;
-import com.project.hotelBooking.service.model.BookingServ;
-import com.project.hotelBooking.service.model.HotelServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

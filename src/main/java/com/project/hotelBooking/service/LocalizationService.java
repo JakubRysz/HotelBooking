@@ -1,9 +1,8 @@
 package com.project.hotelBooking.service;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.repository.model.Hotel;
-import com.project.hotelBooking.repository.model.Localization;
-import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.repository.HotelRepository;
+import com.project.hotelBooking.repository.LocalizationRepository;
 import com.project.hotelBooking.service.mapper.HotelMapperServ;
 import com.project.hotelBooking.service.mapper.LocalizationMapperServ;
 import com.project.hotelBooking.service.model.HotelServ;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

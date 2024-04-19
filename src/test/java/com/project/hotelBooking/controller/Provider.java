@@ -1,10 +1,6 @@
 package com.project.hotelBooking.controller;
 
-import com.project.hotelBooking.repository.model.*;
-import com.project.hotelBooking.service.model.BookingServ;
-import com.project.hotelBooking.service.model.HotelServ;
-import com.project.hotelBooking.service.model.LocalizationServ;
-import com.project.hotelBooking.service.model.RoomServ;
+import com.project.hotelBooking.service.model.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -135,91 +131,232 @@ public class Provider {
     }
 
     //User
-    static Stream<User> userProvider() {
-        List<User> users = new ArrayList<>();
+    static Stream<UserServ> userProvider() {
 
-        users.add(new User(1L, "J", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", EMAIL_TEST, null));  //bad firstName
+        UserServ userBadFirstName = UserServ.builder()
+                .id(1L)
+                .firstName("J")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "K",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", EMAIL_TEST, null));  //bad LastName
+        UserServ userBadLastName = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("K")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.now().minusYears(100).minusDays(1), "jankowalski", "jankowalski123",
-                "ROLE_USER", EMAIL_TEST, null));  //bad dateOfBirth, user has more than 100 years
+        UserServ userOlderThan100 = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.now().minusYears(100).minusDays(1))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.now().minusYears(18).plusDays(1), "jankowalski", "jankowalski123",
-                "ROLE_USER", EMAIL_TEST, null));  //bad dateOfBirth, user has less than 18 years
+        UserServ userLessThan18 = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.now().minusYears(18).plusDays(1))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "j", "jankowalski123",
-                "ROLE_USER", EMAIL_TEST, null));  //bad username
+        UserServ userBadUsername = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("j")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "J", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "j",
-                "ROLE_USER", EMAIL_TEST, null));  //bad password
+        UserServ userBadPassword = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("j")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
+
+        List<UserServ> users = new ArrayList<>(
+                Arrays.asList(
+                        userBadFirstName,
+                        userBadLastName,
+                        userOlderThan100,
+                        userLessThan18,
+                        userBadUsername,
+                        userBadPassword
+                )
+        );
 
         return users.stream();
     }
 
-    static Stream<User> userProviderBadEmail() {
-        List<User> users = new ArrayList<>();
+    static Stream<UserServ> userProviderBadEmail() {
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", "@gmail.com", null));  //no character before at
+        UserServ userBadEmailNoCharacterBeforeAt = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email("@gmail.com")
+                .bookings(null)
+                .build();
 
-        String email = "@gmail.com";
-        for (int i = 0; i < 65; i++) email = "a" + email;
+        StringBuilder email = new StringBuilder("@gmail.com");
+        for (int i = 0; i <= 64; i++) email.insert(0, "a");
+        String emailToLong = email.toString();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", email, null));  //more than 64 in local part
+        UserServ userBadEmailMoreThan64CharsInLocalPart = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(emailToLong)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", ".jan@gmail.com", null));  //dot at the email begin
+        UserServ userBadEmailDotAtTheBegin = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(".jan@gmail.com")
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", "jan.@gmail.com", null));  //dot at the email end
+        UserServ userBadEmailDotAtTheEnd = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email("jan.@gmail.com")
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", "jan@gmail.com.", null));  //dot at domain end
+        UserServ userBadEmailBadDomain = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email("jan@.com")
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", "jan@gmail..com", null));  //double dot at domain
-
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USER", "jan@.com", null));  //bad domain
+        List<UserServ> users = new ArrayList<>(
+                Arrays.asList(
+                        userBadEmailNoCharacterBeforeAt,
+                        userBadEmailMoreThan64CharsInLocalPart,
+                        userBadEmailDotAtTheBegin,
+                        userBadEmailDotAtTheEnd,
+                        userBadEmailBadDomain
+                )
+        );
 
         return users.stream();
     }
 
-    static Stream<User> userProviderBadRole() {
-        List<User> users = new ArrayList<>();
+    static Stream<UserServ> userProviderBadRole() {
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_USERR", EMAIL_TEST, null));  //bad firstName
+        UserServ userBadRoleUser1 = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("K")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USERR")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ROLE_ADMIM", EMAIL_TEST, null));  //bad firstName
+        UserServ userBadRoleUser2 = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("K")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "ADMIN", EMAIL_TEST, null));  //bad firstName
+        UserServ userBadRoleAdmin1 = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("K")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_ADMIM")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
-        users.add(new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10), "jankowalski", "jankowalski123",
-                "USER", EMAIL_TEST, null));  //bad firstName
+        UserServ userBadRoleAdmin2 = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("K")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ADMIM")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
+
+        List<UserServ> users = new ArrayList<>(
+                Arrays.asList(
+                        userBadRoleUser1,
+                        userBadRoleUser2,
+                        userBadRoleAdmin1,
+                        userBadRoleAdmin2
+                )
+        );
+
         return users.stream();
     }
 

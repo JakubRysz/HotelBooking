@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface BookingMapperServ {
 
-    BookingServ mapToServiceBooking(Booking booking);
-    List<BookingServ> mapToServiceBookings(List<Booking> bookings);
+    BookingServ mapToBooking(Booking booking);
+    List<BookingServ> mapToBookings(List<Booking> bookings);
     Booking mapToRepositoryBooking(BookingServ booking);
 }

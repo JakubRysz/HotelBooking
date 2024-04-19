@@ -1,8 +1,8 @@
-package com.project.hotelBooking.mapper;
+package com.project.hotelBooking.controller.mapper;
 
-import com.project.hotelBooking.service.model.HotelServ;
 import com.project.hotelBooking.controller.model.HotelDto;
 import com.project.hotelBooking.controller.model.HotelWithRoomsDto;
+import com.project.hotelBooking.service.model.HotelServ;
 import org.mapstruct.Mapper;
 
 @Mapper(uses = RoomMapper.class, componentModel = "spring")

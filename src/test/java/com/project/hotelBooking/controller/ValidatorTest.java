@@ -3,12 +3,11 @@ package com.project.hotelBooking.controller;
 import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementAlreadyExistException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.repository.model.*;
-import com.project.hotelBooking.service.*;
-import com.project.hotelBooking.service.model.BookingServ;
-import com.project.hotelBooking.service.model.HotelServ;
-import com.project.hotelBooking.service.model.LocalizationServ;
-import com.project.hotelBooking.service.model.RoomServ;
+import com.project.hotelBooking.service.HotelService;
+import com.project.hotelBooking.service.LocalizationService;
+import com.project.hotelBooking.service.RoomService;
+import com.project.hotelBooking.service.UserService;
+import com.project.hotelBooking.service.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,11 +20,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ValidatorTest {
@@ -123,15 +122,27 @@ class ValidatorTest {
     @Test
     public void shouldNotReturnBadRequestExceptionValidateUser() {
         //given
-        User user = new User(1L, "Jan", "Kowalski",
-                LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123",
-                "ROLE_USER", EMAIL_TEST, null);
+        UserServ user = UserServ.builder()
+                .id(1L)
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .password("jankowalski123")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
+
+        when(userService.getUserByUsername(any(String.class))).thenThrow(ElementNotFoundException.class);
+        when(userService.getUserByEmail(any(String.class))).thenThrow(ElementNotFoundException.class);
         //when &then
         assertDoesNotThrow(()->validatorMock.validateUser(user));
     }
+
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.Provider#userProvider")
-    public void shouldReturnBadRequestExceptionValidateUserWhenBadUserData(User user) {
+    public void shouldReturnBadRequestExceptionValidateUserWhenBadUserData(UserServ user) {
         //given
         //when & then
         assertThrows(BadRequestException.class,
@@ -139,7 +150,7 @@ class ValidatorTest {
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.Provider#userProviderBadEmail")
-    public void shouldReturnBadRequestExceptionValidateUserWhenBadEmail(User user) {
+    public void shouldReturnBadRequestExceptionValidateUserWhenBadEmail(UserServ user) {
         //given
         //when & then
         assertThrows(BadRequestException.class,
@@ -148,7 +159,7 @@ class ValidatorTest {
 
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.Provider#userProviderBadRole")
-    public void shouldReturnBadRequestExceptionValidateUserWhenBadRole(User user) {
+    public void shouldReturnBadRequestExceptionValidateUserWhenBadRole(UserServ user) {
         //given
         //when & then
         assertThrows(BadRequestException.class,
@@ -178,7 +189,7 @@ class ValidatorTest {
                 .bookings(bookings)
                 .build();
 
-        when(userService.getUserById(any(Long.class))).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(any(Long.class))).thenReturn(UserServ.builder().build());
         when(roomService.getRoomById(5L)).thenReturn(room);
         //when &then
         assertDoesNotThrow(()->validatorMock.validateBooking(booking));
@@ -216,7 +227,7 @@ class ValidatorTest {
                 .hotelId(3L)
                 .bookings(bookings)
                 .build();
-        when(userService.getUserById(any(Long.class))).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(any(Long.class))).thenReturn(UserServ.builder().build());
         when(roomService.getRoomById(5L)).thenReturn(room);
         //when & then
         assertThrows(ElementAlreadyExistException.class,

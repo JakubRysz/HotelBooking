@@ -1,9 +1,8 @@
 package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
+import com.project.hotelBooking.controller.mapper.BookingMapper;
 import com.project.hotelBooking.controller.model.BookingDto;
-import com.project.hotelBooking.mapper.BookingMapper;
-import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -73,8 +72,7 @@ public class BookingController {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
-                () -> new ElementNotFoundException("No such user"));
+        UserServ user = userService.getUserByUsername(auth.getName());
         return (bookingService.getBookingsByUserId(user.getId(), page, sort).stream().map(bookingMapper::mapToBookingDto).collect(Collectors.toList()));
     }
 
@@ -94,8 +92,7 @@ public class BookingController {
     public BookingDto editOwnBooking(@RequestBody BookingDto bookingDto) {
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
-                () -> new ElementNotFoundException("No such user"));
+        UserServ user = userService.getUserByUsername(auth.getName());
         BookingServ oldBooking = bookingService.getBookingById(booking.getId());
         validator.validateBookingEditUser(booking, oldBooking, user.getId());
         BookingInfo bookingInfo = getInfoFromBooking(booking);
@@ -119,8 +116,7 @@ public class BookingController {
         validator.validateIfBookingExistById(id);
         BookingServ bookingToDelete = bookingService.getBookingById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByUsername(auth.getName()).orElseThrow(
-                () -> new ElementNotFoundException("No such user"));
+        UserServ user = userService.getUserByUsername(auth.getName());
         validator.validateIfUserIsOwnerOfBooking(bookingToDelete, user.getId());
         BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
         bookingService.deleteBookingById(id);
@@ -132,7 +128,7 @@ public class BookingController {
         RoomServ room = roomService.getRoomById(booking.getRoomId());
         HotelServ hotel = hotelService.getHotelById(room.getHotelId());
         LocalizationServ localization = localizationService.getLocalizationById(hotel.getLocalizationId());
-        User user = userService.getUserById(booking.getUserId()).orElseThrow(() -> new ElementNotFoundException("No such user"));
+        UserServ user = userService.getUserById(booking.getUserId());
 
         return BookingInfo.builder()
                 .booking(booking)

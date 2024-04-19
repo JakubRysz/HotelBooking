@@ -1,8 +1,8 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.service.model.BookingInfo;
 import com.project.hotelBooking.service.model.Mail;
+import com.project.hotelBooking.service.model.UserServ;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class SimpleEmailService {
         return mailMessage;
     }
 
-    public void sendMailCreatedUser(User user){
+    public void sendMailCreatedUser(UserServ user){
         Mail mail = Mail.builder()
                 .mailTo(user.getEmail())
                 .subject("Hotel booking - confirmation of creating a new user")
@@ -47,7 +47,7 @@ public class SimpleEmailService {
         send(mail);
     }
 
-    public void sendMailEditedUser(User user){
+    public void sendMailEditedUser(UserServ user){
         Mail mail = Mail.builder()
                 .mailTo(user.getEmail())
                 .subject("Hotel booking - confirmation of editing a user")
@@ -57,7 +57,7 @@ public class SimpleEmailService {
         send(mail);
     }
 
-    public void sendMailDeletedUser(User user){
+    public void sendMailDeletedUser(UserServ user){
         Mail mail = Mail.builder()
                 .mailTo(user.getEmail())
                 .subject("Hotel booking - confirmation of deleting a user")
@@ -98,7 +98,7 @@ public class SimpleEmailService {
         send(mail);
     }
 
-    private String getUserInformation(User user) {
+    private String getUserInformation(UserServ user) {
         String userInformation =
                         "First name: "+user.getFirstName()+"\n"
                         + "Last name: "+user.getLastName()+"\n"

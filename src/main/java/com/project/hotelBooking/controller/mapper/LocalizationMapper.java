@@ -1,6 +1,5 @@
-package com.project.hotelBooking.mapper;
+package com.project.hotelBooking.controller.mapper;
 
-import com.project.hotelBooking.repository.model.Localization;
 import com.project.hotelBooking.controller.model.LocalizationDto;
 import com.project.hotelBooking.controller.model.LocalizationWithHotelsDto;
 import com.project.hotelBooking.service.model.LocalizationServ;

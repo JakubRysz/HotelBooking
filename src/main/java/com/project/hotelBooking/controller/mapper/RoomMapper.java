@@ -1,6 +1,5 @@
-package com.project.hotelBooking.mapper;
+package com.project.hotelBooking.controller.mapper;
 
-import com.project.hotelBooking.repository.model.Room;
 import com.project.hotelBooking.controller.model.RoomDto;
 import com.project.hotelBooking.controller.model.RoomWithBookingsDto;
 import com.project.hotelBooking.controller.model.RoomWithBookingsWithoutUsersDto;

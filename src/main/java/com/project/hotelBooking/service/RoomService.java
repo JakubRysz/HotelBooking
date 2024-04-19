@@ -1,9 +1,8 @@
 package com.project.hotelBooking.service;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.repository.model.Booking;
-import com.project.hotelBooking.repository.model.Room;
-import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.repository.BookingRepository;
+import com.project.hotelBooking.repository.RoomRepository;
 import com.project.hotelBooking.service.mapper.BookingMapperServ;
 import com.project.hotelBooking.service.mapper.RoomMapperServ;
 import com.project.hotelBooking.service.model.BookingServ;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +64,7 @@ public class RoomService {
         List<Long> roomsIds = rooms.stream()
                 .map(RoomServ::getId)
                 .collect(Collectors.toList());
-        List<BookingServ> bookings = bookingMapperServ.mapToServiceBookings(
+        List<BookingServ> bookings = bookingMapperServ.mapToBookings(
                 bookingRepository.findAllByRoomIdIn(roomsIds)
         );
         rooms.forEach(room -> room.withBookings(extractBookings(bookings, room.getId())));

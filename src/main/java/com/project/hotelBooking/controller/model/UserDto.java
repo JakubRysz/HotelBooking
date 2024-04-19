@@ -2,7 +2,6 @@ package com.project.hotelBooking.controller.model;
 
 import lombok.*;
 
-import javax.persistence.Column;
 import java.time.LocalDate;
 
 @Getter

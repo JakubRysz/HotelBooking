@@ -1,8 +1,6 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.model.*;
-//import com.project.hotelBooking.service.model.Mail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +11,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 import java.time.LocalDate;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -87,7 +86,15 @@ public class SimpleEmailServiceTest {
                 .bookings(null)
                 .build();
 
-        User user = new User(1L, "Jan", "Kowalski", LocalDate.of(1979, 1, 10),"jankowalski","jankowalski123","ROLE_USER", EMAIL_TEST, null);
+        UserServ user = UserServ.builder()
+                .firstName("Jan")
+                .lastName("Kowalski")
+                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .username("jankowalski")
+                .role("ROLE_USER")
+                .email(EMAIL_TEST)
+                .bookings(null)
+                .build();
 
         BookingServ booking = BookingServ.builder()
                 .id(1L)
