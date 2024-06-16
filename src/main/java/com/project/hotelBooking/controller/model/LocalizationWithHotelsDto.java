@@ -1,15 +1,17 @@
 package com.project.hotelBooking.controller.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Value;
 
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
+@Value
+@Builder
 public class LocalizationWithHotelsDto {
-    private Long id;
-    private String city;
-    private String country;
-    private List<HotelDto> hotel;
+    Long id;
+    String city;
+    String country;
+    List<HotelDto> hotel;
 }

@@ -1,17 +1,19 @@
 package com.project.hotelBooking.controller.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Value;
 
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
+@Value
+@Builder
 public class RoomWithBookingsDto {
-    private Long id;
-    private int roomNumber;
-    private int numberOfPersons;
-    private int standard;
-    private Long hotelId;
-    private List<BookingDto> bookings;
+    Long id;
+    int roomNumber;
+    int numberOfPersons;
+    int standard;
+    Long hotelId;
+    List<BookingDto> bookings;
 }

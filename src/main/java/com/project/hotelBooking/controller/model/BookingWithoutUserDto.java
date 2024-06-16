@@ -1,17 +1,14 @@
 package com.project.hotelBooking.controller.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Value
+@Builder
 public class BookingWithoutUserDto {
-    private Long id;
-    private Long roomId;
-    private LocalDate start_date;
-    private LocalDate end_date;
+    Long id;
+    Long roomId;
+    LocalDate start_date;
+    LocalDate end_date;
 }

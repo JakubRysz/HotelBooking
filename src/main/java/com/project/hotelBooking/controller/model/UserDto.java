@@ -4,19 +4,16 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Value
 @Builder
 public class UserDto {
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private LocalDate dateOfBirth;
-    private String username;
-    private String password;
+    Long id;
+    String firstName;
+    String lastName;
+    LocalDate dateOfBirth;
+    String username;
+    String password;
     @With
-    private String role;
-    private String email;
+    String role;
+    String email;
 }

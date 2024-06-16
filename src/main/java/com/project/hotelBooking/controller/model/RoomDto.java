@@ -1,18 +1,13 @@
 package com.project.hotelBooking.controller.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Value
 @Builder
 public class RoomDto {
-    private Long id;
-    private int roomNumber;
-    private int numberOfPersons;
-    private int standard;
-    private Long hotelId;
+    Long id;
+    int roomNumber;
+    int numberOfPersons;
+    int standard;
+    Long hotelId;
 }

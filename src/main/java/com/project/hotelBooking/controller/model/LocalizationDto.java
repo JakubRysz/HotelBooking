@@ -2,13 +2,10 @@ package com.project.hotelBooking.controller.model;
 
 import lombok.*;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Value
 @Builder
 public class LocalizationDto {
-    private Long id;
-    private String city;
-    private String country;
+    Long id;
+    String city;
+    String country;
 }

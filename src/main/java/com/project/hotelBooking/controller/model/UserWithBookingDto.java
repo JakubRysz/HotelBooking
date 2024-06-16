@@ -2,21 +2,23 @@ package com.project.hotelBooking.controller.model;
 
 import com.project.hotelBooking.repository.model.Booking;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Value;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
+@Value
+@Builder
 public class UserWithBookingDto {
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private LocalDate dateOfBirth;
-    private String username;
-    private String password;
-    private String role;
-    private String email;
-    private List<Booking> bookings;
+    Long id;
+    String firstName;
+    String lastName;
+    LocalDate dateOfBirth;
+    String username;
+    String password;
+    String role;
+    String email;
+    List<Booking> bookings;
 }
