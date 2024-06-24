@@ -1,48 +1,32 @@
-package com.project.hotelBooking.domain;
+package com.project.hotelBooking.service.model;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Value;
+import lombok.With;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@Entity
-@Table(name = "USERS")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Value
 @Builder
-public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="ID")
-    private Long id;
-    @Column(name="FIRST_NAME")
-    private String firstName;
-    @Column(name="LAST_NAME")
-    private String lastName;
-    @Column(name="BIRTH_DATE")
-    private LocalDate dateOfBirth;
-    @Column(name="USERNAME")
-    private String username;
-    @Column(name="PASSWORD")
-    private String password;
-    @Column(name="ROLE")
-    private String role;
-    @Column(name="EMAIL")
-    private String email;
+public class UserServ implements UserDetails {
 
-
-    @OneToMany(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "userId", updatable = false, insertable = false)
-    private List<Booking> bookings;
+    Long id;
+    String firstName;
+    String lastName;
+    LocalDate dateOfBirth;
+    String username;
+    @With
+    String password;
+    String role;
+    String email;
+    @With
+    List<BookingServ> bookings;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

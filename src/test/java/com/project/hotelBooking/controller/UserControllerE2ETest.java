@@ -1,10 +1,10 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.User;
 import com.project.hotelBooking.repository.UserRepository;
-import com.project.hotelBooking.service.Mail;
+import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.service.SimpleEmailService;
+import com.project.hotelBooking.service.model.Mail;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

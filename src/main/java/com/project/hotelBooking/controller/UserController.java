@@ -1,13 +1,12 @@
 package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.BadRequestException;
-import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.domain.User;
-import com.project.hotelBooking.domain.UserDto;
-import com.project.hotelBooking.domain.UserWithBookingDto;
-import com.project.hotelBooking.mapper.UserMapper;
+import com.project.hotelBooking.controller.mapper.UserMapper;
+import com.project.hotelBooking.controller.model.UserDto;
+import com.project.hotelBooking.controller.model.UserWithBookingDto;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;
+import com.project.hotelBooking.service.model.UserServ;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -27,6 +26,8 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
+    private static final String USER_ROLE = "ROLE_USER";
+
     private final UserService userService;
     private final UserMapper userMapper;
     private final Validator validator;
@@ -35,19 +36,19 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
     public UserDto createUser(@RequestBody UserDto userDto) {
-        User user = userMapper.mapToUser(userDto);
+        UserServ user = userMapper.mapToUser(userDto);
         validator.validateUser(user);
-        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(userMapper.mapToUser(userDto)));
+        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(user));
         emailService.sendMailCreatedUser(user);
         return userCreated;
     }
 
     @PostMapping("/users/registration")
     public UserDto createUserRegistration(@RequestBody UserDto userDto) {
-        userDto.setRole("ROLE_USER");
-        User user = userMapper.mapToUser(userDto);
+        userDto = userDto.withRole(USER_ROLE);
+        UserServ user = userMapper.mapToUser(userDto);
         validator.validateUser(user);
-        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(userMapper.mapToUser(userDto)));
+        UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(user));
         emailService.sendMailCreatedUser(user);
         return userCreated;
     }
@@ -55,15 +56,13 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/bookings/{id}")
     public UserWithBookingDto getSingleUser(@PathVariable Long id) {
-        return userMapper.mapToUserWithBookingDto(userService.getUserById(id)
-                .orElseThrow(() -> new ElementNotFoundException("No such user")));
+        return userMapper.mapToUserWithBookingDto(userService.getUserById(id));
     }
 
     @GetMapping("/users/own/bookings")
     public UserWithBookingDto getSingleUserOwner() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()).orElseThrow(
-                () -> new ElementNotFoundException("No such user")));
+        return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -89,7 +88,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/users")
     public UserDto editUser(@RequestBody UserDto userDto) {
-        User user = userMapper.mapToUser(userDto);
+        UserServ user = userMapper.mapToUser(userDto);
         validator.validateUserEdit(user);
         UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
         emailService.sendMailEditedUser(user);
@@ -99,9 +98,8 @@ public class UserController {
     @PutMapping("/users/own")
     public UserDto editUserUser(@RequestBody UserDto userDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User userAuth = userService.getUserByUsername(auth.getName()).orElseThrow(
-                () -> new ElementNotFoundException("No such user"));
-        User user = userMapper.mapToUser(userDto);
+        UserServ userAuth = userService.getUserByUsername(auth.getName());
+        UserServ user = userMapper.mapToUser(userDto);
         if (!Objects.equals(user.getId(), userAuth.getId()))
             throw new BadRequestException("Given user Id is not Id of current authenticated user");
         validator.validateUserEdit(user);
@@ -113,8 +111,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
-        validator.validateIfUserExistById(id);
-        User userToDelete = userService.getUserById(id).orElseThrow(() -> new ElementNotFoundException("No such user"));
+        UserServ userToDelete = userService.getUserById(id);
         userService.deleteUserById(id);
         emailService.sendMailDeletedUser(userToDelete);
     }

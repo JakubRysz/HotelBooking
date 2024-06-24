@@ -1,10 +1,10 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.Hotel;
-import com.project.hotelBooking.domain.Localization;
 import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.LocalizationRepository;
+import com.project.hotelBooking.repository.model.Hotel;
+import com.project.hotelBooking.repository.model.Localization;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,19 +36,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     private final HotelRepository hotelRepository;
     private final MockMvc mockMvc;
     private final Localization newLocalization = new Localization();
-    private final Hotel newHotel = new Hotel();
+    private Hotel newHotel;
 
     @BeforeEach
     public void initialize() {
         //given
-        newLocalization.setCity("Krakow");
+        newLocalization.setCity("Cracow");
         newLocalization.setCountry("Poland");
         localizationRepository.save(newLocalization);
 
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        newHotel.setLocalizationId(newLocalization.getId());
+        newHotel = Hotel.builder()
+                .name("Hilton1")
+                .numberOfStars(3)
+                .hotelChain("Hilton")
+                .localizationId(newLocalization.getId())
+                .build();
+
         hotelRepository.save(newHotel);
     }
 
@@ -132,14 +135,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     public void shouldGetMultipleHotels() throws Exception {
 
         //given
-        Hotel newHotel2 = new Hotel();
-        newHotel2.setName("Hilton2");
-        newHotel2.setNumberOfStars(4);
-        newHotel2.setHotelChain("Hilton");
-        Hotel newHotel3 = new Hotel();
-        newHotel3.setName("Hilton3");
-        newHotel3.setNumberOfStars(5);
-        newHotel3.setHotelChain("Hilton");
+        Hotel newHotel2 = Hotel.builder()
+                .name("Hilton2")
+                .numberOfStars(4)
+                .hotelChain("Hilton")
+                .build();
+
+        Hotel newHotel3 = Hotel.builder()
+                .name("Hilton3")
+                .numberOfStars(5)
+                .hotelChain("Hilton")
+                .build();
 
         hotelRepository.save(newHotel2);
         hotelRepository.save(newHotel3);
@@ -172,12 +178,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     public void shouldEditHotel() throws Exception {
 
         //given
-        Hotel hotelEdited = new Hotel();
-        hotelEdited.setId(newHotel.getId());
-        hotelEdited.setName("Hilton1");
-        hotelEdited.setNumberOfStars(5);
-        hotelEdited.setHotelChain("Hilton");
-        hotelEdited.setLocalizationId(newLocalization.getId());
+        Hotel hotelEdited = Hotel.builder()
+                .id(newHotel.getId())
+                .name("Hilton1")
+                .numberOfStars(5)
+                .hotelChain("Hilton")
+                .localizationId(newLocalization.getId())
+                .build();
+
         final String jsonContentHotelEdited = objectMapper.writeValueAsString(hotelEdited);
 
         //when
@@ -208,12 +216,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     public void shouldReturnStatus403EditHotelUser() throws Exception {
 
         //given
-        Hotel hotelEdited = new Hotel();
-        hotelEdited.setId(newHotel.getId());
-        hotelEdited.setName("Hilton1");
-        hotelEdited.setNumberOfStars(5);
-        hotelEdited.setHotelChain("Hilton");
-        hotelEdited.setLocalizationId(newLocalization.getId());
+
+        Hotel hotelEdited = Hotel.builder()
+                .id(newHotel.getId())
+                .name("Hilton1")
+                .numberOfStars(5)
+                .hotelChain("Hilton")
+                .localizationId(newLocalization.getId())
+                .build();
+
         final String jsonContentHotelEdited = objectMapper.writeValueAsString(hotelEdited);
 
         //when

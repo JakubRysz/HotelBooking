@@ -1,8 +1,12 @@
 package com.project.hotelBooking.service;
 
-import com.project.hotelBooking.domain.Booking;
-import com.project.hotelBooking.domain.User;
-import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
+import com.project.hotelBooking.repository.BookingRepository;
+import com.project.hotelBooking.repository.UserRepository;
+import com.project.hotelBooking.service.mapper.BookingMapperServ;
+import com.project.hotelBooking.service.mapper.UserMapperServ;
+import com.project.hotelBooking.service.model.BookingServ;
+import com.project.hotelBooking.service.model.UserServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -10,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,38 +22,70 @@ public class UserService {
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final UserMapperServ userMapperServ;
+    private final BookingMapperServ bookingMapperServ;
     private final PasswordEncoder passwordEncoder;
-    private static final int PAGE_SIZE=5;
+    private static final int PAGE_SIZE = 5;
 
-    public Optional<User> getUserByUsername(String username) { return userRepository.findByUsername(username);}
-    public Optional<User> getUserByEmail(String email) { return userRepository.findTopByEmail(email);}
-    public User saveUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    public UserServ getUserByUsername(String username) {
+        return userMapperServ.mapToUser(
+                userRepository.findByUsername(username).orElseThrow(
+                        () -> new ElementNotFoundException("No such user"))
+        );
     }
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+
+    public UserServ saveUser(UserServ user) {
+        user = user.withPassword(passwordEncoder.encode(user.getPassword()));
+        return userMapperServ.mapToUser(
+                userRepository.save(userMapperServ.mapToUserRepository(user))
+        );
     }
+
+    public UserServ getUserById(Long id) {
+        return userMapperServ.mapToUser(
+        userRepository.findById(id).orElseThrow(
+                () -> new ElementNotFoundException("No such user"))
+        );
+    }
+
+    public UserServ getUserByEmail(String email) {
+        return userMapperServ.mapToUser(
+                userRepository.findTopByEmail(email).orElseThrow(
+                        () -> new ElementNotFoundException("No such user"))
+        );
+    }
+
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
-    public List<User> getUsers(Integer page, Sort.Direction sort) {
-        return userRepository.findAllUsers(PageRequest.of(page,PAGE_SIZE, Sort.by(sort, "id")));
+
+    public List<UserServ> getUsers(Integer page, Sort.Direction sort) {
+        return userMapperServ.mapToUsers(
+                userRepository.findAllUsers(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
+        );
     }
-    public List<User> getUsersWithBookings(Integer page, Sort.Direction sort) {
-        List<User> users =  userRepository.findAllUsers(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")));
-        List<Long> ids = users.stream().map(User::getId).collect(Collectors.toList());
-        List<Booking> bookings = bookingRepository.findAllByUserIdIn(ids);
-        users.forEach(user -> user.setBookings(extractBookingsUser(bookings, user.getId())));
+
+    public List<UserServ> getUsersWithBookings(Integer page, Sort.Direction sort) {
+        List<UserServ> users = userMapperServ.mapToUsers(
+                userRepository.findAllUsers(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
+        );
+        List<Long> ids = users.stream().map(UserServ::getId).collect(Collectors.toList());
+        List<BookingServ> bookings = bookingMapperServ.mapToBookings(
+                bookingRepository.findAllByUserIdIn(ids)
+        );
+        users.forEach(user -> user.withBookings(extractBookingsUser(bookings, user.getId())));
         return users;
     }
-    private List<Booking> extractBookingsUser(List<Booking> bookings, Long id) {
+
+    private List<BookingServ> extractBookingsUser(List<BookingServ> bookings, Long id) {
         return bookings.stream()
-                .filter(booking -> booking.getUserId()==id).collect(Collectors.toList());
+                .filter(booking -> booking.getUserId() == id).collect(Collectors.toList());
     }
-    public User editUser(User user) {
+
+    public UserServ editUser(UserServ user) {
         return saveUser(user);
     }
+
     public void deleteAllUsers() {
         userRepository.deleteAll();
     }

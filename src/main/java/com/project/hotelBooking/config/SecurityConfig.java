@@ -15,8 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
-import javax.sql.DataSource;
-
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 

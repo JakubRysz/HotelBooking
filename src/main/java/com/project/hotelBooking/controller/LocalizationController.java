@@ -1,11 +1,10 @@
 package com.project.hotelBooking.controller;
 
-import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
-import com.project.hotelBooking.domain.Localization;
-import com.project.hotelBooking.domain.LocalizationDto;
-import com.project.hotelBooking.domain.LocalizationWithHotelsDto;
-import com.project.hotelBooking.mapper.LocalizationMapper;
+import com.project.hotelBooking.controller.mapper.LocalizationMapper;
+import com.project.hotelBooking.controller.model.LocalizationDto;
+import com.project.hotelBooking.controller.model.LocalizationWithHotelsDto;
 import com.project.hotelBooking.service.LocalizationService;
+import com.project.hotelBooking.service.model.LocalizationServ;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -29,15 +28,16 @@ public class LocalizationController {
     @PostMapping("/localizations")
     @PreAuthorize("hasRole('ADMIN')")
     public LocalizationDto createLocalization(@RequestBody LocalizationDto localizationDto) {
-        Localization localization = localizationMapper.mapToLocalization(localizationDto);
+        LocalizationServ localization = localizationMapper.mapToLocalization(localizationDto);
         validator.validateLocalization(localization);
-        return localizationMapper.mapToLocalizationDto(localizationService.saveLocalization(localizationMapper.mapToLocalization(localizationDto)));
+        return localizationMapper.mapToLocalizationDto(localizationService.saveLocalization(
+                localizationMapper.mapToLocalization(localizationDto))
+        );
     }
 
     @GetMapping("/localizations/hotels/{id}")
     public LocalizationWithHotelsDto getSingleLocalizationWithHotels(@PathVariable Long id) {
-        return localizationMapper.mapToLocalizationWithHotelsDto(localizationService.getLocalizationById(id)
-                .orElseThrow(() -> new ElementNotFoundException("No such localization")));
+        return localizationMapper.mapToLocalizationWithHotelsDto(localizationService.getLocalizationById(id));
     }
 
     @GetMapping("/localizations/hotels")
@@ -54,14 +54,14 @@ public class LocalizationController {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         return (localizationService.getLocalizations(page, sort).stream()
-                .map(k -> localizationMapper.mapToLocalizationDto(k))
+                .map(localizationMapper::mapToLocalizationDto)
                 .collect(Collectors.toList()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/localizations")
     public LocalizationDto editLocalization(@RequestBody LocalizationDto localizationDto) {
-        Localization localization = localizationMapper.mapToLocalization(localizationDto);
+        LocalizationServ localization = localizationMapper.mapToLocalization(localizationDto);
         validator.validateLocalizationEdit(localization);
         return localizationMapper.mapToLocalizationDto(localizationService.editLocalization(localization));
     }

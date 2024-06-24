@@ -1,10 +1,10 @@
 package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.hotelBooking.domain.*;
 import com.project.hotelBooking.repository.*;
-import com.project.hotelBooking.service.Mail;
+import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.SimpleEmailService;
+import com.project.hotelBooking.service.model.Mail;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,21 +54,24 @@ public class BookingControllerTestSuiteE2ETest {
     private static final LocalDate BOOKING_START_DATE = LocalDate.now().plusDays(2);
     private static final LocalDate BOOKING_END_DATE = LocalDate.now().plusDays(4);
     private final Localization newLocalization= new Localization();
-    private final Hotel newHotel = new Hotel();
+    private Hotel newHotel;
     private final Room newRoom = new Room();
     private final User newUser = new User();
     private final Booking newBooking= new Booking();
 
     @BeforeEach
     public void initialize() {
-        newLocalization.setCity("Krakow");
+        newLocalization.setCity("Cracow");
         newLocalization.setCountry("Poland");
         localizationRepository.save(newLocalization);
 
-        newHotel.setName("Hilton1");
-        newHotel.setNumberOfStars(3);
-        newHotel.setHotelChain("Hilton");
-        newHotel.setLocalizationId(newLocalization.getId());
+        newHotel = Hotel.builder()
+                .name("Hilton1")
+                .numberOfStars(3)
+                .hotelChain("Hilton")
+                .localizationId(newLocalization.getId())
+                .build();
+
         hotelRepository.save(newHotel);
 
         newRoom.setRoomNumber(15);
