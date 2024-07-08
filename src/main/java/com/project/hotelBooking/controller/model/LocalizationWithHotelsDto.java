@@ -13,5 +13,5 @@ public class LocalizationWithHotelsDto {
     Long id;
     String city;
     String country;
-    List<HotelDto> hotel;
+    List<HotelDto> hotels;
 }

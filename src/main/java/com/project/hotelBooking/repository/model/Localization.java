@@ -5,14 +5,15 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
+
 @Table(name = "LOCALIZATIONS")
+@Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class Localization {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,6 +27,5 @@ public class Localization {
     @OneToMany(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "localizationId", updatable = false, insertable = false)
     private List<Hotel> hotels;
-
 }
 
