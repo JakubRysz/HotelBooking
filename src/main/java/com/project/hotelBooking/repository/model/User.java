@@ -22,21 +22,21 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="ID")
+    @Column(name = "ID")
     private Long id;
-    @Column(name="FIRST_NAME")
+    @Column(name = "FIRST_NAME")
     private String firstName;
-    @Column(name="LAST_NAME")
+    @Column(name = "LAST_NAME")
     private String lastName;
-    @Column(name="BIRTH_DATE")
+    @Column(name = "BIRTH_DATE")
     private LocalDate dateOfBirth;
-    @Column(name="USERNAME")
+    @Column(name = "USERNAME")
     private String username;
-    @Column(name="PASSWORD")
+    @Column(name = "PASSWORD")
     private String password;
-    @Column(name="ROLE")
+    @Column(name = "ROLE")
     private String role;
-    @Column(name="EMAIL")
+    @Column(name = "EMAIL")
     private String email;
 
 

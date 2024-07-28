@@ -1,9 +1,6 @@
 package com.project.hotelBooking.repository.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -14,6 +11,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,7 +22,7 @@ public class Booking {
 
     private Long roomId;
     @Column(name="START_DATE")
-    private LocalDate start_date;
+    private LocalDate startDate;
     @Column(name="END_DATE")
-    private LocalDate end_date;
+    private LocalDate endDate;
 }

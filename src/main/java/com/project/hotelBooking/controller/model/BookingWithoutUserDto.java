@@ -9,6 +9,6 @@ import java.time.LocalDate;
 public class BookingWithoutUserDto {
     Long id;
     Long roomId;
-    LocalDate start_date;
-    LocalDate end_date;
+    LocalDate startDate;
+    LocalDate endDate;
 }
