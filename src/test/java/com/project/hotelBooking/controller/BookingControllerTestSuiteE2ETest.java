@@ -4,13 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.BookingMapper;
-import com.project.hotelBooking.controller.mapper.RoomMapper;
 import com.project.hotelBooking.controller.model.BookingDto;
 import com.project.hotelBooking.repository.*;
 import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.mapper.BookingMapperServ;
-import com.project.hotelBooking.service.mapper.RoomMapperServ;
 import com.project.hotelBooking.service.model.Mail;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
@@ -19,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,7 +29,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 public class
 BookingControllerTestSuiteE2ETest {
 
-    public static final String BOOKINGS_URL = "/v1/bookings";
+    public static final String BOOKINGS_URL = "/v1/bookings/";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
@@ -88,12 +84,7 @@ BookingControllerTestSuiteE2ETest {
     @WithMockUser(roles = {"ADMIN"})
     public void shouldCreateBooking() throws Exception {
         //given
-        Booking booking1 = Booking.builder()
-                .userId(user1.getId())
-                .roomId(room1.getId())
-                .startDate(BOOKING_START_DATE)
-                .endDate(BOOKING_END_DATE)
-                .build();
+        Booking booking1 = getBooking1();
         BookingDto booking1Dto = mapBookingToBookingDto(booking1);
 
         final String jsonContentNewBooking = objectMapper.writeValueAsString(booking1Dto);
@@ -112,21 +103,16 @@ BookingControllerTestSuiteE2ETest {
         BookingDto booking = getBookingFromResponse(mvcResult);
         int bookingsNumberAfter = bookingRepository.findAllBookings(Pageable.unpaged()).size();
         Booking bookingFromDatabase = bookingRepository.findById(booking.getId()).orElseThrow();
-        assertBookingsWithoutId(booking1, bookingFromDatabase);
+        assertEqualsBookingsWithoutId(booking1, bookingFromDatabase);
         assertEquals(bookingsNumberBefore + 1, bookingsNumberAfter);
     }
 
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldReturnStatus409CreateBooking_whenRoomAlreadyOccupied() throws Exception {
+    public void shouldReturnStatus409_createBooking_whenRoomAlreadyOccupied() throws Exception {
         //given
-        Booking booking1 = Booking.builder()
-                .userId(user1.getId())
-                .roomId(room1.getId())
-                .startDate(BOOKING_START_DATE)
-                .endDate(BOOKING_END_DATE)
-                .build();
+        Booking booking1 = getBooking1();
 
         Booking booking2 = Booking.builder()
                 .userId(user1.getId())
@@ -150,14 +136,9 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldReturnStatus400WhenCreateBooking_withWrongDate() throws Exception {
+    public void shouldReturnStatus400_whenCreateBooking_withWrongDate() throws Exception {
         //given
-        Booking booking1 = Booking.builder()
-                .userId(user1.getId())
-                .roomId(room1.getId())
-                .startDate(BOOKING_START_DATE)
-                .endDate(BOOKING_END_DATE)
-                .build();
+        Booking booking1 = getBooking1();
 
         Booking booking2 = Booking.builder()
                 .userId(user1.getId())
@@ -179,297 +160,242 @@ BookingControllerTestSuiteE2ETest {
                 .andExpect(MockMvcResultMatchers.status().is(400));
     }
 
-//    @Test
-//    @WithMockUser(roles = {"USER"})
-//    public void shouldReturnStatus403CreateBookingUser() throws Exception {
-//
-//        //given
-//        final String jsonContentNewBooking = objectMapper.writeValueAsString(BOOKING_1);
-//
-//        //when & then
-//        mockMvc.perform(MockMvcRequestBuilders.post("/v1/bookings")
-//                        .content(jsonContentNewBooking)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(403));
-//
-//        bookingRepository.delete(BOOKING_1);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
+    @Test
+    @WithMockUser(roles = {"USER"})
+    public void shouldReturnStatus403_createBookingUser() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+        BookingDto booking1Dto = mapBookingToBookingDto(booking1);
+
+        final String jsonContentNewBooking = objectMapper.writeValueAsString(booking1Dto);
+
+        //when & then
+        mockMvc.perform(MockMvcRequestBuilders.post(BOOKINGS_URL)
+                        .content(jsonContentNewBooking)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(403));
+    }
 
     // create own booking user
 
-//
-//    @Test
-//    @WithMockUser(roles = {"ADMIN"})
-//    public void shouldGetSingleBooking() throws Exception {
-//
-//        //given
-//        //when
-//        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/bookings/" + BOOKING_1.getId()))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(200))
-//                .andReturn();
-//
-//        //then
-//        Booking booking = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Booking.class);
-//        assertEquals(BOOKING_1.getId(), booking.getId());
-//        assertEquals(BOOKING_1.getUserId(), booking.getUserId());
-//        assertEquals(BOOKING_1.getRoomId(), booking.getRoomId());
-//        assertEquals(BOOKING_1.getStartDate(), booking.getStartDate());
-//        assertEquals(BOOKING_1.getEndDate(), booking.getEndDate());
-//
-//        bookingRepository.delete(BOOKING_1);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"USER"})
-//    public void shouldReturnStatus403GetSingleBookingUser() throws Exception {
-//
-//        //given
-//        //when & then
-//        mockMvc.perform(MockMvcRequestBuilders.get("/v1/bookings/" + BOOKING_1.getId()))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(403));
-//
-//        bookingRepository.delete(BOOKING_1);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"ADMIN"})
-//    public void shouldGetMultipleBookings() throws Exception {
-//
-//        //given
-//
-//        Booking newBooking2 = new Booking();
-//        newBooking2.setUserId(USER_1.getId());
-//        newBooking2.setRoomId(ROOM_1.getId());
-//        newBooking2.setStartDate(BOOKING_START_DATE.plusDays(10));
-//        newBooking2.setEndDate(BOOKING_END_DATE.plusDays(12));
-//        Booking newBooking3 = new Booking();
-//        newBooking3.setUserId(USER_1.getId());
-//        newBooking3.setRoomId(ROOM_1.getId());
-//        newBooking3.setStartDate(BOOKING_START_DATE.plusDays(20));
-//        newBooking3.setEndDate(BOOKING_END_DATE.plusDays(22));
-//        bookingRepository.save(newBooking2);
-//        bookingRepository.save(newBooking3);
-//
-//        //when
-//        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/bookings"))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(200))
-//                .andReturn();
-//
-//        //then
-//        Booking[] bookingsArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Booking[].class);
-//        List<Booking> bookings = new ArrayList<>((Arrays.asList(bookingsArray)));
-//
-//        assertEquals(3, bookings.size());
-//        assertEquals(newBooking3.getId(), bookings.get(2).getId());
-//        assertEquals(newBooking3.getUserId(), bookings.get(2).getUserId());
-//        assertEquals(newBooking3.getRoomId(), bookings.get(2).getRoomId());
-//        assertEquals(newBooking3.getStartDate(), bookings.get(2).getStartDate());
-//        assertEquals(newBooking3.getEndDate(), bookings.get(2).getEndDate());
-//
-//        bookingRepository.delete(BOOKING_1);
-//        bookingRepository.delete(newBooking2);
-//        bookingRepository.delete(newBooking3);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"USER"})
-//    public void shouldReturnStatus403GetMultipleBookingsUser() throws Exception {
-//
-//        //given
-//        Booking newBooking2 = new Booking();
-//        newBooking2.setUserId(USER_1.getId());
-//        newBooking2.setRoomId(ROOM_1.getId());
-//        newBooking2.setStartDate(BOOKING_START_DATE.plusDays(10));
-//        newBooking2.setEndDate(BOOKING_END_DATE.plusDays(12));
-//        Booking newBooking3 = new Booking();
-//        newBooking3.setUserId(USER_1.getId());
-//        newBooking3.setRoomId(ROOM_1.getId());
-//        newBooking3.setStartDate(BOOKING_START_DATE.plusDays(20));
-//        newBooking3.setEndDate(BOOKING_END_DATE.plusDays(22));
-//        bookingRepository.save(newBooking2);
-//        bookingRepository.save(newBooking3);
-//
-//        //when
-//        mockMvc.perform(MockMvcRequestBuilders.get("/v1/bookings"))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(403));
-//
-//        bookingRepository.delete(BOOKING_1);
-//        bookingRepository.delete(newBooking2);
-//        bookingRepository.delete(newBooking3);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"ADMIN"})
-//    public void shouldEditBooking() throws Exception {
-//
-//        //given
-//        Booking bookingEdited = new Booking();
-//        bookingEdited.setId(BOOKING_1.getId());
-//        bookingEdited.setUserId(USER_1.getId());
-//        bookingEdited.setRoomId(ROOM_1.getId());
-//        bookingEdited.setStartDate(BOOKING_START_DATE.plusDays(1));
-//        bookingEdited.setEndDate(BOOKING_END_DATE.plusDays(1));
-//
-//        final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
-//
-//        //when
-//        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/v1/bookings")
-//                        .content(jsonContentBookingEdited)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(200))
-//                .andReturn();
-//
-//        Booking bookingGet = bookingRepository.findById(bookingEdited.getId()).orElseThrow();
-//
-//        //then
-//        Booking booking = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Booking.class);
-//        assertEquals(bookingEdited.getId(), booking.getId());
-//        assertEquals(bookingEdited.getUserId(), booking.getUserId());
-//        assertEquals(bookingEdited.getRoomId(), booking.getRoomId());
-//        assertEquals(bookingEdited.getStartDate(), booking.getStartDate());
-//        assertEquals(bookingEdited.getEndDate(), booking.getEndDate());
-//
-//        bookingRepository.delete(booking);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"ADMIN"})
-//    public void shouldReturnStatus409EditBookingWhenRoomAlreadyOccupied() throws Exception {
-//
-//        //given
-//        Booking newBooking2 = new Booking();
-//        newBooking2.setUserId(USER_1.getId());
-//        newBooking2.setRoomId(ROOM_1.getId());
-//        newBooking2.setStartDate(BOOKING_END_DATE.plusDays(2));
-//        newBooking2.setEndDate(BOOKING_END_DATE.plusDays(4));
-//        bookingRepository.save(newBooking2);
-//
-//        Booking bookingEdited = new Booking();
-//        bookingEdited.setId(BOOKING_1.getId());
-//        bookingEdited.setUserId(USER_1.getId());
-//        bookingEdited.setRoomId(ROOM_1.getId());
-//        bookingEdited.setStartDate(BOOKING_END_DATE.plusDays(3));
-//        bookingEdited.setEndDate(BOOKING_END_DATE.plusDays(5));
-//        final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
-//
-//        //when
-//        mockMvc.perform(MockMvcRequestBuilders.put("/v1/bookings")
-//                        .content(jsonContentBookingEdited)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(409));
-//
-//        //then
-//        bookingRepository.delete(BOOKING_1);
-//        bookingRepository.delete(newBooking2);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"USER"})
-//    public void shouldReturnStatus403EditBookingUser() throws Exception {
-//
-//        //given
-//        Booking bookingEdited = new Booking();
-//        bookingEdited.setId(BOOKING_1.getId());
-//        bookingEdited.setUserId(USER_1.getId());
-//        bookingEdited.setRoomId(ROOM_1.getId());
-//        bookingEdited.setStartDate(BOOKING_START_DATE.plusDays(1));
-//        bookingEdited.setEndDate(BOOKING_END_DATE.plusDays(1));
-//        final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
-//
-//        //when
-//        mockMvc.perform(MockMvcRequestBuilders.put("/v1/bookings")
-//                        .content(jsonContentBookingEdited)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(403));
-//
-//        bookingRepository.delete(BOOKING_1);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"ADMIN"})
-//    public void shouldDeleteBooking() throws Exception {
-//
-//        //given
-//        int bookingsNumberBefore = bookingRepository.findAllBookings(Pageable.unpaged()).size();
-//
-//        //when
-//        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/bookings/" + BOOKING_1.getId()))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(200));
-//
-//        int bookingsNumberAfter = bookingRepository.findAllBookings(Pageable.unpaged()).size();
-//
-//        //then
-//        assertEquals(bookingsNumberBefore - 1, bookingsNumberAfter);
-//
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
-//
-//    @Test
-//    @WithMockUser(roles = {"USER"})
-//    public void shouldReturnStatus403DeleteBookingUser() throws Exception {
-//
-//        //given
-//        int bookingsNumberBefore = bookingRepository.findAllBookings(Pageable.unpaged()).size();
-//
-//        //when
-//        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/bookings/" + BOOKING_1.getId()))
-//                .andDo(print())
-//                .andExpect(MockMvcResultMatchers.status().is(403));
-//
-//        bookingRepository.delete(BOOKING_1);
-//        roomRepository.delete(ROOM_1);
-//        hotelRepository.delete(HOTEL_1);
-//        localizationRepository.delete(LOCALIZATION_1);
-//        userRepository.delete(USER_1);
-//    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    public void shouldGetSingleBooking() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+
+        bookingRepository.save(booking1);
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + booking1.getId()))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        //then
+        BookingDto booking = getBookingFromResponse(mvcResult);
+        assertEqualsBookings(booking1, mapBookingDtoToBooking(booking));
+    }
+
+    @Test
+    @WithMockUser(roles = {"USER"})
+    public void shouldReturnStatus403_getSingleBookingUser() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+
+        bookingRepository.save(booking1);
+        //when & then
+        mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + booking1.getId()))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(403));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    public void shouldGetMultipleBookings() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+        Booking booking2 = Booking.builder()
+                .userId(user1.getId())
+                .roomId(room1.getId())
+                .startDate(BOOKING_START_DATE.plusDays(10))
+                .endDate(BOOKING_START_DATE.plusDays(12))
+                .build();
+        Booking booking3 = Booking.builder()
+                .userId(user1.getId())
+                .roomId(room1.getId())
+                .startDate(BOOKING_START_DATE.plusDays(20))
+                .endDate(BOOKING_START_DATE.plusDays(22))
+                .build();
+
+        Booking booking1Saved = bookingRepository.save(booking1);
+        Booking booking2Saved = bookingRepository.save(booking2);
+        Booking booking3Saved = bookingRepository.save(booking3);
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        //then
+        BookingDto[] bookingsArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), BookingDto[].class);
+        List<BookingDto> bookings = new ArrayList<>((Arrays.asList(bookingsArray)));
+
+        assertEquals(3, bookings.size());
+        assertEqualsBookings(booking1Saved, mapBookingDtoToBooking(bookings.get(0)));
+        assertEqualsBookings(booking2Saved, mapBookingDtoToBooking(bookings.get(1)));
+        assertEqualsBookings(booking3Saved, mapBookingDtoToBooking(bookings.get(2)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"USER"})
+    public void shouldReturnStatus403_getMultipleBookingsUser() throws Exception {
+        //given
+        //when & then
+        mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(403));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    public void shouldEditBooking() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+        Booking booking1Saved = bookingRepository.save(booking1);
+
+        BookingDto bookingEdited = BookingDto.builder()
+                .id(booking1Saved.getId())
+                .userId(booking1Saved.getUserId())
+                .roomId(booking1Saved.getRoomId())
+                .startDate(booking1Saved.getStartDate().plusDays(10))
+                .endDate(booking1Saved.getEndDate().plusDays(12))
+                .build();
+
+        final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(BOOKINGS_URL)
+                        .content(jsonContentBookingEdited)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        //then
+        BookingDto booking = getBookingFromResponse(mvcResult);
+        Booking bookingFromDatabase = bookingRepository.findById(booking.getId()).orElseThrow();
+        assertEqualsBookings(mapBookingDtoToBooking(bookingEdited), bookingFromDatabase);
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    public void shouldReturnStatus409_editBooking_whenRoomAlreadyOccupied() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+        Booking booking1Saved = bookingRepository.save(booking1);
+
+        User user2 = userRepository.save(USER_2);
+
+        Booking booking2 = Booking.builder()
+                .userId(user2.getId())
+                .roomId(room1.getId())
+                .startDate(BOOKING_START_DATE.plusDays(10))
+                .endDate(BOOKING_END_DATE.plusDays(12))
+                .build();
+
+        bookingRepository.save(booking2);
+
+        BookingDto bookingEdited = BookingDto.builder()
+                .id(booking1Saved.getId())
+                .userId(booking1Saved.getUserId())
+                .roomId(booking1Saved.getRoomId())
+                .startDate(booking1Saved.getStartDate().plusDays(11))
+                .endDate(booking1Saved.getEndDate().plusDays(13))
+                .build();
+
+        final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
+
+        //when & then
+        mockMvc.perform(MockMvcRequestBuilders.put(BOOKINGS_URL)
+                        .content(jsonContentBookingEdited)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(409));
+    }
+
+    @Test
+    @WithMockUser(roles = {"USER"})
+    public void shouldReturnStatus403_editBookingUser() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+        Booking booking1Saved = bookingRepository.save(booking1);
+
+        BookingDto bookingEdited = BookingDto.builder()
+                .id(booking1Saved.getId())
+                .userId(booking1Saved.getUserId())
+                .roomId(booking1Saved.getRoomId())
+                .startDate(booking1Saved.getStartDate().plusDays(10))
+                .endDate(booking1Saved.getEndDate().plusDays(12))
+                .build();
+
+        final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
+
+        //when
+        mockMvc.perform(MockMvcRequestBuilders.put(BOOKINGS_URL)
+                        .content(jsonContentBookingEdited)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(403));
+
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    public void shouldDeleteBooking() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+        Booking booking1Saved = bookingRepository.save(booking1);
+        int bookingsNumberBefore = bookingRepository.findAllBookings(Pageable.unpaged()).size();
+
+        //when
+        mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + booking1Saved.getId()))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200));
+
+        int bookingsNumberAfter = bookingRepository.findAllBookings(Pageable.unpaged()).size();
+
+        //then
+        assertEquals(bookingsNumberBefore - 1, bookingsNumberAfter);
+    }
+
+    @Test
+    @WithMockUser(roles = {"USER"})
+    public void shouldReturnStatus403_deleteBookingUser() throws Exception {
+        //given
+        Booking booking1 = getBooking1();
+        Booking booking1Saved = bookingRepository.save(booking1);
+
+        //when
+        mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + booking1Saved.getId()))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(403));
+    }
+
+    private Booking getBooking1() {
+        return Booking.builder()
+                .userId(user1.getId())
+                .roomId(room1.getId())
+                .startDate(BOOKING_START_DATE)
+                .endDate(BOOKING_END_DATE)
+                .build();
+    }
 
     private BookingDto mapBookingToBookingDto(Booking booking) {
         return bookingMapper.mapToBookingDto(bookingMapperServ.mapToBooking(booking));
@@ -483,15 +409,15 @@ BookingControllerTestSuiteE2ETest {
         return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), BookingDto.class);
     }
 
-    private static void assertBookingsWithoutId(Booking expectedBooking, Booking actuaLBooking) {
+    private static void assertEqualsBookingsWithoutId(Booking expectedBooking, Booking actuaLBooking) {
         assertEquals(expectedBooking.getUserId(), actuaLBooking.getUserId());
         assertEquals(expectedBooking.getRoomId(), actuaLBooking.getRoomId());
         assertEquals(expectedBooking.getStartDate(), actuaLBooking.getStartDate());
         assertEquals(expectedBooking.getEndDate(), actuaLBooking.getEndDate());
     }
 
-    private static void assertBookings(Booking expectedBooking, Booking actuaLBooking) {
+    private static void assertEqualsBookings(Booking expectedBooking, Booking actuaLBooking) {
         assertEquals(expectedBooking.getId(), actuaLBooking.getId());
-        assertBookingsWithoutId(expectedBooking, actuaLBooking);
+        assertEqualsBookingsWithoutId(expectedBooking, actuaLBooking);
     }
 }
