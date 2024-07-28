@@ -8,4 +8,5 @@ public class CommonTestConstants {
     public static String GDANSK_CITY = "Gdansk";
     public static String HILTON_CHAIN = "Hilton";
     public static String ROLE_USER = "ROLE_USER";
+    public static String EMAIL_TEST = "application.test1010@gmail.com";
 }

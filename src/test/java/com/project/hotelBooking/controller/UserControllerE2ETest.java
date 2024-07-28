@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -61,7 +60,7 @@ public class UserControllerE2ETest {
     }
 
     @AfterEach
-    public void clear() {
+    public void cleanUp(){
         commonDatabaseUtils.clearDatabaseTables();
     }
 
@@ -69,6 +68,7 @@ public class UserControllerE2ETest {
     @WithMockUser(roles = {"ADMIN"})
     public void shouldCreateUser() throws Exception {
         //given
+
         UserDto user1Dto = mapUserToUserDto(USER_1);
         final String jsonContentNewUser = objectMapper.writeValueAsString(user1Dto);
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
@@ -146,7 +146,7 @@ public class UserControllerE2ETest {
         //then
         UserDto user = getUserFromResponse(mvcResult.getResponse());
         User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
-        assertEqualsUsersWithoutBookings(userSaved, userFromDatabase);
+        assertEqualsUsers(userSaved, userFromDatabase);
     }
 
     @Test
@@ -181,9 +181,9 @@ public class UserControllerE2ETest {
         List<UserDto> users = new ArrayList<>((Arrays.asList(usersArray)));
 
         assertEquals(3, users.size());
-        assertEqualsUsersWithoutBookings(userSaved1, mapUserToUser(users.get(0)));
-        assertEqualsUsersWithoutBookings(userSaved2, mapUserToUser(users.get(1)));
-        assertEqualsUsersWithoutBookings(userSaved3, mapUserToUser(users.get(2)));
+        assertEqualsUsers(userSaved1, mapUserDtoToUser(users.get(0)));
+        assertEqualsUsers(userSaved2, mapUserDtoToUser(users.get(1)));
+        assertEqualsUsers(userSaved3, mapUserDtoToUser(users.get(2)));
     }
 
     @Test
@@ -206,13 +206,12 @@ public class UserControllerE2ETest {
     public void shouldEditUser() throws Exception {
         //given
         User userSaved = userRepository.save(USER_1);
-        String usernameEdited = "usernameEdited";
         UserDto userEdited = UserDto.builder()
                 .id(userSaved.getId())
                 .firstName(USER_1.getFirstName())
                 .lastName(USER_1.getLastName())
                 .dateOfBirth(USER_1.getDateOfBirth())
-                .username(usernameEdited)
+                .username("usernameEdited")
                 .password(USER_1.getPassword())
                 .role(USER_1.getRole())
                 .email(USER_1.getEmail())
@@ -231,13 +230,7 @@ public class UserControllerE2ETest {
         //then
         UserDto user = getUserFromResponse(mvcResult.getResponse());
         User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
-        assertEquals(userSaved.getId(), userFromDatabase.getId());
-        assertEquals(userSaved.getFirstName(), userFromDatabase.getFirstName());
-        assertEquals(userSaved.getLastName(), userFromDatabase.getLastName());
-        assertEquals(userSaved.getDateOfBirth(), userFromDatabase.getDateOfBirth());
-        assertEquals(usernameEdited, userFromDatabase.getUsername());
-        assertEquals(userSaved.getRole(), userFromDatabase.getRole());
-        assertEquals(userSaved.getEmail(), userFromDatabase.getEmail());
+        assertEqualsUsersWithoutId(mapUserDtoToUser(userEdited), userFromDatabase);
     }
 
     @Test
@@ -303,14 +296,9 @@ public class UserControllerE2ETest {
         assertEquals(expectedUser.getEmail(), actualUser.getEmail());
     }
 
-    private static void assertEqualsUsersWithoutBookings(User expectedUser, User actualUser) {
+    private static void assertEqualsUsers(User expectedUser, User actualUser) {
         assertEquals(expectedUser.getId(), actualUser.getId());
-        assertEquals(expectedUser.getFirstName(), actualUser.getFirstName());
-        assertEquals(expectedUser.getLastName(), actualUser.getLastName());
-        assertEquals(expectedUser.getDateOfBirth(), actualUser.getDateOfBirth());
-        assertEquals(expectedUser.getUsername(), actualUser.getUsername());
-        assertEquals(expectedUser.getRole(), actualUser.getRole());
-        assertEquals(expectedUser.getEmail(), actualUser.getEmail());
+        assertEqualsUsersWithoutId(expectedUser, actualUser);
     }
 
     private UserDto getUserFromResponse(MockHttpServletResponse response) throws UnsupportedEncodingException, JsonProcessingException {
@@ -321,7 +309,7 @@ public class UserControllerE2ETest {
         return userMapper.mapToUserDto(userMapperServ.mapToUser(user));
     }
 
-    private User mapUserToUser(UserDto userDto) {
+    private User mapUserDtoToUser(UserDto userDto) {
         return userMapperServ.mapToUserRepository(userMapper.mapToUser(userDto));
     }
 }

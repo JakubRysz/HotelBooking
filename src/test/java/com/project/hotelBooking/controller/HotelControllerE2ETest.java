@@ -2,6 +2,7 @@ package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.HotelMapper;
 import com.project.hotelBooking.controller.mapper.RoomMapper;
 import com.project.hotelBooking.controller.model.HotelDto;
@@ -14,6 +15,7 @@ import com.project.hotelBooking.repository.model.Room;
 import com.project.hotelBooking.service.mapper.HotelMapperServ;
 import com.project.hotelBooking.service.mapper.RoomMapperServ;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +52,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     private final HotelMapper hotelMapper;
     private final HotelMapperServ hotelMapperServ;
     private final MockMvc mockMvc;
+    private final CommonDatabaseUtils commonDatabaseUtils;
+
     private Localization localization1;
 
     @BeforeEach
     public void initialize() {
         localization1 = localizationRepository.save(LOCALIZATION_1);
+    }
+
+    @AfterEach
+    public void cleanUp(){
+        commonDatabaseUtils.clearDatabaseTables();
     }
 
 

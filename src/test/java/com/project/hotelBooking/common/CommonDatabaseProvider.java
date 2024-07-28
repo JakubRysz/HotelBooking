@@ -1,17 +1,15 @@
 package com.project.hotelBooking.common;
 
 import com.project.hotelBooking.repository.model.*;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 
 import static com.project.hotelBooking.common.CommonTestConstants.*;
 
 public class CommonDatabaseProvider {
-    @Value("${email_test}")
-    public static String EMAIL_TEST;
-    public  static final LocalDate BOOKING_START_DATE = LocalDate.now().plusDays(2);
-    public  static final LocalDate BOOKING_END_DATE = LocalDate.now().plusDays(4);
+
+    public static final LocalDate BOOKING_START_DATE = LocalDate.now().plusDays(2);
+    public static final LocalDate BOOKING_END_DATE = LocalDate.now().plusDays(4);
 
     public static final Localization LOCALIZATION_1 = Localization.builder()
             .city(CRACOW_CITY)
@@ -39,19 +37,30 @@ public class CommonDatabaseProvider {
     public static final User USER_1 = User.builder()
             .firstName("Poul")
             .lastName("Smith")
-            .dateOfBirth(LocalDate.of(1991,2,16))
+            .dateOfBirth(LocalDate.of(1991, 2, 16))
             .username("paulsmith")
             .password("paulsmith123")
             .role(ROLE_USER)
             .email(EMAIL_TEST)
             .build();
 
-    public static Booking getBooking1(Long userId, Long roomId) {
-        return Booking.builder()
-                .userId(userId)
-                .roomId(roomId)
-                .startDate(BOOKING_START_DATE)
-                .endDate(BOOKING_END_DATE)
-                .build();
-    }
+    public static final User USER_2 = User.builder()
+            .firstName("Jan")
+            .lastName("Kowalski")
+            .dateOfBirth(LocalDate.of(1992, 3, 15))
+            .username("jankowalski")
+            .password("jankowalski123")
+            .role(ROLE_USER)
+            .email(EMAIL_TEST)
+            .build();
+
+    public static final User USER_3 = User.builder()
+            .firstName("Cris")
+            .lastName("Brown")
+            .dateOfBirth(LocalDate.of(1993, 4, 15))
+            .username("crisbrown")
+            .password("crisbrown123")
+            .role(ROLE_USER)
+            .email(EMAIL_TEST)
+            .build();
 }

@@ -8,12 +8,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.project.hotelBooking.controller.ValidatorTest.EMAIL_TEST;
+import static com.project.hotelBooking.common.CommonTestConstants.EMAIL_TEST;
+import static com.project.hotelBooking.common.CommonTestConstants.ROLE_USER;
 
-public class Provider {
+public class ValidationDataProvider {
 
     //Localization
-    static Stream<LocalizationServ> localizationProvider() {
+    static Stream<LocalizationServ> incorrectLocalizationProvider() {
         LocalizationServ localizationBadCity = LocalizationServ.builder()
                 .id(1L)
                 .city("K")
@@ -37,7 +38,7 @@ public class Provider {
     }
 
     //Hotel
-    protected static Stream<HotelServ> hotelProvider() {
+    protected static Stream<HotelServ> incorrectHotelProvider() {
         HotelServ hotelZeroStars = HotelServ.builder()
                 .id(1L)
                 .name("Hotel1")
@@ -85,7 +86,7 @@ public class Provider {
     }
 
     //Room
-    static Stream<RoomServ> roomProvider() {
+    static Stream<RoomServ> incorrectRoomProvider() {
 
         RoomServ roomBadRoomNumber = RoomServ.builder()
                 .id(1L)
@@ -131,7 +132,7 @@ public class Provider {
     }
 
     //User
-    static Stream<UserServ> userProvider() {
+    static Stream<UserServ> incorrectUserProvider() {
 
         UserServ userBadFirstName = UserServ.builder()
                 .id(1L)
@@ -140,7 +141,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -152,7 +153,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -164,7 +165,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.now().minusYears(100).minusDays(1))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -176,7 +177,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.now().minusYears(18).plusDays(1))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -188,7 +189,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("j")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -200,7 +201,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("j")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -228,7 +229,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email("@gmail.com")
                 .bookings(null)
                 .build();
@@ -244,7 +245,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(emailToLong)
                 .bookings(null)
                 .build();
@@ -256,7 +257,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(".jan@gmail.com")
                 .bookings(null)
                 .build();
@@ -268,7 +269,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email("jan.@gmail.com")
                 .bookings(null)
                 .build();
@@ -280,7 +281,7 @@ public class Provider {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email("jan@.com")
                 .bookings(null)
                 .build();
@@ -367,24 +368,24 @@ public class Provider {
                 .id(1L)
                 .userId(3L)
                 .roomId(5L)
-                .start_date(LocalDate.now().plusDays(4))
-                .end_date(LocalDate.now().plusDays(2))
+                .startDate(LocalDate.now().plusDays(4))
+                .endDate(LocalDate.now().plusDays(2))
                 .build();
 
         BookingServ bookingWithStartDateInPast = BookingServ.builder()
                 .id(1L)
                 .userId(3L)
                 .roomId(5L)
-                .start_date(LocalDate.now().minusDays(1))
-                .end_date(LocalDate.now().plusDays(2))
+                .startDate(LocalDate.now().minusDays(1))
+                .endDate(LocalDate.now().plusDays(2))
                 .build();
 
         BookingServ bookingWithStartDateEqualEndDate = BookingServ.builder()
                 .id(1L)
                 .userId(3L)
                 .roomId(5L)
-                .start_date(LocalDate.now().plusDays(2))
-                .end_date(LocalDate.now().plusDays(2))
+                .startDate(LocalDate.now().plusDays(2))
+                .endDate(LocalDate.now().plusDays(2))
                 .build();
 
         List<BookingServ> bookings = new ArrayList<>(Arrays.asList(
@@ -402,16 +403,16 @@ public class Provider {
                 .id(2L)
                 .userId(3L)
                 .roomId(5L)
-                .start_date(LocalDate.now())
-                .end_date(LocalDate.now().plusDays(6))
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(6))
                 .build();
 
         BookingServ bookingRoomOccupied2 = BookingServ.builder()
                 .id(2L)
                 .userId(3L)
                 .roomId(5L)
-                .start_date(LocalDate.now().plusDays(8))
-                .end_date(LocalDate.now().plusDays(15))
+                .startDate(LocalDate.now().plusDays(8))
+                .endDate(LocalDate.now().plusDays(15))
                 .build();
 
         List<BookingServ> bookings = new ArrayList<>(Arrays.asList(

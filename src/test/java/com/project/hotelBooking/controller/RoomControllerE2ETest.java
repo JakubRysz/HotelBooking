@@ -67,7 +67,7 @@ public class RoomControllerE2ETest {
     }
 
     @AfterEach
-    public void clear() {
+    public void cleanUp(){
         commonDatabaseUtils.clearDatabaseTables();
     }
 

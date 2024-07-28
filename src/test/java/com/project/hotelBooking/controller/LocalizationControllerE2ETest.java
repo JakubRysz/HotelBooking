@@ -58,7 +58,7 @@ class LocalizationControllerE2ETest {
     private final HotelMapperServ hotelMapperServ;
 
     @AfterEach
-    public void clear() {
+    public void cleanUp(){
         commonDatabaseUtils.clearDatabaseTables();
     }
 
@@ -110,15 +110,8 @@ class LocalizationControllerE2ETest {
     public void shouldGetSingleLocalizationWithHotels() throws Exception {
         //given
         Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
+        Hotel hotel1Saved = hotelRepository.save(getHotel1(localizationSaved.getId()));
 
-        Hotel hotel1 = Hotel.builder()
-                .name("Hilton1")
-                .numberOfStars(3)
-                .hotelChain(HILTON_CHAIN)
-                .localizationId(localizationSaved.getId())
-                .build();
-
-        hotelRepository.save(hotel1);
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(LOCALIZATIONS_WITH_HOTELS_URL + localizationSaved.getId()))
                 .andDo(print())
@@ -128,7 +121,7 @@ class LocalizationControllerE2ETest {
         //then
         LocalizationWithHotelsDto localizationRetrieved = getLocalizationWithHotelsFromResponse(mvcResult.getResponse());
         assertEqualsLocalizationsWithoutHotels(localizationSaved, localizationRetrieved);
-        assertEquals(List.of(mapHotelToHotelDto(hotel1)), localizationRetrieved.getHotels());
+        assertEquals(List.of(mapHotelToHotelDto(hotel1Saved)), localizationRetrieved.getHotels());
     }
 
     @Test
@@ -142,13 +135,6 @@ class LocalizationControllerE2ETest {
 
         Localization localizationSaved1 = localizationRepository.save(LOCALIZATION_1);
         Localization localizationSaved2 = localizationRepository.save(newLocalization2);
-
-        Hotel hotel1 = Hotel.builder()
-                .name("Hilton1")
-                .numberOfStars(3)
-                .hotelChain(HILTON_CHAIN)
-                .localizationId(localizationSaved1.getId())
-                .build();
 
         Hotel hotel2 = Hotel.builder()
                 .name("Hilton2")
@@ -164,9 +150,9 @@ class LocalizationControllerE2ETest {
                 .localizationId(localizationSaved2.getId())
                 .build();
 
-        hotelRepository.save(hotel1);
-        hotelRepository.save(hotel2);
-        hotelRepository.save(hotel3);
+        Hotel hotel1Saved = hotelRepository.save(getHotel1(localizationSaved1.getId()));
+        Hotel hotel2Saved = hotelRepository.save(hotel2);
+        Hotel hotel3Saved = hotelRepository.save(hotel3);
 
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(LOCALIZATIONS_WITH_HOTELS_URL))
@@ -182,8 +168,8 @@ class LocalizationControllerE2ETest {
         assertEquals(2, localizations.size());
         assertEqualsLocalizationsWithoutHotels(localizationSaved1, localizations.get(0));
         assertEqualsLocalizationsWithoutHotels(localizationSaved2, localizations.get(1));
-        assertEquals(List.of(mapHotelToHotelDto(hotel1), mapHotelToHotelDto(hotel2)), localizations.get(0).getHotels());
-        assertEquals(List.of(mapHotelToHotelDto(hotel3)), localizations.get(1).getHotels());
+        assertEquals(List.of(mapHotelToHotelDto(hotel1Saved), mapHotelToHotelDto(hotel2Saved)), localizations.get(0).getHotels());
+        assertEquals(List.of(mapHotelToHotelDto(hotel3Saved)), localizations.get(1).getHotels());
     }
 
     @Test
@@ -283,8 +269,7 @@ class LocalizationControllerE2ETest {
 
     private static void assertEqualsLocalizationsWithoutHotels(Localization expectedlocalization, LocalizationWithHotelsDto actualLocalization) {
         assertEquals(expectedlocalization.getId(), actualLocalization.getId());
-        assertEquals(expectedlocalization.getCity(), actualLocalization.getCity());
-        assertEquals(expectedlocalization.getCountry(), actualLocalization.getCountry());
+        assertEqualsLocalizationsWithoutHotels(expectedlocalization, actualLocalization);
     }
 
     private HotelDto mapHotelToHotelDto(Hotel hotel1Saved1) {
