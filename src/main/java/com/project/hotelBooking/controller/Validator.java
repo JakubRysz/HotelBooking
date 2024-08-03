@@ -191,9 +191,11 @@ public class Validator {
     private void validateEmail(String emailAddress) {
         String regexPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*"
                 + "@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-        if (!Pattern.compile(regexPattern)
+        if (Objects.isNull(emailAddress) ||
+                !Pattern.compile(regexPattern)
                 .matcher(emailAddress)
-                .matches()) throw new BadRequestException("Bad e-mail data");
+                .matches()
+        ) throw new BadRequestException("Bad e-mail data");
     }
 
     private void validateUserRole(String role) {
@@ -233,9 +235,9 @@ public class Validator {
 
     private void validateBookingData(BookingServ booking) {
         if (booking == null
-                || booking.getStart_date().isBefore(LocalDate.now())
-                || booking.getStart_date().isAfter(booking.getEnd_date())
-                || booking.getStart_date().equals(booking.getEnd_date()))
+                || booking.getStartDate().isBefore(LocalDate.now())
+                || booking.getStartDate().isAfter(booking.getEndDate())
+                || booking.getStartDate().equals(booking.getEndDate()))
             throw new BadRequestException("Bad booking date");
     }
 
@@ -248,8 +250,8 @@ public class Validator {
                 if (Objects.equals(bookingDatabase.getId(), booking.getId())) {
                     continue;
                 }
-                if (bookingDatabase.getEnd_date().isAfter(booking.getStart_date())) {
-                    if (bookingDatabase.getStart_date().isBefore(booking.getEnd_date()))
+                if (bookingDatabase.getEndDate().isAfter(booking.getStartDate())) {
+                    if (bookingDatabase.getStartDate().isBefore(booking.getEndDate()))
                         throw new ElementAlreadyExistException("Room occupied at this time");
                 }
             }

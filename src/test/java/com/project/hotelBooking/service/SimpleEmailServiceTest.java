@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 import java.time.LocalDate;
 
+import static com.project.hotelBooking.common.CommonTestConstants.ROLE_USER;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -91,7 +92,7 @@ public class SimpleEmailServiceTest {
                 .lastName("Kowalski")
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -100,8 +101,8 @@ public class SimpleEmailServiceTest {
                 .id(1L)
                 .userId(1L)
                 .roomId(1L)
-                .start_date(LocalDate.of(2023, 02, 17))
-                .end_date(LocalDate.of(2023, 02, 21))
+                .startDate(LocalDate.of(2023, 02, 17))
+                .endDate(LocalDate.of(2023, 02, 21))
                 .build();
 
         BookingInfo bookingInfo = BookingInfo.builder()

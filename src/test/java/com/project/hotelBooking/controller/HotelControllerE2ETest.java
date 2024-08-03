@@ -1,11 +1,21 @@
 package com.project.hotelBooking.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.hotelBooking.common.CommonDatabaseUtils;
+import com.project.hotelBooking.controller.mapper.HotelMapper;
+import com.project.hotelBooking.controller.mapper.RoomMapper;
+import com.project.hotelBooking.controller.model.HotelDto;
+import com.project.hotelBooking.controller.model.RoomDto;
 import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.LocalizationRepository;
 import com.project.hotelBooking.repository.model.Hotel;
 import com.project.hotelBooking.repository.model.Localization;
+import com.project.hotelBooking.repository.model.Room;
+import com.project.hotelBooking.service.mapper.HotelMapperServ;
+import com.project.hotelBooking.service.mapper.RoomMapperServ;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +29,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.project.hotelBooking.common.CommonDatabaseProvider.LOCALIZATION_1;
+import static com.project.hotelBooking.common.CommonDatabaseProvider.getHotel1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -31,42 +44,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
     public class HotelControllerE2ETest {
 
+    public static final String HOTELS_URL = "/v1/hotels/";
+    public static final String HOTELS_ROOMS_URL = HOTELS_URL + "rooms/";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
+    private final HotelMapper hotelMapper;
+    private final HotelMapperServ hotelMapperServ;
     private final MockMvc mockMvc;
-    private final Localization newLocalization = new Localization();
-    private Hotel newHotel;
+    private final CommonDatabaseUtils commonDatabaseUtils;
+
+    private Localization localization1;
 
     @BeforeEach
     public void initialize() {
-        //given
-        newLocalization.setCity("Cracow");
-        newLocalization.setCountry("Poland");
-        localizationRepository.save(newLocalization);
+        localization1 = localizationRepository.save(LOCALIZATION_1);
+    }
 
-        newHotel = Hotel.builder()
-                .name("Hilton1")
-                .numberOfStars(3)
-                .hotelChain("Hilton")
-                .localizationId(newLocalization.getId())
-                .build();
-
-        hotelRepository.save(newHotel);
+    @AfterEach
+    public void cleanUp(){
+        commonDatabaseUtils.clearDatabaseTables();
     }
 
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldCreateHotel() throws Exception {
-
         //given
-        hotelRepository.delete(newHotel);
-        final String jsonContentNewHotel = objectMapper.writeValueAsString(newHotel);
+        Hotel hotel1 = getHotel1(localization1.getId());
+        HotelDto hotel1Dto = mapHotelToHotelDto(hotel1);
+        final String jsonContentNewHotel = objectMapper.writeValueAsString(hotel1Dto);
         int hotelsNumberBefore = hotelRepository.findAllHotels(Pageable.unpaged()).size();
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/v1/hotels")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(HOTELS_URL)
                         .content(jsonContentNewHotel)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -75,121 +86,105 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
                 .andReturn();
 
         //then
-        Hotel hotel = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Hotel.class);
+        HotelDto hotel = getHotelFromResponse(mvcResult);
         int hotelsNumberAfter = hotelRepository.findAllHotels(Pageable.unpaged()).size();
-        assertEquals(newHotel.getName(), hotel.getName());
-        assertEquals(newHotel.getNumberOfStars(), hotel.getNumberOfStars());
-        assertEquals(newHotel.getHotelChain(), hotel.getHotelChain());
-        assertEquals(newHotel.getLocalizationId(), hotel.getLocalizationId());
+        Hotel hotelFromDatabase = hotelRepository.findById(hotel.getId()).orElseThrow();
+        assertEqualsHotelsWithoutId(hotel1, hotelFromDatabase);
         assertEquals(hotelsNumberBefore + 1, hotelsNumberAfter);
-
-        hotelRepository.delete(hotel);
-        localizationRepository.delete(newLocalization);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403CreateHotelUser() throws Exception {
-
+    public void shouldReturnStatus403CreateHotel_user() throws Exception {
         //given
-        final String jsonContentNewHotel = objectMapper.writeValueAsString(newHotel);
+        Hotel hotel1 = getHotel1(localization1.getId());
+        HotelDto hotel1Dto = mapHotelToHotelDto(hotel1);
+        final String jsonContentNewHotel = objectMapper.writeValueAsString(hotel1Dto);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.post("/v1/hotels")
+        mockMvc.perform(MockMvcRequestBuilders.post(HOTELS_URL)
                         .content(jsonContentNewHotel)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
-
-        hotelRepository.delete(newHotel);
-        localizationRepository.delete(newLocalization);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldGetSingleHotel() throws Exception {
-
         //given
+        Hotel hotel1 = getHotel1(localization1.getId());
+        Hotel hotel1Saved = hotelRepository.save(hotel1);
+
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/hotels/rooms/" + newHotel.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(HOTELS_ROOMS_URL + hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
         //then
-        Hotel hotel = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Hotel.class);
-
-        assertEquals(newHotel.getId(), hotel.getId());
-        assertEquals(newHotel.getName(), hotel.getName());
-        assertEquals(newHotel.getNumberOfStars(), hotel.getNumberOfStars());
-        assertEquals(newHotel.getHotelChain(), hotel.getHotelChain());
-        assertEquals(newHotel.getLocalizationId(), hotel.getLocalizationId());
-
-        hotelRepository.delete(newHotel);
-        localizationRepository.delete(newLocalization);
+        HotelDto hotel = getHotelFromResponse(mvcResult);
+        assertEqualsHotels(hotel1Saved, mapHotelDtoToHotel(hotel));
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldGetMultipleHotels() throws Exception {
-
         //given
-        Hotel newHotel2 = Hotel.builder()
+        Hotel hotel2 = Hotel.builder()
                 .name("Hilton2")
                 .numberOfStars(4)
                 .hotelChain("Hilton")
+                .localizationId(localization1.getId())
                 .build();
 
-        Hotel newHotel3 = Hotel.builder()
+        Hotel hotel3 = Hotel.builder()
                 .name("Hilton3")
                 .numberOfStars(5)
                 .hotelChain("Hilton")
+                .localizationId(localization1.getId())
                 .build();
 
-        hotelRepository.save(newHotel2);
-        hotelRepository.save(newHotel3);
+        Hotel hotel1Saved = hotelRepository.save(getHotel1(localization1.getId()));
+        Hotel hotel2Saved = hotelRepository.save(hotel2);
+        Hotel hotel3Saved = hotelRepository.save(hotel3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/hotels/rooms"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(HOTELS_ROOMS_URL))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
         //then
-        Hotel[] hotelsArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Hotel[].class);
-        List<Hotel> hotels = new ArrayList<>((Arrays.asList(hotelsArray)));
+        HotelDto[] hotelsArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), HotelDto[].class);
+        List<HotelDto> hotels = new ArrayList<>((Arrays.asList(hotelsArray)));
 
         assertEquals(3, hotels.size());
-        assertEquals(newHotel3.getId(), hotels.get(2).getId());
-        assertEquals(newHotel3.getName(), hotels.get(2).getName());
-        assertEquals(newHotel3.getNumberOfStars(), hotels.get(2).getNumberOfStars());
-        assertEquals(newHotel3.getHotelChain(), hotels.get(2).getHotelChain());
-        assertEquals(newHotel3.getLocalizationId(), hotels.get(2).getLocalizationId());
-
-        hotelRepository.delete(newHotel);
-        hotelRepository.delete(newHotel2);
-        hotelRepository.delete(newHotel3);
-        localizationRepository.delete(newLocalization);
+        assertEqualsHotels(hotel1Saved, mapHotelDtoToHotel(hotels.get(0)));
+        assertEqualsHotels(hotel2Saved, mapHotelDtoToHotel(hotels.get(1)));
+        assertEqualsHotels(hotel3Saved, mapHotelDtoToHotel(hotels.get(2)));
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldEditHotel() throws Exception {
-
         //given
-        Hotel hotelEdited = Hotel.builder()
-                .id(newHotel.getId())
-                .name("Hilton1")
-                .numberOfStars(5)
-                .hotelChain("Hilton")
-                .localizationId(newLocalization.getId())
+        Hotel hotel1 = getHotel1(localization1.getId());
+        Hotel hotel1Saved = hotelRepository.save(hotel1);
+
+        HotelDto hotelEdited = HotelDto.builder()
+                .id(hotel1Saved.getId())
+                .name("HotelNamedEdited")
+                .numberOfStars(hotel1Saved.getNumberOfStars())
+                .hotelChain(hotel1Saved.getHotelChain())
+                .localizationId(hotel1Saved.getLocalizationId())
                 .build();
 
         final String jsonContentHotelEdited = objectMapper.writeValueAsString(hotelEdited);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/v1/hotels")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(HOTELS_URL)
                         .content(jsonContentHotelEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -197,57 +192,48 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
-        Hotel hotelGet = hotelRepository.findById(hotelEdited.getId()).orElseThrow();
-
         //then
-        Hotel hotel = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Hotel.class);
-        assertEquals(hotelEdited.getId(), hotel.getId());
-        assertEquals(hotelEdited.getName(), hotel.getName());
-        assertEquals(hotelEdited.getNumberOfStars(), hotel.getNumberOfStars());
-        assertEquals(hotelEdited.getHotelChain(), hotel.getHotelChain());
-        assertEquals(hotelEdited.getLocalizationId(), hotel.getLocalizationId());
-
-        hotelRepository.delete(hotel);
-        localizationRepository.delete(newLocalization);
+        HotelDto hotel = getHotelFromResponse(mvcResult);
+        Hotel hotelFromDatabase = hotelRepository.findById(hotel.getId()).orElseThrow();
+        assertEqualsHotelsWithoutId(mapHotelDtoToHotel(hotelEdited), hotelFromDatabase);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403EditHotelUser() throws Exception {
-
         //given
+        Hotel hotel1 = getHotel1(localization1.getId());
+        Hotel hotel1Saved = hotelRepository.save(hotel1);
 
-        Hotel hotelEdited = Hotel.builder()
-                .id(newHotel.getId())
-                .name("Hilton1")
-                .numberOfStars(5)
-                .hotelChain("Hilton")
-                .localizationId(newLocalization.getId())
+        HotelDto hotelEdited = HotelDto.builder()
+                .id(hotel1Saved.getId())
+                .name("HotelNamedEdited")
+                .numberOfStars(hotel1Saved.getNumberOfStars())
+                .hotelChain(hotel1Saved.getHotelChain())
+                .localizationId(hotel1Saved.getLocalizationId())
                 .build();
 
         final String jsonContentHotelEdited = objectMapper.writeValueAsString(hotelEdited);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.put("/v1/hotels")
+        mockMvc.perform(MockMvcRequestBuilders.put(HOTELS_URL)
                         .content(jsonContentHotelEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
-
-        hotelRepository.delete(newHotel);
-        localizationRepository.delete(newLocalization);
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldDeleteHotel() throws Exception {
-
         //given
+        Hotel hotel1 = getHotel1(localization1.getId());
+        Hotel hotel1Saved = hotelRepository.save(hotel1);
         int hotelsNumberBefore = hotelRepository.findAllHotels(Pageable.unpaged()).size();
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/hotels/" + newHotel.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -255,22 +241,42 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
         //then
         assertEquals(hotelsNumberBefore - 1, hotelsNumberAfter);
-
-        localizationRepository.delete(newLocalization);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403DeleteHotelUser() throws Exception {
-
         //given
+        Hotel hotel1 = getHotel1(localization1.getId());
+        Hotel hotel1Saved = hotelRepository.save(hotel1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/hotels/" + newHotel.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
+    }
 
-        hotelRepository.delete(newHotel);
-        localizationRepository.delete(newLocalization);
+    private HotelDto getHotelFromResponse(MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
+        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), HotelDto.class);
+    }
+
+    private static void assertEqualsHotelsWithoutId(Hotel expectedHotel, Hotel actualHotel) {
+        assertEquals(expectedHotel.getName(), actualHotel.getName());
+        assertEquals(expectedHotel.getNumberOfStars(), actualHotel.getNumberOfStars());
+        assertEquals(expectedHotel.getHotelChain(), actualHotel.getHotelChain());
+        assertEquals(expectedHotel.getLocalizationId(), actualHotel.getLocalizationId());
+    }
+
+    private static void assertEqualsHotels(Hotel expectedHotel, Hotel actualHotel) {
+        assertEquals(expectedHotel.getId(), actualHotel.getId());
+        assertEqualsHotelsWithoutId(expectedHotel, actualHotel);
+    }
+
+    private HotelDto mapHotelToHotelDto(Hotel hotel) {
+        return hotelMapper.mapToHotelDto(hotelMapperServ.mapToHotel(hotel));
+    }
+
+    private Hotel mapHotelDtoToHotel(HotelDto hotelDto) {
+        return hotelMapperServ.mapToRepositoryHotel(hotelMapper.mapToHotel(hotelDto));
     }
 }

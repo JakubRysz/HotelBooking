@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.project.hotelBooking.common.CommonTestConstants.EMAIL_TEST;
+import static com.project.hotelBooking.common.CommonTestConstants.ROLE_USER;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,8 +42,6 @@ class ValidatorTest {
     @Mock
     private UserService userService;
 
-    protected static final String EMAIL_TEST = "application.test1010@gmail.com";
-
     //Localization
     @Test
     public void shouldNotReturnBadRequestExceptionValidateLocalization() {
@@ -57,7 +57,7 @@ class ValidatorTest {
         assertDoesNotThrow(()->validatorMock.validateLocalization(localization));
     }
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#localizationProvider")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#incorrectLocalizationProvider")
     public void shouldReturnBadRequestExceptionValidateLocalizationWhenBadLocalizationData(LocalizationServ localization) {
         //given
         //when &then
@@ -84,7 +84,7 @@ class ValidatorTest {
         assertDoesNotThrow(()->validatorMock.validateHotel(hotel));
     }
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#hotelProvider")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#incorrectHotelProvider")
     public void shouldReturnBadRequestExceptionValidateHotelWhenBadHotelData(HotelServ hotel) {
         //given
         //when & then
@@ -110,7 +110,7 @@ class ValidatorTest {
         assertDoesNotThrow(()->validatorMock.validateRoom(room));
     }
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#roomProvider")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#incorrectRoomProvider")
     public void shouldReturnBadRequestExceptionValidateRoomWhenBadRoomData(RoomServ room) {
         //given
         //when & then
@@ -129,7 +129,7 @@ class ValidatorTest {
                 .dateOfBirth(LocalDate.of(1979, 1, 10))
                 .username("jankowalski")
                 .password("jankowalski123")
-                .role("ROLE_USER")
+                .role(ROLE_USER)
                 .email(EMAIL_TEST)
                 .bookings(null)
                 .build();
@@ -141,7 +141,7 @@ class ValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#userProvider")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#incorrectUserProvider")
     public void shouldReturnBadRequestExceptionValidateUserWhenBadUserData(UserServ user) {
         //given
         //when & then
@@ -149,7 +149,7 @@ class ValidatorTest {
                 ()->validatorMock.validateUser(user),"Bad user data");
     }
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#userProviderBadEmail")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#userProviderBadEmail")
     public void shouldReturnBadRequestExceptionValidateUserWhenBadEmail(UserServ user) {
         //given
         //when & then
@@ -158,7 +158,7 @@ class ValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#userProviderBadRole")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#userProviderBadRole")
     public void shouldReturnBadRequestExceptionValidateUserWhenBadRole(UserServ user) {
         //given
         //when & then
@@ -176,8 +176,8 @@ class ValidatorTest {
                 .id(2L)
                 .userId(4L)
                 .roomId(5L)
-                .start_date(LocalDate.now().plusDays(10))
-                .end_date(LocalDate.now().plusDays(15))
+                .startDate(LocalDate.now().plusDays(10))
+                .endDate(LocalDate.now().plusDays(15))
                 .build();
 
         RoomServ room = RoomServ.builder()
@@ -200,14 +200,14 @@ class ValidatorTest {
                 .id(1L)
                 .userId(3L)
                 .roomId(5L)
-                .start_date(LocalDate.now().plusDays(5))
-                .end_date(LocalDate.now().plusDays(9))
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(9))
                 .build();
         return new ArrayList<>(Arrays.asList(bookingOld));
     }
 
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#bookingProviderBadDate")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#bookingProviderBadDate")
     public void shouldReturnBadRequestExceptionValidateBookingWhenBadBookingDate(BookingServ booking) {
         //given
         //when & then
@@ -215,7 +215,7 @@ class ValidatorTest {
                 ()->validatorMock.validateBooking(booking),"Bad booking date");
     }
     @ParameterizedTest
-    @MethodSource("com.project.hotelBooking.controller.Provider#bookingProviderRoomOccupied")
+    @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#bookingProviderRoomOccupied")
     public void shouldReturnElementAlreadyExistExceptionValidateBookingWhenRoomOccupied(BookingServ booking) {
         //given
         List<BookingServ> bookings = provideBookingsList();

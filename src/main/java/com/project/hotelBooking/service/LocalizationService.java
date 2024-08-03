@@ -24,35 +24,40 @@ public class LocalizationService {
     private final HotelRepository hotelRepository;
     private final LocalizationMapperServ localizationMapperServ;
     private final HotelMapperServ hotelMapperServ;
-    private static final int PAGE_SIZE=5;
+    private static final int PAGE_SIZE = 5;
 
     public LocalizationServ getLocalizationByCityAndCountry(LocalizationServ localization) {
         return localizationMapperServ.mapToLocalization(localizationRepository.findLocalizationByCityAndCountry(
-            localization.getCity(), localization.getCountry()).orElseThrow(
-                ()->new ElementNotFoundException("No such localization"))
+                localization.getCity(), localization.getCountry()).orElseThrow(
+                () -> new ElementNotFoundException("No such localization"))
         );
     }
+
     public LocalizationServ saveLocalization(LocalizationServ localization) {
         return localizationMapperServ.mapToLocalization(
                 localizationRepository.save(localizationMapperServ.mapToRepositoryLocalization(localization))
         );
     }
+
     public LocalizationServ getLocalizationById(Long id) {
         return localizationMapperServ.mapToLocalization(
                 localizationRepository.findById(id).orElseThrow(
                         () -> new ElementNotFoundException("No such localization"))
         );
     }
+
     public void deleteLocalizationById(Long id) {
         localizationRepository.deleteById(id);
     }
+
     public List<LocalizationServ> getLocalizations(Integer page, Sort.Direction sort) {
         return localizationMapperServ.mapToLocalizations(
                 localizationRepository.findAllLocalizations(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
         );
     }
+
     public List<LocalizationServ> getLocalizationsWithHotels(Integer page, Sort.Direction sort) {
-        List<LocalizationServ> localizations =  localizationMapperServ.mapToLocalizations(
+        List<LocalizationServ> localizations = localizationMapperServ.mapToLocalizations(
                 localizationRepository.findAllLocalizations(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
         );
         List<Long> localizationIds = localizations.stream()
@@ -70,13 +75,10 @@ public class LocalizationService {
                 .filter(hotel -> Objects.equals(hotel.getLocalizationId(), id))
                 .collect(Collectors.toList());
     }
+
     public LocalizationServ editLocalization(LocalizationServ localization) {
         return localizationMapperServ.mapToLocalization(
                 localizationRepository.save(localizationMapperServ.mapToRepositoryLocalization(localization))
         );
     }
-    public void deleteAllLocalizations() {
-        localizationRepository.deleteAll();
-    }
-
 }

@@ -1,31 +1,38 @@
 package com.project.hotelBooking.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.hotelBooking.common.CommonDatabaseUtils;
+import com.project.hotelBooking.controller.mapper.UserMapper;
+import com.project.hotelBooking.controller.model.UserDto;
 import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.service.SimpleEmailService;
+import com.project.hotelBooking.service.mapper.UserMapperServ;
 import com.project.hotelBooking.service.model.Mail;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDate;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -36,38 +43,38 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserControllerE2ETest {
 
+    private static final String USERS_URL = "/v1/users/";
+    private static final String USERS_BOOKINGS_URL = USERS_URL + "bookings/";
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final MockMvc mockMvc;
-    private final User newUser = new User();
-    @Value("${email_test}")
-    private String EMAIL_TEST;
+    private final UserMapper userMapper;
+    private final UserMapperServ userMapperServ;
+    private final CommonDatabaseUtils commonDatabaseUtils;
     @MockBean
     private SimpleEmailService emailService;
 
     @BeforeEach
     public void initialize() {
-        newUser.setFirstName("Paul");
-        newUser.setLastName("Smith");
-        newUser.setDateOfBirth(LocalDate.of(1991,2,16));
-        newUser.setUsername("paulsmith");
-        newUser.setPassword("paulsmith123");
-        newUser.setRole("ROLE_USER");
-        newUser.setEmail(EMAIL_TEST);
-        userRepository.save(newUser);
         doNothing().when(emailService).send(any(Mail.class));
+    }
+
+    @AfterEach
+    public void cleanUp(){
+        commonDatabaseUtils.clearDatabaseTables();
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldCreateUser() throws Exception {
-
         //given
-        userRepository.delete(newUser);
-        final String jsonContentNewUser = objectMapper.writeValueAsString(newUser);
+
+        UserDto user1Dto = mapUserToUserDto(USER_1);
+        final String jsonContentNewUser = objectMapper.writeValueAsString(user1Dto);
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
+
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/v1/users")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(USERS_URL)
                         .content(jsonContentNewUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -76,28 +83,22 @@ public class UserControllerE2ETest {
                 .andReturn();
 
         //then
-        User user = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), User.class);
+        UserDto user = getUserFromResponse(mvcResult.getResponse());
         int usersNumberAfter = userRepository.findAllUsers(Pageable.unpaged()).size();
-        assertEquals(newUser.getFirstName(), user.getFirstName());
-        assertEquals(newUser.getLastName(), user.getLastName());
-        assertEquals(newUser.getDateOfBirth(), user.getDateOfBirth());
-        assertEquals(newUser.getUsername(), user.getUsername());
-        assertEquals(newUser.getRole(), user.getRole());
-        assertEquals(newUser.getEmail(), user.getEmail());
-        assertEquals(usersNumberBefore+1, usersNumberAfter);
-
-        userRepository.delete(newUser);
+        User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
+        assertEqualsUsersWithoutId(USER_1, userFromDatabase);
+        assertEquals(usersNumberBefore + 1, usersNumberAfter);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403CreateUserUser() throws Exception {
-
         //given
-        final String jsonContentNewUser = objectMapper.writeValueAsString(newUser);
-        userRepository.delete(newUser);
+        UserDto user1Dto = mapUserToUserDto(USER_1);
+        final String jsonContentNewUser = objectMapper.writeValueAsString(user1Dto);
+
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post("/v1/users")
+        mockMvc.perform(MockMvcRequestBuilders.post(USERS_URL)
                         .content(jsonContentNewUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -106,15 +107,15 @@ public class UserControllerE2ETest {
     }
 
     @Test
-    public void shouldCreateUserRegistrationUser() throws Exception {
-
+    @WithMockUser(roles = {"USER"})
+    public void shouldRegisterUser() throws Exception {
         //given
-        userRepository.deleteAll();
-        userRepository.delete(newUser);
-        final String jsonContentNewUser = objectMapper.writeValueAsString(newUser);
+        UserDto user1Dto = mapUserToUserDto(USER_1);
+        final String jsonContentNewUser = objectMapper.writeValueAsString(user1Dto);
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
+
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/v1/users/registration")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(USERS_URL + "registration")
                         .content(jsonContentNewUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -123,158 +124,102 @@ public class UserControllerE2ETest {
                 .andReturn();
 
         //then
-        User user = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), User.class);
+        UserDto user = getUserFromResponse(mvcResult.getResponse());
         int usersNumberAfter = userRepository.findAllUsers(Pageable.unpaged()).size();
-        assertEquals(newUser.getFirstName(), user.getFirstName());
-        assertEquals(newUser.getLastName(), user.getLastName());
-        assertEquals(newUser.getDateOfBirth(), user.getDateOfBirth());
-        assertEquals(newUser.getUsername(), user.getUsername());
-        assertEquals(newUser.getEmail(), user.getEmail());
-        assertEquals("ROLE_USER", user.getRole());
-        assertEquals(usersNumberBefore+1, usersNumberAfter);
-
-        userRepository.delete(newUser);
+        User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
+        assertEqualsUsersWithoutId(USER_1, userFromDatabase);
+        assertEquals(usersNumberBefore + 1, usersNumberAfter);
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldGetSingleUser() throws Exception {
-
         //given
+        User userSaved = userRepository.save(USER_1);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"+newUser.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + userSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
         //then
-        User user = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), User.class);
-
-        assertEquals(newUser.getId(), user.getId());
-        assertEquals(newUser.getFirstName(), user.getFirstName());
-        assertEquals(newUser.getLastName(), user.getLastName());
-        assertEquals(newUser.getDateOfBirth(), user.getDateOfBirth());
-        assertEquals(newUser.getUsername(), user.getUsername());
-        assertEquals(newUser.getEmail(), user.getEmail());
-        assertEquals(newUser.getRole(), user.getRole());
-
-        userRepository.delete(newUser);
+        UserDto user = getUserFromResponse(mvcResult.getResponse());
+        User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
+        assertEqualsUsers(userSaved, userFromDatabase);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403GetSingleUserUser() throws Exception {
-
         //given
+        User userSaved = userRepository.save(USER_1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"+newUser.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + userSaved.getId()))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
-
-        userRepository.delete(newUser);
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldGetMultipleUsers() throws Exception {
-
         //given
-        User newUser2 = new User();
-        newUser2.setFirstName("Jan");
-        newUser2.setLastName("Kowalski");
-        newUser2.setDateOfBirth(LocalDate.of(1992,3,15));
-        newUser2.setUsername("jankowalski");
-        newUser2.setPassword("jankowalski123");
-        newUser2.setRole("ROLE_USER");
-        newUser2.setEmail(EMAIL_TEST);
-        User newUser3 = new User();
-        newUser3.setFirstName("Cris");
-        newUser3.setLastName("Brown");
-        newUser3.setDateOfBirth(LocalDate.of(1993,4,15));
-        newUser3.setUsername("crisbrown");
-        newUser3.setPassword("crisbrown123");
-        newUser3.setRole("ROLE_USER");
-        newUser3.setEmail(EMAIL_TEST);
-        userRepository.save(newUser2);
-        userRepository.save(newUser3);
+        User userSaved1 = userRepository.save(USER_1);
+        User userSaved2 = userRepository.save(USER_2);
+        User userSaved3 = userRepository.save(USER_3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
         //then
-        User[] usersArray=objectMapper.readValue(mvcResult.getResponse().getContentAsString(), User[].class);
-        List<User> users =new ArrayList<>((Arrays.asList(usersArray)));
+        UserDto[] usersArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserDto[].class);
+        List<UserDto> users = new ArrayList<>((Arrays.asList(usersArray)));
 
         assertEquals(3, users.size());
-        assertEquals(newUser3.getId(), users.get(2).getId());
-        assertEquals(newUser3.getFirstName(), users.get(2).getFirstName());
-        assertEquals(newUser3.getLastName(), users.get(2).getLastName());
-        assertEquals(newUser3.getDateOfBirth(), users.get(2).getDateOfBirth());
-        assertEquals(newUser3.getUsername(), users.get(2).getUsername());
-        assertEquals(newUser3.getRole(), users.get(2).getRole());
-        assertEquals(newUser3.getEmail(), users.get(2).getEmail());
-
-        userRepository.delete(newUser);
-        userRepository.delete(newUser2);
-        userRepository.delete(newUser3);
+        assertEqualsUsers(userSaved1, mapUserDtoToUser(users.get(0)));
+        assertEqualsUsers(userSaved2, mapUserDtoToUser(users.get(1)));
+        assertEqualsUsers(userSaved3, mapUserDtoToUser(users.get(2)));
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403GetMultipleUsersUser() throws Exception {
-
         //given
-        User newUser2 = new User();
-        newUser2.setFirstName("Jan");
-        newUser2.setLastName("Kowalski");
-        newUser2.setDateOfBirth(LocalDate.of(1992,3,15));
-        newUser2.setUsername("jankowalski");
-        newUser2.setPassword("jankowalski123");
-        newUser2.setRole("ROLE_USER");
-        newUser2.setEmail(EMAIL_TEST);
-        User newUser3 = new User();
-        newUser3.setFirstName("Cris");
-        newUser3.setLastName("Brown");
-        newUser3.setDateOfBirth(LocalDate.of(1993,4,15));
-        newUser3.setUsername("crisbrown");
-        newUser3.setPassword("crisbrown123");
-        newUser3.setRole("ROLE_USER");
-        newUser3.setEmail(EMAIL_TEST);
-        userRepository.save(newUser2);
-        userRepository.save(newUser3);
+        userRepository.save(USER_1);
+        userRepository.save(USER_2);
+        userRepository.save(USER_3);
 
-        //when
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/users/bookings/"))
+        //when & then
+        mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
-
-        userRepository.delete(newUser);
-        userRepository.delete(newUser2);
-        userRepository.delete(newUser3);
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldEditUser() throws Exception {
-
         //given
-        User userEdited = new User();
-        userEdited.setId(newUser.getId());
-        userEdited.setFirstName("Paul");
-        userEdited.setLastName("Smith");
-        userEdited.setDateOfBirth(LocalDate.of(1982,2,16));
-        userEdited.setUsername("paulsmith");
-        userEdited.setPassword("paulsmith123");
-        userEdited.setRole("ROLE_USER");
-        userEdited.setEmail(EMAIL_TEST);
+        User userSaved = userRepository.save(USER_1);
+        UserDto userEdited = UserDto.builder()
+                .id(userSaved.getId())
+                .firstName(USER_1.getFirstName())
+                .lastName(USER_1.getLastName())
+                .dateOfBirth(USER_1.getDateOfBirth())
+                .username("usernameEdited")
+                .password(USER_1.getPassword())
+                .role(USER_1.getRole())
+                .email(USER_1.getEmail())
+                .build();
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
+
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/v1/users")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(USERS_URL)
                         .content(jsonContentUserEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -282,75 +227,89 @@ public class UserControllerE2ETest {
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
-        User userGet = userRepository.findById(userEdited.getId()).orElseThrow();
-
         //then
-        User user = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), User.class);
-        assertEquals(userEdited.getId(), user.getId());
-        assertEquals(userEdited.getFirstName(), user.getFirstName());
-        assertEquals(userEdited.getLastName(), user.getLastName());
-        assertEquals(userEdited.getDateOfBirth(), user.getDateOfBirth());
-        assertEquals(userEdited.getUsername(), user.getUsername());
-        assertEquals(userEdited.getEmail(), user.getEmail());
-        assertEquals(userEdited.getRole(), user.getRole());
-
-        userRepository.delete(user);
+        UserDto user = getUserFromResponse(mvcResult.getResponse());
+        User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
+        assertEqualsUsersWithoutId(mapUserDtoToUser(userEdited), userFromDatabase);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldEReturnStatus403ditUserUser() throws Exception {
-
+    public void shouldReturnStatus403EditUserUser() throws Exception {
         //given
-        User userEdited = new User();
-        userEdited.setId(newUser.getId());
-        userEdited.setFirstName("Paul");
-        userEdited.setLastName("Smith");
-        userEdited.setDateOfBirth(LocalDate.of(1982,2,16));
-        userEdited.setUsername("paulsmith");
-        userEdited.setPassword("paulsmith123");
-        userEdited.setRole("ROLE_USER");
-        userEdited.setEmail(EMAIL_TEST);
+        User userSaved = userRepository.save(USER_1);
+        UserDto userEdited = UserDto.builder()
+                .id(userSaved.getId())
+                .firstName(USER_1.getFirstName())
+                .lastName(USER_1.getLastName())
+                .dateOfBirth(USER_1.getDateOfBirth())
+                .username("usernameEdited")
+                .password(USER_1.getPassword())
+                .role(USER_1.getRole())
+                .email(USER_1.getEmail())
+                .build();
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
         //when
-        mockMvc.perform(MockMvcRequestBuilders.put("/v1/users")
+        mockMvc.perform(MockMvcRequestBuilders.put(USERS_URL)
                         .content(jsonContentUserEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
-
-        userRepository.delete(newUser);
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldDeleteUser() throws Exception {
-
         //given
-        int usersNumberBefore=userRepository.findAllUsers(Pageable.unpaged()).size();
+        User userSaved = userRepository.save(USER_1);
+        int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/users/"+newUser.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + userSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
-        int usersNumberAfter=userRepository.findAllUsers(Pageable.unpaged()).size();
+        int usersNumberAfter = userRepository.findAllUsers(Pageable.unpaged()).size();
 
         //then
-        assertEquals(usersNumberBefore-1, usersNumberAfter);
+        assertEquals(usersNumberBefore - 1, usersNumberAfter);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403DeleteUserUser() throws Exception {
-
         //given
-
-        //when
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/users/"+newUser.getId()))
+        userRepository.save(USER_1);
+        //when & then
+        mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + USER_1.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
+    }
 
-        userRepository.delete(newUser);
+
+    private static void assertEqualsUsersWithoutId(User expectedUser, User actualUser) {
+        assertEquals(expectedUser.getFirstName(), actualUser.getFirstName());
+        assertEquals(expectedUser.getLastName(), actualUser.getLastName());
+        assertEquals(expectedUser.getDateOfBirth(), actualUser.getDateOfBirth());
+        assertEquals(expectedUser.getUsername(), actualUser.getUsername());
+        assertEquals(expectedUser.getRole(), actualUser.getRole());
+        assertEquals(expectedUser.getEmail(), actualUser.getEmail());
+    }
+
+    private static void assertEqualsUsers(User expectedUser, User actualUser) {
+        assertEquals(expectedUser.getId(), actualUser.getId());
+        assertEqualsUsersWithoutId(expectedUser, actualUser);
+    }
+
+    private UserDto getUserFromResponse(MockHttpServletResponse response) throws UnsupportedEncodingException, JsonProcessingException {
+        return objectMapper.readValue(response.getContentAsString(), UserDto.class);
+    }
+
+    private UserDto mapUserToUserDto(User user) {
+        return userMapper.mapToUserDto(userMapperServ.mapToUser(user));
+    }
+
+    private User mapUserDtoToUser(UserDto userDto) {
+        return userMapperServ.mapToUserRepository(userMapper.mapToUser(userDto));
     }
 }

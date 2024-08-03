@@ -1,57 +1,78 @@
 package com.project.hotelBooking.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.hotelBooking.common.CommonDatabaseUtils;
+import com.project.hotelBooking.controller.mapper.HotelMapper;
+import com.project.hotelBooking.controller.mapper.LocalizationMapper;
+import com.project.hotelBooking.controller.model.HotelDto;
+import com.project.hotelBooking.controller.model.LocalizationDto;
+import com.project.hotelBooking.controller.model.LocalizationWithHotelsDto;
+import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.LocalizationRepository;
+import com.project.hotelBooking.repository.model.Hotel;
 import com.project.hotelBooking.repository.model.Localization;
+import com.project.hotelBooking.service.mapper.HotelMapperServ;
+import com.project.hotelBooking.service.mapper.LocalizationMapperServ;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static com.project.hotelBooking.common.CommonTestConstants.*;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class LocalizationControllerE2ETest {
+class LocalizationControllerE2ETest {
 
+    private static final String LOCALIZATIONS_URL = "/v1/localizations/";
+    private static final String LOCALIZATIONS_WITH_HOTELS_URL = "/v1/localizations/hotels/";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
+    private final HotelRepository hotelRepository;
+    private final CommonDatabaseUtils commonDatabaseUtils;
     private final MockMvc mockMvc;
-    private final Localization newLocalization = new Localization();
+    private final LocalizationMapper localizationMapper;
+    private final LocalizationMapperServ localizationMapperServ;
+    private final HotelMapper hotelMapper;
+    private final HotelMapperServ hotelMapperServ;
 
-    @BeforeEach
-    public void initialize() {
-        newLocalization.setCity("Cracow");
-        newLocalization.setCountry("Poland");
-        localizationRepository.save(newLocalization);
+    @AfterEach
+    public void cleanUp(){
+        commonDatabaseUtils.clearDatabaseTables();
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldCreateLocalization() throws Exception {
-
         //given
-        localizationRepository.delete(newLocalization);
-        final String jsonContentNewLocalization = objectMapper.writeValueAsString(newLocalization);
+        LocalizationDto localization1Dto  = localizationMapper.mapToLocalizationDto(
+                localizationMapperServ.mapToLocalization(LOCALIZATION_1));
+        final String jsonContentNewLocalization = objectMapper.writeValueAsString(localization1Dto);
         int localizationsNumberBefore = localizationRepository.findAllLocalizations(Pageable.unpaged()).size();
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/v1/localizations")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(LOCALIZATIONS_URL)
                         .content(jsonContentNewLocalization)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -60,101 +81,112 @@ public class LocalizationControllerE2ETest {
                 .andReturn();
 
         //then
-        Localization localization = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Localization.class);
+        LocalizationDto localization = getLocalizationFromResponse(mvcResult.getResponse());
         int localizationsNumberAfter = localizationRepository.findAllLocalizations(Pageable.unpaged()).size();
-        assertEquals(newLocalization.getCity(), localization.getCity());
-        assertEquals(newLocalization.getCountry(), localization.getCountry());
+        Localization localizationFromDatabase = localizationRepository.findById(localization.getId()).orElseThrow();
+        assertEqualsLocalizationsWithoutId(LOCALIZATION_1, localizationFromDatabase);
         assertEquals(localizationsNumberBefore + 1, localizationsNumberAfter);
-
-        localizationRepository.delete(newLocalization);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403CreateLocalizationUser() throws Exception {
-
         //given
-        final String jsonContentNewLocalization = objectMapper.writeValueAsString(newLocalization);
+        LocalizationDto localization1Dto  = localizationMapper.mapToLocalizationDto(
+                localizationMapperServ.mapToLocalization(LOCALIZATION_1));
+        final String jsonContentNewLocalization = objectMapper.writeValueAsString(localization1Dto);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post("/v1/localizations")
+        mockMvc.perform(MockMvcRequestBuilders.post(LOCALIZATIONS_URL)
                         .content(jsonContentNewLocalization)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
-
-        localizationRepository.delete(newLocalization);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldGetSingleLocalization() throws Exception {
-
+    public void shouldGetSingleLocalizationWithHotels() throws Exception {
         //given
+        Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
+        Hotel hotel1Saved = hotelRepository.save(getHotel1(localizationSaved.getId()));
+
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/localizations/hotels/" + newLocalization.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(LOCALIZATIONS_WITH_HOTELS_URL + localizationSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
         //then
-        Localization localization = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Localization.class);
-
-        assertEquals(newLocalization.getId(), localization.getId());
-        assertEquals(newLocalization.getCity(), localization.getCity());
-        assertEquals(newLocalization.getCountry(), localization.getCountry());
-
-        localizationRepository.delete(newLocalization);
+        LocalizationWithHotelsDto localizationRetrieved = getLocalizationWithHotelsFromResponse(mvcResult.getResponse());
+        assertEqualsLocalizationsWithoutHotels(localizationSaved, localizationRetrieved);
+        assertEquals(List.of(mapHotelToHotelDto(hotel1Saved)), localizationRetrieved.getHotels());
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldGetMultipleLocalizations() throws Exception {
-
         //given
-        Localization newLocalization2 = new Localization();
-        newLocalization2.setCity("Poznan");
-        newLocalization2.setCountry("Poland");
-        Localization newLocalization3 = new Localization();
-        newLocalization3.setCity("Warsaw");
-        newLocalization3.setCountry("Poland");
-        localizationRepository.save(newLocalization2);
-        localizationRepository.save(newLocalization3);
+        Localization newLocalization2 = Localization.builder()
+                .city(WARSAW_CITY)
+                .country(POLAND_COUNTRY)
+                .build();
+
+        Localization localizationSaved1 = localizationRepository.save(LOCALIZATION_1);
+        Localization localizationSaved2 = localizationRepository.save(newLocalization2);
+
+        Hotel hotel2 = Hotel.builder()
+                .name("Hilton2")
+                .numberOfStars(3)
+                .hotelChain(HILTON_CHAIN)
+                .localizationId(localizationSaved1.getId())
+                .build();
+
+        Hotel hotel3 = Hotel.builder()
+                .name("Hilton3")
+                .numberOfStars(3)
+                .hotelChain(HILTON_CHAIN)
+                .localizationId(localizationSaved2.getId())
+                .build();
+
+        Hotel hotel1Saved = hotelRepository.save(getHotel1(localizationSaved1.getId()));
+        Hotel hotel2Saved = hotelRepository.save(hotel2);
+        Hotel hotel3Saved = hotelRepository.save(hotel3);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/v1/localizations/hotels/"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(LOCALIZATIONS_WITH_HOTELS_URL))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
         //then
-        Localization[] localizationsArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Localization[].class);
-        List<Localization> localizations = new ArrayList<>((Arrays.asList(localizationsArray)));
+        LocalizationWithHotelsDto[] localizationsArray = objectMapper.readValue(
+                mvcResult.getResponse().getContentAsString(), LocalizationWithHotelsDto[].class);
+        List<LocalizationWithHotelsDto> localizations = new ArrayList<>((Arrays.asList(localizationsArray)));
 
-        assertEquals(3, localizations.size());
-        assertEquals(newLocalization3.getId(), localizations.get(2).getId());
-        assertEquals(newLocalization3.getCity(), localizations.get(2).getCity());
-        assertEquals(newLocalization3.getCountry(), localizations.get(2).getCountry());
-
-        localizationRepository.delete(newLocalization);
-        localizationRepository.delete(newLocalization2);
-        localizationRepository.delete(newLocalization3);
+        assertEquals(2, localizations.size());
+        assertEqualsLocalizationsWithoutHotels(localizationSaved1, localizations.get(0));
+        assertEqualsLocalizationsWithoutHotels(localizationSaved2, localizations.get(1));
+        assertEquals(List.of(mapHotelToHotelDto(hotel1Saved), mapHotelToHotelDto(hotel2Saved)), localizations.get(0).getHotels());
+        assertEquals(List.of(mapHotelToHotelDto(hotel3Saved)), localizations.get(1).getHotels());
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldEditLocalization() throws Exception {
-
         //given
-        Localization localizationEdited = new Localization();
-        localizationEdited.setId(newLocalization.getId());
-        localizationEdited.setCity("Gdansk");
-        localizationEdited.setCountry("Poland");
+        Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
+
+        LocalizationDto localizationEdited = LocalizationDto.builder()
+                .id(localizationSaved.getId())
+                .city(GDANSK_CITY)
+                .country(POLAND_COUNTRY)
+                .build();
         final String jsonContentLocalizationEdited = objectMapper.writeValueAsString(localizationEdited);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/v1/localizations")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(LOCALIZATIONS_URL)
                         .content(jsonContentLocalizationEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -165,45 +197,42 @@ public class LocalizationControllerE2ETest {
         Localization localizationGet = localizationRepository.findById(localizationEdited.getId()).orElseThrow();
 
         //then
-        Localization localization = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Localization.class);
-        assertEquals(localizationEdited.getId(), localizationGet.getId());
+        LocalizationDto localization = getLocalizationFromResponse(mvcResult.getResponse());
+        assertEquals(localizationEdited.getId(), localization.getId());
         assertEquals(localizationEdited.getCity(), localizationGet.getCity());
         assertEquals(localizationEdited.getCountry(), localizationGet.getCountry());
-
-        localizationRepository.delete(localization);
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403EditLocalizationUser() throws Exception {
-
         //given
+        Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
+
         Localization localizationEdited = new Localization();
-        localizationEdited.setId(newLocalization.getId());
-        localizationEdited.setCity("Gdansk");
-        localizationEdited.setCountry("Poland");
+        localizationEdited.setId(localizationSaved.getId());
+        localizationEdited.setCity(GDANSK_CITY);
+        localizationEdited.setCountry(POLAND_COUNTRY);
         final String jsonContentLocalizationEdited = objectMapper.writeValueAsString(localizationEdited);
 
         //when & them
-        mockMvc.perform(MockMvcRequestBuilders.put("/v1/localizations")
+        mockMvc.perform(MockMvcRequestBuilders.put(LOCALIZATIONS_URL)
                         .content(jsonContentLocalizationEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
-
-        localizationRepository.delete(newLocalization);
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     public void shouldDeleteLocalization() throws Exception {
-
         //given
+        Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
         int localizationsNumberBefore = localizationRepository.findAllLocalizations(Pageable.unpaged()).size();
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/localizations/" + newLocalization.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + localizationSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -216,14 +245,35 @@ public class LocalizationControllerE2ETest {
     @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403DeleteLocalizationUser() throws Exception {
-
         //given
+        Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/localizations/" + newLocalization.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + localizationSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
+    }
 
-        localizationRepository.delete(newLocalization);
+    private LocalizationDto getLocalizationFromResponse(MockHttpServletResponse response) throws UnsupportedEncodingException, JsonProcessingException {
+        return objectMapper.readValue(response.getContentAsString(), LocalizationDto.class);
+    }
+
+    private LocalizationWithHotelsDto getLocalizationWithHotelsFromResponse(MockHttpServletResponse response) throws UnsupportedEncodingException, JsonProcessingException {
+        return objectMapper.readValue(response.getContentAsString(), LocalizationWithHotelsDto.class);
+    }
+
+    private static void assertEqualsLocalizationsWithoutId(Localization expectedlocalization, Localization actualLocalization) {
+        assertEquals(expectedlocalization.getCity(), actualLocalization.getCity());
+        assertEquals(expectedlocalization.getCountry(), actualLocalization.getCountry());
+    }
+
+    private static void assertEqualsLocalizationsWithoutHotels(Localization expectedlocalization, LocalizationWithHotelsDto actualLocalization) {
+        assertEquals(expectedlocalization.getId(), actualLocalization.getId());
+        assertEquals(expectedlocalization.getCity(), actualLocalization.getCity());
+        assertEquals(expectedlocalization.getCountry(), actualLocalization.getCountry());
+    }
+
+    private HotelDto mapHotelToHotelDto(Hotel hotel1Saved1) {
+        return hotelMapper.mapToHotelDto(hotelMapperServ.mapToHotel(hotel1Saved1));
     }
 }

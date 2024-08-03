@@ -111,8 +111,8 @@ public class SimpleEmailService {
 
     private String getBookingMainInformation(BookingInfo bookingInfo) {
         String bookingInformation =
-                        "Start date: " + bookingInfo.getBooking().getStart_date()+"\n"
-                        + "End date: " + bookingInfo.getBooking().getEnd_date()+"\n"
+                        "Start date: " + bookingInfo.getBooking().getStartDate()+"\n"
+                        + "End date: " + bookingInfo.getBooking().getEndDate()+"\n"
                         + "Booking owner: "+bookingInfo.getUser().getFirstName()+" "+bookingInfo.getUser().getLastName()+"\n"
                         + "Hotel name: "+ bookingInfo.getHotel().getName()+"\n"
                         + "Hotel chain: "+ bookingInfo.getHotel().getHotelChain()+"\n"
