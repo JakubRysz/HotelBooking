@@ -269,7 +269,8 @@ class LocalizationControllerE2ETest {
 
     private static void assertEqualsLocalizationsWithoutHotels(Localization expectedlocalization, LocalizationWithHotelsDto actualLocalization) {
         assertEquals(expectedlocalization.getId(), actualLocalization.getId());
-        assertEqualsLocalizationsWithoutHotels(expectedlocalization, actualLocalization);
+        assertEquals(expectedlocalization.getCity(), actualLocalization.getCity());
+        assertEquals(expectedlocalization.getCountry(), actualLocalization.getCountry());
     }
 
     private HotelDto mapHotelToHotelDto(Hotel hotel1Saved1) {
