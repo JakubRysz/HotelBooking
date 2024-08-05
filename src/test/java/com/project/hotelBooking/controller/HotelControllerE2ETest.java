@@ -44,8 +44,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
     public class HotelControllerE2ETest {
 
-    public static final String HOTELS_URL = "/v1/hotels/";
-    public static final String HOTELS_ROOMS_URL = HOTELS_URL + "rooms/";
+    public static final String HOTELS_URL = "/v1/hotels";
+    public static final String HOTELS_ROOMS_URL = HOTELS_URL + "/rooms";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
@@ -118,7 +118,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         Hotel hotel1Saved = hotelRepository.save(hotel1);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(HOTELS_ROOMS_URL + hotel1Saved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(HOTELS_ROOMS_URL + "/" + hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -233,7 +233,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         int hotelsNumberBefore = hotelRepository.findAllHotels(Pageable.unpaged()).size();
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + hotel1Saved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + "/" +hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -251,7 +251,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         Hotel hotel1Saved = hotelRepository.save(hotel1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + hotel1Saved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + "/" + hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }

@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 public class
 BookingControllerTestSuiteE2ETest {
 
-    public static final String BOOKINGS_URL = "/v1/bookings/";
+    public static final String BOOKINGS_URL = "/v1/bookings";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
@@ -189,7 +189,7 @@ BookingControllerTestSuiteE2ETest {
 
         bookingRepository.save(booking1);
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + booking1.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + "/" + booking1.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -207,7 +207,7 @@ BookingControllerTestSuiteE2ETest {
 
         bookingRepository.save(booking1);
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + booking1.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + "/" + booking1.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }
@@ -365,7 +365,7 @@ BookingControllerTestSuiteE2ETest {
         int bookingsNumberBefore = bookingRepository.findAllBookings(Pageable.unpaged()).size();
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + booking1Saved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + "/" + booking1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -383,7 +383,7 @@ BookingControllerTestSuiteE2ETest {
         Booking booking1Saved = bookingRepository.save(booking1);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + booking1Saved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + "/" + booking1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }

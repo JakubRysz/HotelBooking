@@ -45,9 +45,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RoomControllerE2ETest {
 
-    public static final String ROOMS_URL = "/v1/rooms/";
-    private static final String ROOMS_BOOKINGS_URL = ROOMS_URL + "bookings/";
-    private static final String ROOMS_BOOKINGS_WITHOUT_USERS_URL = ROOMS_BOOKINGS_URL + "withoutUsers/";
+    public static final String ROOMS_URL = "/v1/rooms";
+    private static final String ROOMS_BOOKINGS_URL = ROOMS_URL + "/bookings";
+    private static final String ROOMS_BOOKINGS_WITHOUT_USERS_URL = ROOMS_BOOKINGS_URL + "/withoutUsers";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
@@ -122,7 +122,7 @@ public class RoomControllerE2ETest {
         Room roomSaved = roomRepository.save(room1);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL + roomSaved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL + "/" + roomSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -140,7 +140,7 @@ public class RoomControllerE2ETest {
         Room roomSaved = roomRepository.save(room1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL + roomSaved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL + "/" + roomSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }
@@ -153,7 +153,7 @@ public class RoomControllerE2ETest {
         Room roomSaved = roomRepository.save(room1);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_WITHOUT_USERS_URL + roomSaved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_WITHOUT_USERS_URL + "/" + roomSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -331,7 +331,7 @@ public class RoomControllerE2ETest {
         int roomsNumberBefore = roomRepository.findAllRooms(Pageable.unpaged()).size();
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(ROOMS_URL + roomSaved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(ROOMS_URL + "/" + roomSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -349,7 +349,7 @@ public class RoomControllerE2ETest {
         Room roomSaved = roomRepository.save(room1);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(ROOMS_URL + roomSaved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(ROOMS_URL + "/" + roomSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }

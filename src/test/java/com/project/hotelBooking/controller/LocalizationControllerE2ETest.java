@@ -45,8 +45,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class LocalizationControllerE2ETest {
 
-    private static final String LOCALIZATIONS_URL = "/v1/localizations/";
-    private static final String LOCALIZATIONS_WITH_HOTELS_URL = "/v1/localizations/hotels/";
+    private static final String LOCALIZATIONS_URL = "/v1/localizations";
+    private static final String LOCALIZATIONS_WITH_HOTELS_URL = "/v1/localizations/hotels";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
@@ -113,7 +113,7 @@ class LocalizationControllerE2ETest {
         Hotel hotel1Saved = hotelRepository.save(getHotel1(localizationSaved.getId()));
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(LOCALIZATIONS_WITH_HOTELS_URL + localizationSaved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(LOCALIZATIONS_WITH_HOTELS_URL + "/" + localizationSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -232,7 +232,7 @@ class LocalizationControllerE2ETest {
         int localizationsNumberBefore = localizationRepository.findAllLocalizations(Pageable.unpaged()).size();
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + localizationSaved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + "/" + localizationSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -249,7 +249,7 @@ class LocalizationControllerE2ETest {
         Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + localizationSaved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + "/" + localizationSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }
