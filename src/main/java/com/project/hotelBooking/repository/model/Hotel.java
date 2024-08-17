@@ -1,9 +1,8 @@
 package com.project.hotelBooking.repository.model;
 
-
+import jakarta.persistence.*;
 import lombok.*;
 
-import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -17,7 +16,7 @@ public class Hotel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="ID")
-    Long id;
+     Long id;
     @Column(name="Name")
     String name;
     @Column(name="NUMBER_OF_STARS")

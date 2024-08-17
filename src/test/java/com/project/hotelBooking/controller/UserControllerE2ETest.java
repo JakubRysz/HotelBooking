@@ -43,8 +43,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserControllerE2ETest {
 
-    private static final String USERS_URL = "/v1/users/";
-    private static final String USERS_BOOKINGS_URL = USERS_URL + "bookings/";
+    private static final String USERS_URL = "/v1/users";
+    public static final String USERS_REGISTRATION = USERS_URL + "/registration";
+    private static final String USERS_BOOKINGS_URL = USERS_URL + "/bookings";
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final MockMvc mockMvc;
@@ -115,7 +116,7 @@ public class UserControllerE2ETest {
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(USERS_URL + "registration")
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(USERS_REGISTRATION)
                         .content(jsonContentNewUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -138,7 +139,7 @@ public class UserControllerE2ETest {
         User userSaved = userRepository.save(USER_1);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + userSaved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + "/" + userSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
@@ -156,7 +157,7 @@ public class UserControllerE2ETest {
         User userSaved = userRepository.save(USER_1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + userSaved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + "/" + userSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403))
                 .andReturn();
@@ -265,7 +266,7 @@ public class UserControllerE2ETest {
         User userSaved = userRepository.save(USER_1);
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + userSaved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + "/" + userSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -281,7 +282,7 @@ public class UserControllerE2ETest {
         //given
         userRepository.save(USER_1);
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + USER_1.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + "/" + USER_1.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403));
     }

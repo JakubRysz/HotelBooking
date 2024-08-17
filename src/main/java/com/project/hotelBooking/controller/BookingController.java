@@ -5,7 +5,6 @@ import com.project.hotelBooking.controller.mapper.BookingMapper;
 import com.project.hotelBooking.controller.model.BookingDto;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.*;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
 public class BookingController {
 
     private final BookingService bookingService;
