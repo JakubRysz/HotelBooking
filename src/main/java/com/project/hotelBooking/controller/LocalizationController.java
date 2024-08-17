@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
 public class LocalizationController {
 
     private final LocalizationService localizationService;
