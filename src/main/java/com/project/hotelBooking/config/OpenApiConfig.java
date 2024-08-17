@@ -1,17 +1,22 @@
 package com.project.hotelBooking.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springdoc.core.customizers.OpenApiCustomiser;
-import org.springframework.stereotype.Component;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-public class OpenApiConfig implements OpenApiCustomiser {
-    @Override
-    public void customise(OpenAPI openApi) {
-        var securitySchemeName = "bearerAuth";
-        openApi.getComponents().addSecuritySchemes(securitySchemeName, new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT"));
-        openApi.addSecurityItem(new SecurityRequirement().addList(securitySchemeName));
-    }
+@Configuration
+@OpenAPIDefinition(
+        info = @Info(title = "API Documentation", version = "1.0"),
+        security = @SecurityRequirement(name = "bearerAuth")
+)
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
+public class OpenApiConfig {
 }
