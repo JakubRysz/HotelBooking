@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,9 +61,9 @@ public class LoginController {
                 .sign(Algorithm.HMAC256(secret));
 
         return new Token(token, principal.getAuthorities().stream()
-                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .map(GrantedAuthority::getAuthority)
                // .filter(s -> UserRole.ROLE_ADMIN.name().equals(s))
-                .filter(s -> ROLE_ADMIN.equals(s))
+                .filter(ROLE_ADMIN::equals)
                 .map(s -> true)
                 .findFirst()
                 .orElse(false));
