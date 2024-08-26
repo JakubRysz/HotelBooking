@@ -2,14 +2,17 @@ package com.project.hotelBooking.config;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.project.hotelBooking.config.exceptions.InvalidLoginCredentialsException;
 import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,6 +31,8 @@ public class LoginController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private static final String INVALID_USERNAME_OR_PASSWORD_MESSAGE = "Invalid username or password";
+    private static final String AUTHENTICATION_FAILED_MESSAGE = "Authentication failed";
     private long expirationTime;
     private String secret;
 
@@ -49,11 +54,22 @@ public class LoginController {
     }
 
     private Token authenticate(String username, String password) {
-        User user = userRepository.findByUsername(username).orElseThrow();
-
-        Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), password)
+        User user = userRepository.findByUsername(username).orElseThrow(
+                ()-> new InvalidLoginCredentialsException(INVALID_USERNAME_OR_PASSWORD_MESSAGE)
         );
+
+        Authentication authenticate;
+        try {
+            authenticate = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), password)
+            );
+        } catch (BadCredentialsException e) {
+
+            throw new InvalidLoginCredentialsException(INVALID_USERNAME_OR_PASSWORD_MESSAGE);
+        } catch (AuthenticationException ex) {
+            throw new InvalidLoginCredentialsException(AUTHENTICATION_FAILED_MESSAGE);
+    }
+
         User principal = (User) authenticate.getPrincipal();
         String token = JWT.create()
                 .withSubject(String.valueOf(principal.getUsername()))
