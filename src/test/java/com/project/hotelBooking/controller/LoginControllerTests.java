@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class LoginControllerTests {
 
     public static final String LOGIN_URL = "/login";
+    public static final String AUTHENTICATION_ERROR_INVALID_USERNAME_OR_PASSWORD = "Authentication error: Invalid username or password";
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final MockMvc mockMvc;
@@ -96,14 +97,16 @@ public class LoginControllerTests {
         LoginCredentials loginCredentials = new LoginCredentials(username1, "bad_password");
         String jsonLoginCredentials = objectMapper.writeValueAsString(loginCredentials);
 
-        // when & then
-        // TODO: add response message validation after configure error handler
+        // when
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .content(jsonLoginCredentials)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(401))
                 .andReturn();
+        // then
+        String response = result.getResponse().getContentAsString();
+        assertEquals(AUTHENTICATION_ERROR_INVALID_USERNAME_OR_PASSWORD, response);
     }
 
     @Test
@@ -112,14 +115,17 @@ public class LoginControllerTests {
         LoginCredentials loginCredentials = new LoginCredentials("not_existing_user", "bad_password");
         String jsonLoginCredentials = objectMapper.writeValueAsString(loginCredentials);
 
-        // when & then
-        // TODO: add response message validation after configure error handler
+        // when
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .content(jsonLoginCredentials)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(401))
                 .andReturn();
+
+        // then
+        String response = result.getResponse().getContentAsString();
+        assertEquals(AUTHENTICATION_ERROR_INVALID_USERNAME_OR_PASSWORD, response);
     }
 
     @AllArgsConstructor
