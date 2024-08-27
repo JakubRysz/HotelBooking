@@ -35,7 +35,7 @@ public class CommonDatabaseProvider {
     }
 
     public static final User USER_1 = User.builder()
-            .firstName("Poul")
+            .firstName("Paul")
             .lastName("Smith")
             .dateOfBirth(LocalDate.of(1991, 2, 16))
             .username("paulsmith")
