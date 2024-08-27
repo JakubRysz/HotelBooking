@@ -88,7 +88,7 @@ public class LoginControllerTests {
     }
 
     @Test
-    public void shouldNotLogUser_whenUserExists_butInvalidPasswordProvided() throws Exception {
+    public void shouldReturn401HttpStatus_whenUserExists_butInvalidPasswordProvided() throws Exception {
         // given
         user1.setPassword(passwordEncoder.encode(password1));
         user1.setRole(ROLE_USER);
@@ -96,25 +96,24 @@ public class LoginControllerTests {
         LoginCredentials loginCredentials = new LoginCredentials(username1, "bad_password");
         String jsonLoginCredentials = objectMapper.writeValueAsString(loginCredentials);
 
-        // when
+        // when & then
+        // TODO: add response message validation after configure error handler
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .content(jsonLoginCredentials)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(401))
                 .andReturn();
-
-        // then
-
     }
 
     @Test
-    public void shouldNotLogUser_whenUserNotExists() throws Exception {
+    public void shouldReturn401HttpStatus_whenUserNotExists() throws Exception {
         // given
-        LoginCredentials loginCredentials = new LoginCredentials("not existing user", "bad_password");
+        LoginCredentials loginCredentials = new LoginCredentials("not_existing_user", "bad_password");
         String jsonLoginCredentials = objectMapper.writeValueAsString(loginCredentials);
 
         // when & then
+        // TODO: add response message validation after configure error handler
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(LOGIN_URL)
                         .content(jsonLoginCredentials)
                         .contentType(MediaType.APPLICATION_JSON)
