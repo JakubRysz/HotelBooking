@@ -64,7 +64,6 @@ public class LoginController {
                     new UsernamePasswordAuthenticationToken(user.getUsername(), password)
             );
         } catch (BadCredentialsException e) {
-
             throw new InvalidLoginCredentialsException(INVALID_USERNAME_OR_PASSWORD_MESSAGE);
         } catch (AuthenticationException ex) {
             throw new InvalidLoginCredentialsException(AUTHENTICATION_FAILED_MESSAGE);

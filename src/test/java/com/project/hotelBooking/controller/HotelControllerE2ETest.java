@@ -4,16 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.HotelMapper;
-import com.project.hotelBooking.controller.mapper.RoomMapper;
 import com.project.hotelBooking.controller.model.HotelDto;
-import com.project.hotelBooking.controller.model.RoomDto;
 import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.LocalizationRepository;
 import com.project.hotelBooking.repository.model.Hotel;
 import com.project.hotelBooking.repository.model.Localization;
-import com.project.hotelBooking.repository.model.Room;
 import com.project.hotelBooking.service.mapper.HotelMapperServ;
-import com.project.hotelBooking.service.mapper.RoomMapperServ;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +32,7 @@ import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.LOCALIZATION_1;
 import static com.project.hotelBooking.common.CommonDatabaseProvider.getHotel1;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -102,12 +99,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         final String jsonContentNewHotel = objectMapper.writeValueAsString(hotel1Dto);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.post(HOTELS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(HOTELS_URL)
                         .content(jsonContentNewHotel)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
+
     }
 
     @Test
@@ -216,12 +219,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         final String jsonContentHotelEdited = objectMapper.writeValueAsString(hotelEdited);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.put(HOTELS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(HOTELS_URL)
                         .content(jsonContentHotelEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -251,9 +259,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         Hotel hotel1Saved = hotelRepository.save(hotel1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + "/" + hotel1Saved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + "/" + hotel1Saved.getId()))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     private HotelDto getHotelFromResponse(MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {

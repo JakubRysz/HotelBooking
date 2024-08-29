@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -45,6 +46,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class
 BookingControllerTestSuiteE2ETest {
+
+    private final String ROOM_OCCUPIED_MESSAGE = "Conflict: Room occupied at this time";
+    private final String BAD_BOOKING_DATE_MESSAGE = "Bad request: Bad booking date";
+
 
     public static final String BOOKINGS_URL = "/v1/bookings";
     private final ObjectMapper objectMapper;
@@ -125,13 +130,18 @@ BookingControllerTestSuiteE2ETest {
 
         final String jsonContentNewBooking = objectMapper.writeValueAsString(mapBookingToBookingDto(booking2));
 
-        //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post(BOOKINGS_URL)
+        //when
+        MvcResult mvcResult =  mockMvc.perform(MockMvcRequestBuilders.post(BOOKINGS_URL)
                         .content(jsonContentNewBooking)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(409));
+                .andExpect(MockMvcResultMatchers.status().is(409))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ROOM_OCCUPIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -152,12 +162,17 @@ BookingControllerTestSuiteE2ETest {
         final String jsonContentNewBooking = objectMapper.writeValueAsString(mapBookingToBookingDto(booking2));
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post(BOOKINGS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(BOOKINGS_URL)
                         .content(jsonContentNewBooking)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(400));
+                .andExpect(MockMvcResultMatchers.status().is(400))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(BAD_BOOKING_DATE_MESSAGE, responseMessage);
     }
 
     @Test
@@ -170,16 +185,20 @@ BookingControllerTestSuiteE2ETest {
         final String jsonContentNewBooking = objectMapper.writeValueAsString(booking1Dto);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post(BOOKINGS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(BOOKINGS_URL)
                         .content(jsonContentNewBooking)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
-    // create own booking user
-
+    //TODO - add test: create own booking user
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
@@ -207,9 +226,14 @@ BookingControllerTestSuiteE2ETest {
 
         bookingRepository.save(booking1);
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + "/" + booking1.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL + "/" + booking1.getId()))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -255,9 +279,14 @@ BookingControllerTestSuiteE2ETest {
     public void shouldReturnStatus403_getMultipleBookingsUser() throws Exception {
         //given
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BOOKINGS_URL))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -321,12 +350,17 @@ BookingControllerTestSuiteE2ETest {
         final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.put(BOOKINGS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(BOOKINGS_URL)
                         .content(jsonContentBookingEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(409));
+                .andExpect(MockMvcResultMatchers.status().is(409))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ROOM_OCCUPIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -347,12 +381,17 @@ BookingControllerTestSuiteE2ETest {
         final String jsonContentBookingEdited = objectMapper.writeValueAsString(bookingEdited);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.put(BOOKINGS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(BOOKINGS_URL)
                         .content(jsonContentBookingEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
 
     }
 
@@ -383,9 +422,14 @@ BookingControllerTestSuiteE2ETest {
         Booking booking1Saved = bookingRepository.save(booking1);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + "/" + booking1Saved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(BOOKINGS_URL + "/" + booking1Saved.getId()))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     private Booking getBooking1() {
