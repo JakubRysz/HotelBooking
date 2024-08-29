@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -99,12 +100,17 @@ public class UserControllerE2ETest {
         final String jsonContentNewUser = objectMapper.writeValueAsString(user1Dto);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post(USERS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(USERS_URL)
                         .content(jsonContentNewUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -157,10 +163,14 @@ public class UserControllerE2ETest {
         User userSaved = userRepository.save(USER_1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + "/" + userSaved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL + "/" + userSaved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403))
                 .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -196,10 +206,14 @@ public class UserControllerE2ETest {
         userRepository.save(USER_3);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(USERS_BOOKINGS_URL))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403))
                 .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -251,12 +265,16 @@ public class UserControllerE2ETest {
                 .build();
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
         //when
-        mockMvc.perform(MockMvcRequestBuilders.put(USERS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(USERS_URL)
                         .content(jsonContentUserEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -282,9 +300,14 @@ public class UserControllerE2ETest {
         //given
         userRepository.save(USER_1);
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + "/" + USER_1.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(USERS_URL + "/" + USER_1.getId()))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
 

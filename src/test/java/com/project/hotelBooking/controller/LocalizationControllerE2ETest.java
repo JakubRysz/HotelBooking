@@ -29,14 +29,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static com.project.hotelBooking.common.CommonTestConstants.*;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
+import static com.project.hotelBooking.common.CommonDatabaseProvider.LOCALIZATION_1;
+import static com.project.hotelBooking.common.CommonDatabaseProvider.getHotel1;
+import static com.project.hotelBooking.common.CommonTestConstants.*;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -97,12 +98,17 @@ class LocalizationControllerE2ETest {
         final String jsonContentNewLocalization = objectMapper.writeValueAsString(localization1Dto);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post(LOCALIZATIONS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(LOCALIZATIONS_URL)
                         .content(jsonContentNewLocalization)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -216,12 +222,17 @@ class LocalizationControllerE2ETest {
         final String jsonContentLocalizationEdited = objectMapper.writeValueAsString(localizationEdited);
 
         //when & them
-        mockMvc.perform(MockMvcRequestBuilders.put(LOCALIZATIONS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(LOCALIZATIONS_URL)
                         .content(jsonContentLocalizationEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -249,9 +260,14 @@ class LocalizationControllerE2ETest {
         Localization localizationSaved = localizationRepository.save(LOCALIZATION_1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + "/" + localizationSaved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(LOCALIZATIONS_URL + "/" + localizationSaved.getId()))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     private LocalizationDto getLocalizationFromResponse(MockHttpServletResponse response) throws UnsupportedEncodingException, JsonProcessingException {

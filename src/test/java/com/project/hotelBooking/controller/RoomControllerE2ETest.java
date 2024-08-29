@@ -4,18 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.RoomMapper;
-import com.project.hotelBooking.controller.mapper.UserMapper;
 import com.project.hotelBooking.controller.model.RoomDto;
-import com.project.hotelBooking.controller.model.UserDto;
 import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.LocalizationRepository;
 import com.project.hotelBooking.repository.RoomRepository;
 import com.project.hotelBooking.repository.model.Hotel;
 import com.project.hotelBooking.repository.model.Localization;
 import com.project.hotelBooking.repository.model.Room;
-import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.service.mapper.RoomMapperServ;
-import com.project.hotelBooking.service.mapper.UserMapperServ;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -106,12 +103,17 @@ public class RoomControllerE2ETest {
         final String jsonContentNewRoom = objectMapper.writeValueAsString(room1Dto);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.post(ROOMS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(ROOMS_URL)
                         .content(jsonContentNewRoom)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -140,9 +142,14 @@ public class RoomControllerE2ETest {
         Room roomSaved = roomRepository.save(room1);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL + "/" + roomSaved.getId()))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL + "/" + roomSaved.getId()))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -224,9 +231,14 @@ public class RoomControllerE2ETest {
         roomRepository.save(room3);
 
         //when & then
-        mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ROOMS_BOOKINGS_URL))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
@@ -314,12 +326,17 @@ public class RoomControllerE2ETest {
         final String jsonContentRoomEdited = objectMapper.writeValueAsString(roomEdited);
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.put(ROOMS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(ROOMS_URL)
                         .content(jsonContentRoomEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(403));
+                .andExpect(MockMvcResultMatchers.status().is(403))
+                .andReturn();
+
+        // then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(ACCESS_DENIED_MESSAGE, responseMessage);
     }
 
     @Test
