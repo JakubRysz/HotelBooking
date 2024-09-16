@@ -29,7 +29,7 @@ jobs:
         run: mvn dependency:tree -DoutputType=dot -DoutputFile=target/dependency-submission.json
 
       - name: Submit dependencies to GitHub
-        uses: github/dependency-submission-toolkit@v1
+        uses: github/dependency-submission-toolkit@v2.0.4
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
