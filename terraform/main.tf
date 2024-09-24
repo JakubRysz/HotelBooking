@@ -2,7 +2,7 @@ terraform {
   #  backend "s3" {
   #    bucket         = "tf-state-bucket-hotel-booking"
   #    key            = "terraform/terraform.tfstate"
-  #    region         = "eu-central-1"
+  #    region         = var.region
   #    dynamodb_table = "terraform-state-locking"
   #    encrypt        = true
   #  }
@@ -15,7 +15,11 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-central-1"
+  region = var.region
+}
+
+data "aws_availability_zones" "available_zones" {
+  state = "available"
 }
 
 resource "aws_s3_bucket" "terraform_state" {
@@ -51,49 +55,75 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
 resource "aws_vpc" "vpc_1" {
   cidr_block = "10.0.0.0/16"
-  tags       = {
-    Name = "test_vpc"
+  tags = {
+    Name = "vpc_1"
   }
 }
 
-resource "aws_internet_gateway" "gw" {
+resource "aws_internet_gateway" "internet_gw" {
   vpc_id = aws_vpc.vpc_1.id
+  tags   = {
+    Name = "internet_gateway_1"
+  }
 }
 
-resource "aws_route_table" "route_table_1" {
+resource "aws_subnet" "subnet_public" {
+  vpc_id     = aws_vpc.vpc_1.id
+  cidr_block = var.public_subnet_cidr
+
+  tags = {
+    Name = "subnet_public"
+  }
+}
+
+resource "aws_subnet" "subnet_private" {
+  // RDS requires 2 subnets for a database
+  count             = var.private_subnets_count
+  vpc_id            = aws_vpc.vpc_1.id
+  cidr_block        = var.private_subnet_cidr_blocks[count.index]
+  availability_zone = data.aws_availability_zones.available_zones.names[count.index]
+
+  tags = {
+    Name = "subnet_private_${count.index}"
+  }
+}
+
+resource "aws_route_table" "route_table_public" {
   vpc_id = aws_vpc.vpc_1.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
-  }
-
-  route {
-    ipv6_cidr_block = "::/0"
-    gateway_id      = aws_internet_gateway.gw.id
+    gateway_id = aws_internet_gateway.internet_gw.id
   }
 
   tags = {
-    Name = "test_route_table"
+    Name = "route_table_public"
   }
 }
 
-resource "aws_subnet" "subnet_1" {
-  vpc_id     = aws_vpc.vpc_1.id
-  cidr_block = "10.0.1.0/24"
+resource "aws_route_table_association" "route_table_association_public" {
+  subnet_id      = aws_subnet.subnet_public.id
+  route_table_id = aws_route_table.route_table_public.id
+}
+
+resource "aws_route_table" "route_table_private" {
+  vpc_id = aws_vpc.vpc_1.id
+
+  //no route as this is private rout table
 
   tags = {
-    Name = "test-subnet"
+    Name = "route_table_private"
   }
 }
 
-resource "aws_route_table_association" "a" {
-  subnet_id      = aws_subnet.subnet_1.id
-  route_table_id = aws_route_table.route_table_1.id
+resource "aws_route_table_association" "route_table_association_private" {
+  count          = var.private_subnets_count
+  subnet_id      = aws_subnet.subnet_private[count.index].id
+  route_table_id = aws_route_table.route_table_private.id
 }
 
-resource "aws_security_group" "allow_web" {
-  name        = "allow_web_traffic"
+resource "aws_security_group" "security_group_web" {
+  name = "security_group_web"
   description = "Allow Web inbound traffic"
   vpc_id      = aws_vpc.vpc_1.id
 
@@ -102,31 +132,25 @@ resource "aws_security_group" "allow_web" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["193.192.177.152/32"]
+    cidr_blocks = ["${var.my_public_ip_address}/32"]
   }
   ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["193.192.177.152/32"]
-  }
-  ingress {
-    description = "HTTP"
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["193.192.177.152/32"]
+    cidr_blocks = ["${var.my_public_ip_address}/32"]
   }
   ingress {
     description = "SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${var.my_public_ip_address}/32"]
   }
 
   egress {
+    description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -134,23 +158,40 @@ resource "aws_security_group" "allow_web" {
   }
 
   tags = {
-    Name = "allow_web"
+    Name = "security_group_web"
   }
 }
 
+resource "aws_security_group" "security_group_rds" {
+  name        = "security_group_rds"
+  description = "No inbound or outbound traffic for outside traffic, as only EC2 instance should be able to connect to db"
+  vpc_id      = aws_vpc.vpc_1.id
 
-resource "aws_network_interface" "web-server" {
-  subnet_id       = aws_subnet.subnet_1.id
-  private_ips     = ["10.0.1.50"]
-  security_groups = [aws_security_group.allow_web.id]
+  ingress {
+    description     = "Allow PostgreSQL traffic only for security_group_web "
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.security_group_web.id]
+  }
+
+  tags = {
+    Name = "security_group_rds"
+  }
 }
 
-resource "aws_eip" "one" {
-  domain                    = "vpc"
-  network_interface         = aws_network_interface.web-server.id
-  associate_with_private_ip = "10.0.1.50"
-  depends_on                = [aws_internet_gateway.gw]
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name        = "db_subnet_group"
+  description = "subnet group for RDS database"
+  // RDS requires two or more subnets
+  subnet_ids  = [for subnet in aws_subnet.subnet_private : subnet.id]
 }
+
+#resource "aws_network_interface" "web-server" {
+#  subnet_id       = aws_subnet.subnet_public.id
+#  private_ips     = ["10.0.1.50"]
+#  security_groups = [aws_security_group.security_group_web.id]
+#}
 
 resource "aws_ecr_repository" "ecr_1" {
   name = "ecr_repository_1"
@@ -163,7 +204,7 @@ resource "aws_iam_role" "ec2_role" {
     Version   = "2012-10-17"
     Statement = [
       {
-        Effect    = "Allow"
+        Effect = "Allow"
         Principal = {
           Service = "ec2.amazonaws.com"
         }
@@ -178,7 +219,7 @@ resource "aws_iam_role_policy" "ec2_policy" {
   role = aws_iam_role.ec2_role.id
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow",
@@ -202,17 +243,33 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
+resource "aws_db_instance" "postgres-db-instance" {
+  allocated_storage      = var.settings.database.allocated_storage
+  engine                 = var.settings.database.engine
+  engine_version         = var.settings.database.engine_version
+  identifier             = var.settings.database.identifier
+  db_name                = var.settings.database.db_name
+  instance_class         = var.settings.database.instance_class
+  username               = var.db_user
+  password               = var.db_password
+  skip_final_snapshot    = var.settings.database.skip_final_snapshot
+  db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.id
+  vpc_security_group_ids = [aws_security_group.security_group_rds.id]
+}
+
+resource "aws_key_pair" "key_pair_ec2" {
+  key_name   = "key_pair_ec2"
+  public_key = file("key_pair_ec2.pub")
+}
+
 resource "aws_instance" "web-server-instance" {
-  ami           = "ami-0e04bcbe83a83792e" # Replace with your desired AMI
-  instance_type = "t2.micro"
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.id
-
-  network_interface {
-    device_index         = 0
-    network_interface_id = aws_network_interface.web-server.id
-  }
-
-  user_data = <<-EOF
+  ami                    = var.ec2_ami # Replace with your desired AMI
+  instance_type          = var.ec2_instance_type
+  subnet_id              = aws_subnet.subnet_public.id
+  vpc_security_group_ids = [aws_security_group.security_group_web.id]
+  key_name               = aws_key_pair.key_pair_ec2.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.id
+  user_data              = <<-EOF
               #!/bin/bash
               sudo apt update
               sudo apt install -y docker.io
@@ -232,6 +289,11 @@ resource "aws_instance" "web-server-instance" {
               EOF
 
   tags = {
-    Name = "my-instance"
+    Name = "my_instance_1"
   }
+}
+
+resource "aws_eip" "one" {
+  domain   = "vpc"
+  instance = aws_instance.web-server-instance.id
 }
