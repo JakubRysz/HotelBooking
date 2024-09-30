@@ -146,7 +146,7 @@ resource "aws_security_group" "security_group_web" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.my_public_ip_address}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -169,8 +169,8 @@ resource "aws_security_group" "security_group_rds" {
 
   ingress {
     description     = "Allow PostgreSQL traffic only for security_group_web "
-    from_port       = 443
-    to_port         = 443
+    from_port       = 5432
+    to_port         = 5432
     protocol        = "tcp"
     security_groups = [aws_security_group.security_group_web.id]
   }
