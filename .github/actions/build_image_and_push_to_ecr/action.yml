@@ -12,9 +12,11 @@ inputs:
   image_tag:
     description: 'Docker Image Tag'
     default: 'latest'
-  AWS_ACCESS_KEY_ID:
+  aws_account_id:
     required: true
-  AWS_SECRET_ACCESS_KEY:
+  aws_access_key_id:
+    required: true
+  aws_secret_access_key:
     required: true
 
 runs:
@@ -29,13 +31,13 @@ runs:
     - name: Set up AWS CLI
       uses: aws-actions/configure-aws-credentials@v1
       with:
-          aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ AWS_REGION }}
+          aws-access-key-id: ${{ inputs.aws_access_key_id }}
+          aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+          aws-region: ${{ inputs.aws_region }}
 
     - name: Log in to Amazon ECR
       run: |
-        aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+        aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
       shell: bash
       env:
         AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
@@ -43,11 +45,11 @@ runs:
 
     - name: Build Docker image
       run: |
-        docker build -t ${{ inputs.ecr _repository_name }}:${{ inputs.image_tag }} .
-        docker tag ${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }} ${{ AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+        docker build -t ${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }} .
+        docker tag ${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }} ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
       shell: bash
 
     - name: Push Docker image to ECR
       run: |
-        docker push ${{ AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+        docker push ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
       shell: bash
