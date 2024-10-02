@@ -20,7 +20,7 @@ inputs:
     required: true
 
 runs:
-  using: "docker"
+  using: "composite"
   steps:
     - name: Checkout code
       uses: actions/checkout@v3
