@@ -10,9 +10,6 @@ jobs:
   build-maven:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Build project with Maven and run tests
         uses: ./.github/actions/build_maven
 
@@ -20,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref_name == 'main'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Build and Push Docker Image to ECR
         uses: ./.github/actions/build_image_and_push_to_ecr
         with:
@@ -35,9 +29,6 @@ jobs:
     needs: build-and-push-to-ecr
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Deploy Docker Image to EC2
         uses: ./.github/actions/deploy_docker_image_to_EC2
         with:

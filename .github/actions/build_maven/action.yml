@@ -16,7 +16,7 @@ runs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up JDK 17
+    - name: Set up JDK ${{ inputs.java-version }}
       uses: actions/setup-java@v3
       with:
         java-version: ${{ inputs.java-version }}
@@ -25,3 +25,4 @@ runs:
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+      shell: bash
