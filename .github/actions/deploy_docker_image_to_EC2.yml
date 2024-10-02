@@ -1,0 +1,40 @@
+name: Deploy Docker Image to EC2
+
+description: SSH into EC2 and update the Docker container with the latest image from ECR
+
+inputs:
+  aws_region:
+    description: 'AWS Region'
+    required: true
+  ecr_repository_name:
+    description: 'ECR Repository Name'
+    required: true
+  image_tag:
+    description: 'Docker Image Tag'
+    default: 'latest'
+  ec2_user:
+    description: 'EC2 SSH User'
+    required: true
+  ec2_host:
+    description: 'EC2 Host (Public IP or DNS)'
+    required: true
+  container_name:
+    description: 'Docker container name on EC2'
+    required: true
+
+runs:
+  using: "docker"
+  steps:
+    - name: SSH into EC2 and update Docker container
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ inputs.ec2_host }}
+        username: ${{ inputs.ec2_user }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+          docker stop ${{ inputs.container_name }} || true # there will be no error if container do not exists because of  || true  
+          docker rm ${{ inputs.container_name }} || true
+          docker run -d --name ${{ inputs.container_name }} -p 80:80 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}

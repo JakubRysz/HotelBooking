@@ -1,0 +1,46 @@
+name: Build and Push Docker Image to ECR
+
+description: Build a Docker image and push it to AWS ECR
+
+inputs:
+  aws_region:
+    description: 'AWS Region'
+    required: true
+  ecr_repository_name:
+    description: 'ECR Repository Name'
+    required: true
+  image_tag:
+    description: 'Docker Image Tag'
+    default: 'latest'
+
+runs:
+  using: "docker"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      run: |
+        aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ inputs.ecr _repository_name }}:${{ inputs.image_tag }} .
+        docker tag ${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }} <aws_account_id>.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+
+    - name: Push Docker image to ECR
+      run: |
+        docker push <aws_account_id>.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
