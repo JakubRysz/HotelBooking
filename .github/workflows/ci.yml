@@ -36,7 +36,8 @@ jobs:
           aws_region: $AWS_REGION
           ecr_repository_name: $ECR_REPOSITORY_NAME
           image_tag: 'latest'
-        secrets: inherit
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,4 +56,3 @@ jobs:
           ec2_user: 'ec2-user'
           ec2_host: '12.34.56.78'
           container_name: 'docker_container'
-        secrets: inherit
