@@ -32,6 +32,7 @@ runs:
     - name: Log in to Amazon ECR
       run: |
         aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+      shell: bash
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -40,7 +41,9 @@ runs:
       run: |
         docker build -t ${{ inputs.ecr _repository_name }}:${{ inputs.image_tag }} .
         docker tag ${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }} ${{ AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+      shell: bash
 
     - name: Push Docker image to ECR
       run: |
         docker push ${{ AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+      shell: bash
