@@ -33,10 +33,10 @@ jobs:
       - name: Build and Push Docker Image to ECR
         uses: ./.github/actions/build_image_and_push_to_ecr
         with:
-          aws_region: $AWS_REGION
-          ecr_repository_name: $ECR_REPOSITORY_NAME
+          aws_region: ${{ env.AWS_REGION }}
+          ecr_repository_name: ${{ env.ECR_REPOSITORY_NAME }}
           image_tag: 'latest'
-          aws_account_id: $AWS_ACCOUNT_ID
+          aws_account_id: ${{ env.AWS_ACCOUNT_ID }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
