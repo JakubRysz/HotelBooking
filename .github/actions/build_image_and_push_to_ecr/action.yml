@@ -38,6 +38,7 @@ runs:
         latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` || echo "v0.0.0")
         new_tag=$(echo $latest_tag | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
         echo "new_tag=$new_tag" >> $GITHUB_ENV
+      shell: bash
 
     - name: Create and push new Git tag
       run: |
@@ -45,6 +46,7 @@ runs:
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{ env.new_tag }}
         git push origin ${{ env.new_tag }}
+      shell: bash
 
     - name: Build Docker image
       run: |
