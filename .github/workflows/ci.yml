@@ -1,0 +1,59 @@
+name: Main Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'is testing mode enabled'
+        default: 'true'
+
+jobs:
+  build-maven:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build project with Maven and run tests
+        uses: ./.github/actions/build_maven
+
+  build-and-push-to-ecr:
+    runs-on: ubuntu-latest
+    needs: build-maven
+    if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and Push Docker Image to ECR
+        uses: ./.github/actions/build_image_and_push_to_ecr
+        with:
+          aws_region: ${{ vars.AWS_REGION }}
+          ecr_repository_name: ${{ vars.ECR_REPOSITORY_NAME }}
+          image_tag: 'latest'
+          aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push-to-ecr
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy Docker Image to EC2
+        uses: ./.github/actions/deploy_docker_image_to_EC2
+        with:
+          aws_region: $AWS_REGION
+          ecr_repository_name: $ECR_REPOSITORY_NAME
+          image_tag: 'latest'
+          ec2_user: 'ec2-user'
+          ec2_host: '12.34.56.78'
+          container_name: 'docker_container'
