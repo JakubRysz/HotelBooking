@@ -1,0 +1,68 @@
+name: Build and Push Docker Image to ECR
+
+description: Build a Docker image and push it to AWS ECR
+
+inputs:
+  aws_region:
+    description: 'AWS Region'
+    required: true
+  ecr_repository_name:
+    description: 'ECR Repository Name'
+    required: true
+  aws_account_id:
+    required: true
+  aws_access_key_id:
+    required: true
+  aws_secret_access_key:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+          aws-access-key-id: ${{ inputs.aws_access_key_id }}
+          aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+          aws-region: ${{ inputs.aws_region }}
+
+    - name: Get the latest Git tag
+      id: get_tag
+      run: |
+        latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` || echo "v0.0.0")
+        new_tag=$(echo $latest_tag | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+        echo "new_tag=$new_tag" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Create and push new Git tag
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@users.noreply.github.com"
+        git tag ${{ env.new_tag }}
+        git push origin ${{ env.new_tag }}
+      shell: bash
+
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ inputs.ecr_repository_name }}:${{ env.new_tag }} .
+        docker tag ${{ inputs.ecr_repository_name }}:${{ env.new_tag }} ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ env.new_tag }}
+      shell: bash
+
+    - name: Log in to Amazon ECR
+      run: |
+        aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Push Docker image to ECR
+      run: |
+        docker push ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ env.new_tag }}
+      shell: bash
