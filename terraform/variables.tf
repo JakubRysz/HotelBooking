@@ -18,13 +18,7 @@ variable "ec2_instance_type" {
   default     = "t2.micro"
 }
 
-# S3 Variables
-
-#variable "bucket_prefix" {
-#  description = "prefix of s3 bucket for app data"
-#  type        = string
-#}
-
+# db Variables
 
 variable "db_user" {
   description = "Username for DB"

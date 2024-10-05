@@ -67,3 +67,4 @@ runs:
       run: |
         docker push ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ env.new_image_tag }}
       shell: bash
+
