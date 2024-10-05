@@ -29,21 +29,37 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Build and Push Docker Image to ECR
         uses: ./.github/actions/build_image_and_push_to_ecr
         with:
           aws_region: ${{ vars.AWS_REGION }}
           ecr_repository_name: ${{ vars.ECR_REPOSITORY_NAME }}
-          image_tag: 'latest'
           aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-  deploy:
+  terraform-init-plan-apply:
     runs-on: ubuntu-latest
     needs: build-and-push-to-ecr
-    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy Docker Image to EC2
+        uses: ./.github/actions/terraform_init_plan_apply
+        with:
+          aws_region: $AWS_REGION
+          ecr_repository_name: $ECR_REPOSITORY_NAME
+          aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  deploy-to-EC2:
+    runs-on: ubuntu-latest
+    needs: terraform-init-plan-apply
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,7 +69,9 @@ jobs:
         with:
           aws_region: $AWS_REGION
           ecr_repository_name: $ECR_REPOSITORY_NAME
-          image_tag: 'latest'
-          ec2_user: 'ec2-user'
-          ec2_host: '12.34.56.78'
-          container_name: 'docker_container'
+          aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ec2_ssh_key: ${{ secrets.EC2_SSH_KEY }}
+          image_tag: ${{ env.new_image_tag }}
+          container_name: "hotel_booking_container"
