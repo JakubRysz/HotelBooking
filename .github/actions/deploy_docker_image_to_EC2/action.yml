@@ -1,0 +1,57 @@
+name: Deploy Docker Image to EC2
+
+description: SSH into EC2 and update the Docker container with the latest image from ECR
+
+inputs:
+  aws_region:
+    description: 'AWS Region'
+    required: true
+  ecr_repository_name:
+    description: 'ECR Repository Name'
+    required: true
+  aws_account_id:
+    description: 'AWS account id'
+    required: true
+  aws_access_key_id:
+    description: 'AWS access key id'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS secret access key id'
+    required: true
+  ec2_ssh_key:
+    description: 'EC2 ssh key id'
+    required: true
+  image_tag:
+    description: 'Docker Image Tag'
+    default: 'latest'
+  ec2_user:
+    description: 'EC2 SSH User'
+    default: : 'ubuntu'
+  container_name:
+    description: 'Docker container name on EC2'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: SSH into EC2 and update Docker container
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ env.instance_1_ip_addr }}
+        username: ${{ inputs.ec2_user }}
+        key: ${{ inputs.ec2_ssh_key }}
+        script: |
+          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+          docker stop ${{ inputs.container_name }} || true # there will be no error if container do not exists because of  || true  
+          docker rm ${{ inputs.container_name }} || true
+          docker run -d --name ${{ inputs.container_name }} -p 80:80 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+        shell: bash
