@@ -23,7 +23,7 @@ inputs:
     default: '1.9.7'
   tf_directory:
     description: 'Directory containing the Terraform configuration'
-    default: './terrafrom'
+    default: './terraform'
   test_mode:
     description: 'Is test mode active'
     default: 'false'
