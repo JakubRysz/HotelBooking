@@ -1,11 +1,11 @@
 terraform {
-  #  backend "s3" {
-  #    bucket         = "tf-state-bucket-hotel-booking"
-  #    key            = "terraform/terraform.tfstate"
-  #    region         = var.region
-  #    dynamodb_table = "terraform-state-locking"
-  #    encrypt        = true
-  #  }
+    backend "s3" {
+      bucket         = "tf-state-bucket-hotel-booking"
+      key            = "terraform/terraform.tfstate"
+      region         = "eu-central-1"
+      dynamodb_table = "terraform-state-locking"
+      encrypt        = true
+    }
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -62,7 +62,7 @@ resource "aws_vpc" "vpc_1" {
 
 resource "aws_internet_gateway" "internet_gw" {
   vpc_id = aws_vpc.vpc_1.id
-  tags   = {
+  tags = {
     Name = "internet_gateway_1"
   }
 }
@@ -123,7 +123,7 @@ resource "aws_route_table_association" "route_table_association_private" {
 }
 
 resource "aws_security_group" "security_group_web" {
-  name = "security_group_web"
+  name        = "security_group_web"
   description = "Allow Web inbound traffic"
   vpc_id      = aws_vpc.vpc_1.id
 
@@ -184,24 +184,18 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   name        = "db_subnet_group"
   description = "subnet group for RDS database"
   // RDS requires two or more subnets
-  subnet_ids  = [for subnet in aws_subnet.subnet_private : subnet.id]
+  subnet_ids = [for subnet in aws_subnet.subnet_private : subnet.id]
 }
 
-#resource "aws_network_interface" "web-server" {
-#  subnet_id       = aws_subnet.subnet_public.id
-#  private_ips     = ["10.0.1.50"]
-#  security_groups = [aws_security_group.security_group_web.id]
-#}
-
 resource "aws_ecr_repository" "ecr_1" {
-  name = "ecr_repository_1"
+  name = var.ecr_repository_name
 }
 
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_role"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
