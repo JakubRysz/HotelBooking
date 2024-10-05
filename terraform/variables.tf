@@ -64,6 +64,18 @@ variable "private_subnets_count" {
   default     = 2
 }
 
+variable "aws_account_id" {
+  description = "AWS account id"
+  type        = string
+  default     = "586794440391"
+}
+
+variable "ecr_repository_name" {
+  description = "AWS ecr repository name"
+  type        = string
+  default     = "ecr_repository_1"
+}
+
 variable "settings" {
   description = "Config settings"
   type        = map(any)
