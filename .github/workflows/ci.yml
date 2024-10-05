@@ -51,8 +51,8 @@ jobs:
       - name: Deploy Docker Image to EC2
         uses: ./.github/actions/terraform_init_plan_apply
         with:
-          aws_region: $AWS_REGION
-          ecr_repository_name: $ECR_REPOSITORY_NAME
+          aws_region: ${{ vars.AWS_REGION }}
+          ecr_repository_name: ${{ vars.ECR_REPOSITORY_NAME }}
           aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -67,8 +67,8 @@ jobs:
       - name: Deploy Docker Image to EC2
         uses: ./.github/actions/deploy_docker_image_to_EC2
         with:
-          aws_region: $AWS_REGION
-          ecr_repository_name: $ECR_REPOSITORY_NAME
+          aws_region: ${{ vars.AWS_REGION }}
+          ecr_repository_name: ${{ vars.ECR_REPOSITORY_NAME }}
           aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
