@@ -26,7 +26,7 @@ inputs:
     default: 'latest'
   ec2_user:
     description: 'EC2 SSH User'
-    default: : 'ubuntu'
+    default: 'ubuntu'
   container_name:
     description: 'Docker container name on EC2'
     required: true
