@@ -18,13 +18,7 @@ variable "ec2_instance_type" {
   default     = "t2.micro"
 }
 
-# S3 Variables
-
-#variable "bucket_prefix" {
-#  description = "prefix of s3 bucket for app data"
-#  type        = string
-#}
-
+# db Variables
 
 variable "db_user" {
   description = "Username for DB"
@@ -62,6 +56,18 @@ variable "private_subnets_count" {
   description = "number of private subnets, RDS requires two subnets"
   type        = number
   default     = 2
+}
+
+variable "aws_account_id" {
+  description = "AWS account id"
+  type        = string
+  default     = "586794440391"
+}
+
+variable "ecr_repository_name" {
+  description = "AWS ecr repository name"
+  type        = string
+  default     = "ecr_repository_1"
 }
 
 variable "settings" {
