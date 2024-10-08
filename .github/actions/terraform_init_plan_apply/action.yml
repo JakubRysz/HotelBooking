@@ -60,7 +60,7 @@ runs:
      # if:  github.ref == 'refs/heads/main' || ${{ inputs.test_mode == 'true' }}"
       working-directory: ${{ inputs.tf_directory }}
       run: |
-        terraform apply -var-file="tfvars/dev.tfvars" -auto-approve tfplan
+        terraform apply -auto-approve tfplan
         echo "instance_1_ip_addr=$(terraform output -raw instance_1_ip_addr)" >> $GITHUB_ENV
         echo "The EC2 instance IP address is: ${{ env.instance_1_ip_addr }}"
       shell: bash
