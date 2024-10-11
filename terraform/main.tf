@@ -1,11 +1,15 @@
+provider "aws" {
+  region = var.region
+}
+
 terraform {
-  #  backend "s3" {
-  #    bucket         = "tf-state-bucket-hotel-booking"
-  #    key            = "terraform/terraform.tfstate"
-  #    region         = var.region
-  #    dynamodb_table = "terraform-state-locking"
-  #    encrypt        = true
-  #  }
+    backend "s3" {
+      bucket         = "tf-state-bucket-hotel-booking"
+      key            = "terraform/terraform.tfstate"
+      region         = "eu-central-1"
+      dynamodb_table = "terraform-state-locking"
+      encrypt        = true
+    }
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -14,43 +18,8 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = var.region
-}
-
 data "aws_availability_zones" "available_zones" {
   state = "available"
-}
-
-resource "aws_s3_bucket" "terraform_state" {
-  bucket        = "tf-state-bucket-hotel-booking"
-  force_destroy = true
-}
-
-resource "aws_s3_bucket_versioning" "terraform_bucket_versioning" {
-  bucket = aws_s3_bucket.terraform_state.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_crypto_conf" {
-  bucket = aws_s3_bucket.terraform_state.bucket
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "terraform-state-locking"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
 }
 
 resource "aws_vpc" "vpc_1" {
@@ -62,7 +31,7 @@ resource "aws_vpc" "vpc_1" {
 
 resource "aws_internet_gateway" "internet_gw" {
   vpc_id = aws_vpc.vpc_1.id
-  tags   = {
+  tags = {
     Name = "internet_gateway_1"
   }
 }
@@ -123,7 +92,7 @@ resource "aws_route_table_association" "route_table_association_private" {
 }
 
 resource "aws_security_group" "security_group_web" {
-  name = "security_group_web"
+  name        = "security_group_web"
   description = "Allow Web inbound traffic"
   vpc_id      = aws_vpc.vpc_1.id
 
@@ -184,24 +153,18 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   name        = "db_subnet_group"
   description = "subnet group for RDS database"
   // RDS requires two or more subnets
-  subnet_ids  = [for subnet in aws_subnet.subnet_private : subnet.id]
+  subnet_ids = [for subnet in aws_subnet.subnet_private : subnet.id]
 }
 
-#resource "aws_network_interface" "web-server" {
-#  subnet_id       = aws_subnet.subnet_public.id
-#  private_ips     = ["10.0.1.50"]
-#  security_groups = [aws_security_group.security_group_web.id]
-#}
-
 resource "aws_ecr_repository" "ecr_1" {
-  name = "ecr_repository_1"
+  name = var.ecr_repository_name
 }
 
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_role"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -259,7 +222,7 @@ resource "aws_db_instance" "postgres-db-instance" {
 
 resource "aws_key_pair" "key_pair_ec2" {
   key_name   = "key_pair_ec2"
-  public_key = file("key_pair_ec2.pub")
+  public_key = file("../key_pair_ec2.pub")
 }
 
 resource "aws_instance" "web-server-instance" {
