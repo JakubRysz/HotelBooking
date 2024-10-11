@@ -41,6 +41,12 @@ runs:
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
         aws-region: ${{ inputs.aws_region }}
 
+    - name: Print ssh connection data
+      run: |
+        echo "EC2 ip address =${{ env.instance_1_ip_addr }}"
+        echo "EC2 user name = ${{ inputs.ec2_user }}"
+      shell: bash
+
     - name: SSH into EC2 and update Docker container
       uses: appleboy/ssh-action@v0.1.8
       with:
