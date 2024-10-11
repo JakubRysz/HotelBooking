@@ -222,7 +222,7 @@ resource "aws_db_instance" "postgres-db-instance" {
 
 resource "aws_key_pair" "key_pair_ec2" {
   key_name   = "key_pair_ec2"
-  public_key = file("key_pair_ec2.pub")
+  public_key = file("../key_pair_ec2.pub")
 }
 
 resource "aws_instance" "web-server-instance" {
