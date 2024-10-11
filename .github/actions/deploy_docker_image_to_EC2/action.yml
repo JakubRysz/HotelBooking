@@ -53,7 +53,7 @@ runs:
     - name: SSH into EC2 and update Docker container
       uses: appleboy/ssh-action@v0.1.8
       with:
-        host: ${{ inputs.ec2_ip_addr }}"
+        host: ${{ inputs.ec2_ip_addr }}
         username: ${{ inputs.ec2_user }}
         key: ${{ inputs.ec2_ssh_key }}
         script: |
