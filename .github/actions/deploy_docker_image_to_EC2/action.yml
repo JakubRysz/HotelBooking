@@ -24,6 +24,9 @@ inputs:
   image_tag:
     description: 'Docker Image Tag'
     default: 'latest'
+  ec2_ip_addr:
+    description: 'EC2 IP address'
+    default: '3.70.144.228'
   ec2_user:
     description: 'EC2 SSH User'
     default: 'ubuntu'
@@ -43,14 +46,14 @@ runs:
 
     - name: Print ssh connection data
       run: |
-        echo "EC2 ip address =${{ env.instance_1_ip_addr }}"
+        echo "EC2 ip address = ${{ inputs.ec2_ip_addr }}"
         echo "EC2 user name = ${{ inputs.ec2_user }}"
       shell: bash
 
     - name: SSH into EC2 and update Docker container
       uses: appleboy/ssh-action@v0.1.8
       with:
-        host: ${{ env.instance_1_ip_addr }}
+        host: ${{ inputs.ec2_ip_addr }}"
         username: ${{ inputs.ec2_user }}
         key: ${{ inputs.ec2_ssh_key }}
         script: |
