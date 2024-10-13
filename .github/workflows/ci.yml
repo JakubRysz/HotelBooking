@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       new_image_tag: ${{ steps.build-and-push-to-ecr.outputs.new_image_tag }}
-    needs: build-maven
+  #  needs: build-maven
     if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
     #if: github.ref_name == 'main'
     steps:
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       ec2_instance_ip_addr: ${{ steps.terraform-init-plan-apply.outputs.ec2_instance_ip_addr }}
-    if: github.ref_name == 'main'
+    #if: github.ref_name == 'main'
     needs: build-and-push-to-ecr
     steps:
       - name: Checkout code
