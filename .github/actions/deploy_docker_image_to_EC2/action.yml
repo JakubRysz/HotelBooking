@@ -44,10 +44,11 @@ runs:
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
         aws-region: ${{ inputs.aws_region }}
 
-    - name: Print ssh connection data
+    - name: Print inputs data
       run: |
         echo "EC2 ip address = ${{ inputs.ec2_ip_addr }}"
         echo "EC2 user name = ${{ inputs.ec2_user }}"
+        echo "ECR image tag = ${{ inputs.image_tag }}"
       shell: bash
 
     - name: SSH into EC2 and update Docker container

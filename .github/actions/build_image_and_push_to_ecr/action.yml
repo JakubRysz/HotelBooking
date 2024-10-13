@@ -19,6 +19,11 @@ inputs:
     description: 'AWS secret access key id'
     required: true
 
+outputs:
+  new_image_tag:
+    value: ${{ steps.get_tag.outputs.new_image_tag }}
+    description: "Tag of a new docker image"
+
 runs:
   using: "composite"
   steps:
@@ -38,14 +43,15 @@ runs:
         latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` || echo "v0.0.0")
         echo $latest_tag
         new_image_tag=$(echo $latest_tag | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-        echo "new_image_tag=$new_image_tag" >> $GITHUB_ENV
+        echo "new_image_tag=$new_image_tag" >> "$GITHUB_ENV"
+        echo "new_image_tag=$new_image_tag" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Create and push new Git tag
       run: |
         git config user.name "github-actions"
         git config user.email "github-actions@users.noreply.github.com"
-        git tag ${{ env.new_image_tag }}
+        git tag ${{ outputs.new_image_tag }}
         git push origin ${{ env.new_image_tag }}
       shell: bash
 
