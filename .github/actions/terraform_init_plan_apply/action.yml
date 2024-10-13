@@ -63,10 +63,8 @@ runs:
 
     - name: Terraform Apply
       id: terraform_apply
-     # if:  github.ref == 'refs/heads/main' || ${{ inputs.test_mode == 'true' }}"
       working-directory: ${{ inputs.tf_directory }}
       run: |
         terraform apply -auto-approve tfplan
         echo "ec2_instance_ip_addr=$(terraform output -raw instance_1_ip_addr)" >> "$GITHUB_OUTPUT"
       shell: bash
-

@@ -10,7 +10,7 @@ on:
     inputs:
       test_mode:
         description: 'is testing mode enabled'
-        default: 'true'
+        default: 'false'
 
 jobs:
   build-maven:
@@ -27,9 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       new_image_tag: ${{ steps.build-and-push-to-ecr.outputs.new_image_tag }}
-  #  needs: build-maven
+    needs: build-maven
     if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
-    #if: github.ref_name == 'main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -48,9 +47,9 @@ jobs:
 
   terraform-init-plan-apply:
     runs-on: ubuntu-latest
+    if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
     outputs:
       ec2_instance_ip_addr: ${{ steps.terraform-init-plan-apply.outputs.ec2_instance_ip_addr }}
-    #if: github.ref_name == 'main'
     needs: build-and-push-to-ecr
     steps:
       - name: Checkout code
@@ -68,6 +67,7 @@ jobs:
 
   deploy-to-EC2:
     runs-on: ubuntu-latest
+    if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
     needs: [terraform-init-plan-apply, build-and-push-to-ecr]
     steps:
       - name: Checkout code
@@ -84,5 +84,3 @@ jobs:
           ec2_ssh_key: ${{ secrets.EC2_SSH_KEY }}
           ec2_ip_addr: ${{ needs.terraform-init-plan-apply.outputs.ec2_instance_ip_addr }}
           image_tag: ${{ needs.build-and-push-to-ecr.outputs.new_image_tag }}
-         # image_tag: "v0.0.15"
-          container_name: "hotel_booking_container"

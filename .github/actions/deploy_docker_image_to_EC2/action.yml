@@ -23,16 +23,16 @@ inputs:
     required: true
   image_tag:
     description: 'Docker Image Tag'
-    default: 'latest'
+    required: true
   ec2_ip_addr:
     description: 'EC2 IP address'
-    default: '3.70.144.228'
+    required: true
   ec2_user:
     description: 'EC2 SSH User'
     default: 'ubuntu'
   container_name:
-    description: 'Docker container name on EC2'
-    required: true
+    description: 'Docker container name'
+    default: "hotel_booking_container"
 
 runs:
   using: "composite"
