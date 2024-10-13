@@ -1,0 +1,70 @@
+name: Terraform init plan and apply
+
+description: A composite action to initialize Terraform ,plan and apply terraform changes
+
+inputs:
+  aws_region:
+    description: 'AWS Region'
+    required: true
+  ecr_repository_name:
+    description: 'ECR Repository Name'
+    required: true
+  aws_account_id:
+    description: 'AWS account id'
+    required: true
+  aws_access_key_id:
+    description: 'AWS access key id'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS secret access key id'
+    required: true
+  tf_version:
+    description: 'Terraform version to use'
+    default: '1.9.7'
+  tf_directory:
+    description: 'Directory containing the Terraform configuration'
+    default: './terraform'
+  test_mode:
+    description: 'Is test mode active'
+    default: 'false'
+
+outputs:
+  ec2_instance_ip_addr:
+    value: ${{ steps.terraform_apply.outputs.ec2_instance_ip_addr }}
+    description: "Output value"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Terraform
+      run: |
+        curl -sSL https://releases.hashicorp.com/terraform/${{ inputs.tf_version }}/terraform_${{ inputs.tf_version }}_linux_amd64.zip -o /tmp/terraform.zip
+        unzip /tmp/terraform.zip -d /tmp/ 
+        sudo mv /tmp/terraform /usr/local/bin/terraform
+        terraform -version
+      shell: bash
+
+    - name: configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Terraform Init
+      working-directory: ${{ inputs.tf_directory }}
+      run: terraform init
+      shell: bash
+
+    - name: Terraform Plan
+      working-directory: ${{ inputs.tf_directory }}
+      run: terraform plan -var-file="tfvars/dev.tfvars" -out=tfplan
+      shell: bash
+
+    - name: Terraform Apply
+      id: terraform_apply
+      working-directory: ${{ inputs.tf_directory }}
+      run: |
+        terraform apply -auto-approve tfplan
+        echo "ec2_instance_ip_addr=$(terraform output -raw instance_1_ip_addr)" >> "$GITHUB_OUTPUT"
+      shell: bash
