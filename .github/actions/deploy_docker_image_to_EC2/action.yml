@@ -62,5 +62,5 @@ runs:
           sudo docker pull ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
           sudo docker stop ${{ inputs.container_name }} || true # there will be no error if container do not exists because of  || true  
           sudo docker rm ${{ inputs.container_name }} || true
-          sudo docker run -d --name ${{ inputs.container_name }} -p 80:80 ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+          sudo docker run -d --name ${{ inputs.container_name }} -p 80:8080 ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
         shell: bash
