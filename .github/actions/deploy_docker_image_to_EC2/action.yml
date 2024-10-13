@@ -1,0 +1,66 @@
+name: Deploy Docker Image to EC2
+
+description: SSH into EC2 and update the Docker container with the latest image from ECR
+
+inputs:
+  aws_region:
+    description: 'AWS Region'
+    required: true
+  ecr_repository_name:
+    description: 'ECR Repository Name'
+    required: true
+  aws_account_id:
+    description: 'AWS account id'
+    required: true
+  aws_access_key_id:
+    description: 'AWS access key id'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS secret access key id'
+    required: true
+  ec2_ssh_key:
+    description: 'EC2 ssh key id'
+    required: true
+  image_tag:
+    description: 'Docker Image Tag'
+    required: true
+  ec2_ip_addr:
+    description: 'EC2 IP address'
+    required: true
+  ec2_user:
+    description: 'EC2 SSH User'
+    default: 'ubuntu'
+  container_name:
+    description: 'Docker container name'
+    default: "hotel_booking_container"
+
+runs:
+  using: "composite"
+  steps:
+    - name: configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Print inputs data
+      run: |
+        echo "EC2 ip address = ${{ inputs.ec2_ip_addr }}"
+        echo "EC2 user name = ${{ inputs.ec2_user }}"
+        echo "ECR image tag = ${{ inputs.image_tag }}"
+      shell: bash
+
+    - name: SSH into EC2 and update Docker container
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ inputs.ec2_ip_addr }}
+        username: ${{ inputs.ec2_user }}
+        key: ${{ inputs.ec2_ssh_key }}
+        script: |
+          aws ecr get-login-password --region ${{ inputs.aws_region }} | docker login --username AWS --password-stdin ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+          sudo docker pull ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+          sudo docker stop ${{ inputs.container_name }} || true # there will be no error if container do not exists because of  || true  
+          sudo docker rm ${{ inputs.container_name }} || true
+          sudo docker run -d --name ${{ inputs.container_name }} -p 80:8080 ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository_name }}:${{ inputs.image_tag }}
+        shell: bash
