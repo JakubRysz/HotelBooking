@@ -54,8 +54,8 @@ resource "aws_key_pair" "key_pair_ec2" {
   public_key = file("../key_pair_ec2.pub")
 }
 
-resource "aws_instance" "web-server-instance" {
-  ami                    = local.ec2_ami # Replace with your desired AMI
+resource "aws_instance" "hotel_booking_instance" {
+  ami                    = local.ec2_ami
   instance_type          = local.ec2_instance_type
   subnet_id              = aws_subnet.subnet_public.id
   vpc_security_group_ids = [aws_security_group.security_group_web.id]
@@ -80,11 +80,11 @@ resource "aws_instance" "web-server-instance" {
               sudo docker run -d -p 80:8080 586794440391.dkr.ecr.eu-central-1.amazonaws.com/ecr_repository_1:latest
               EOF
   tags = {
-    Name = "my_instance_1"
+    Name = "hotel_booking_instance"
   }
 }
 
-resource "aws_eip" "one" {
+resource "aws_eip" "eip_hotel_booking_instance" {
   domain   = "vpc"
-  instance = aws_instance.web-server-instance.id
+  instance = aws_instance.hotel_booking_instance.id
 }

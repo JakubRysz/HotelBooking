@@ -53,11 +53,13 @@ variable "settings" {
   type        = map(any)
   default = {
     "database" = {
-      allocated_storage   = 10
-      engine              = "postgres"
-      engine_version      = "16.3"
-      identifier          = "database-instance-1"
-      db_name             = "database_1"
+      allocated_storage = 10
+      engine            = "postgres"
+      engine_version    = "16.3"
+      identifier        = "database-instance-1"
+      db_name           = "database_1"
+
+
       instance_class      = "db.t3.micro"
       skip_final_snapshot = true
       storage_encrypted   = false
