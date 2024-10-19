@@ -66,5 +66,5 @@ runs:
       working-directory: ${{ inputs.tf_directory }}
       run: |
         terraform apply -auto-approve tfplan
-        echo "ec2_instance_ip_addr=$(terraform output -raw instance_1_ip_addr)" >> "$GITHUB_OUTPUT"
+        echo "ec2_instance_ip_addr=$(terraform output -raw hotel_booking_instance_ip_addr)" >> "$GITHUB_OUTPUT"
       shell: bash
