@@ -24,6 +24,7 @@ jobs:
 
   build-and-push-to-ecr:
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || github.event.inputs.test_mode == 'true' }}
     outputs:
       new_image_tag: ${{ steps.build-and-push-to-ecr.outputs.new_image_tag }}
     needs: build-maven
@@ -45,7 +46,6 @@ jobs:
 
   terraform-init-plan-apply:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
     outputs:
       ec2_instance_ip_addr: ${{ steps.terraform-init-plan-apply.outputs.ec2_instance_ip_addr }}
     needs: build-maven
