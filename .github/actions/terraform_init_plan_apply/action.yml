@@ -63,7 +63,7 @@ runs:
 
     - name: Terraform Apply
       id: terraform_apply
-      if: ${{ github.ref_name == 'main' || github.event.inputs.test_mode == 'true' }}
+      if: ${{ github.ref_name == 'main' || inputs.test_mode == 'true' }}
       working-directory: ${{ inputs.tf_directory }}
       run: |
         terraform apply -auto-approve tfplan
