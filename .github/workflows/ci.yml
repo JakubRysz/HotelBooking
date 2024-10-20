@@ -27,7 +27,6 @@ jobs:
     outputs:
       new_image_tag: ${{ steps.build-and-push-to-ecr.outputs.new_image_tag }}
     needs: build-maven
-    if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -49,7 +48,7 @@ jobs:
     if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
     outputs:
       ec2_instance_ip_addr: ${{ steps.terraform-init-plan-apply.outputs.ec2_instance_ip_addr }}
-    needs: build-and-push-to-ecr
+    needs: build-maven
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
