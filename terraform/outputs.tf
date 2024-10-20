@@ -1,5 +1,5 @@
-output "instance_1_ip_addr" {
-  value = aws_instance.web-server-instance.public_ip
+output "hotel_booking_instance_ip_addr" {
+  value = aws_eip.eip_hotel_booking_instance.public_ip
 }
 
 output "db_instance_addr" {
