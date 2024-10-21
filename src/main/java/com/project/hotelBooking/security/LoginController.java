@@ -1,10 +1,10 @@
-package com.project.hotelBooking.config;
+package com.project.hotelBooking.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.project.hotelBooking.config.exceptions.InvalidLoginCredentialsException;
 import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
+import com.project.hotelBooking.security.exceptions.InvalidLoginCredentialsException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

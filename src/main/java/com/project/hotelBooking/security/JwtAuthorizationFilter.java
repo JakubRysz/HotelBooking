@@ -1,4 +1,4 @@
-package com.project.hotelBooking.config;
+package com.project.hotelBooking.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

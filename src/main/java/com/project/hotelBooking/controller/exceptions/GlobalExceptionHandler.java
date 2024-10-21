@@ -1,6 +1,6 @@
 package com.project.hotelBooking.controller.exceptions;
 
-import com.project.hotelBooking.config.exceptions.InvalidLoginCredentialsException;
+import com.project.hotelBooking.security.exceptions.InvalidLoginCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
