@@ -74,10 +74,9 @@ resource "aws_instance" "hotel_booking_instance" {
               unzip awscliv2.zip
               sudo ./aws/install
 
-              aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 586794440391.dkr.ecr.eu-central-1.amazonaws.com
+              sudo usermod -aG docker $USER
+              newgrp docker
 
-              sudo docker pull 586794440391.dkr.ecr.eu-central-1.amazonaws.com/ecr_repository_1:latest
-              sudo docker run -d -p 80:8080 586794440391.dkr.ecr.eu-central-1.amazonaws.com/ecr_repository_1:latest
               EOF
   tags = {
     Name = "hotel_booking_instance"
