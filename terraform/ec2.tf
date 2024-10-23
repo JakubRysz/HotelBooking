@@ -74,7 +74,7 @@ resource "aws_instance" "hotel_booking_instance" {
               unzip awscliv2.zip
               sudo ./aws/install
 
-              sudo usermod -aG docker $USER
+              sudo usermod -aG docker ubuntu
               newgrp docker
 
               EOF
