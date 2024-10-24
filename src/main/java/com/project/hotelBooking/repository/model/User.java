@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,10 @@ public class User implements UserDetails {
     private String role;
     @Column(name = "EMAIL")
     private String email;
+    @Column(name = "HASH")
+    private String hash;
+    @Column(name = "HASH_DATE")
+    private LocalDateTime HashDate;
 
 
     @OneToMany(cascade = CascadeType.REMOVE)
