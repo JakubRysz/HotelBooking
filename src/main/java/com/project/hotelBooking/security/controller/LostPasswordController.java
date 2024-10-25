@@ -1,6 +1,6 @@
 package com.project.hotelBooking.security.controller;
 
-import com.project.hotelBooking.security.model.ChangePassword;
+import com.project.hotelBooking.security.model.ChangedPassword;
 import com.project.hotelBooking.security.service.LostPasswordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +19,7 @@ public class LostPasswordController {
     }
 
     @PostMapping("/changePassword")
-    public void changePassword(@RequestBody ChangePassword changePassword) {
-        lostPasswordService.changePassword(changePassword);
+    public void changePassword(@RequestBody ChangedPassword changedPassword) {
+        lostPasswordService.changePassword(changedPassword);
     }
 }
