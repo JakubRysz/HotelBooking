@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/v1/initializeDb").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/v1/users/registration").permitAll()
+                .requestMatchers("/lostPassword").permitAll()
                         .anyRequest().authenticated()
         );
         http.csrf(AbstractHttpConfigurer::disable);

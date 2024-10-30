@@ -6,6 +6,7 @@ import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.security.exceptions.PasswordMismatchException;
 import com.project.hotelBooking.security.model.ChangedPassword;
+import com.project.hotelBooking.security.model.EmailDto;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.model.Mail;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +33,8 @@ public class LostPasswordService {
     @Value("${app.passwordResetLinkValidityMinutes}")
     private int passwordResetLinkValidityMinutes;
 
-    public void sendEmailWithLink(String email) {
-        User user = userRepository.findByUsername(email)
+    public void sendEmailWithLink(EmailDto emailDto) {
+        User user = userRepository.findTopByEmail(emailDto.getEmail())
                 .orElseThrow(() -> new ElementNotFoundException("There is no user with given email"));
 
         String hash = generateHashForLostPassword(user);
@@ -41,7 +42,7 @@ public class LostPasswordService {
         user.setHashDate(LocalDateTime.now());
         String MAIL_SUBJECT_RESET_PASSWORD = "Hotel booking - reset password request";
         Mail mail = Mail.builder()
-                .mailTo(email)
+                .mailTo(emailDto.getEmail())
                 .subject(MAIL_SUBJECT_RESET_PASSWORD)
                 .message(createMailMessage(hash))
                 .build();
@@ -49,7 +50,7 @@ public class LostPasswordService {
     }
 
     private String createMailMessage(String hashLink) {
-        return "Please click to link bellow to reset your password:" +
+        return "Please click link below to reset your password:" +
                 "\n\n" + createLink(hashLink) +
                 "\n\nThank you";
     }
