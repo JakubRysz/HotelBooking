@@ -14,6 +14,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -33,6 +34,7 @@ public class LostPasswordService {
     @Value("${app.passwordResetLinkValidityMinutes}")
     private int passwordResetLinkValidityMinutes;
 
+    @Transactional
     public void sendEmailWithLink(EmailDto emailDto) {
         User user = userRepository.findTopByEmail(emailDto.getEmail())
                 .orElseThrow(() -> new ElementNotFoundException("There is no user with given email"));
@@ -49,14 +51,10 @@ public class LostPasswordService {
         emailService.send(mail);
     }
 
-    private String createMailMessage(String hashLink) {
-        return "Please click link below to reset your password:" +
-                "\n\n" + createLink(hashLink) +
+    private String createMailMessage(String hash) {
+        return "Please find bellow hash to reset your password:" +
+                "\n\n" + hash +
                 "\n\nThank you";
-    }
-
-    private String createLink(String hash) {
-        return serviceAddress + "/lostPassword/" + hash;
     }
 
     private String generateHashForLostPassword(User user) {
@@ -64,6 +62,7 @@ public class LostPasswordService {
         return DigestUtils.sha256Hex(toHash);
     }
 
+    @Transactional
     public void changePassword(ChangedPassword changedPassword) {
         checkIfGivenPasswordsMatch(changedPassword);
         User user = userRepository.findByHash(changedPassword.getHash())
