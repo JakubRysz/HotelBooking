@@ -477,6 +477,45 @@ Sample body:
 }
 ```
 
+### 3.6 Changing user password
+
+User might change password using two endpoints:
+ - /lostPassword  - to send mail with hash used to reset password by providing e-mail, where 
+mail with hash should be sent.
+ - /changePassword - to provide new password with hash. Hash is used to find user who password should be changed.
+    By default hash is valid for 20 minutes.
+ - 
+#### 3.6.1 Mail with hash
+
+After sending /lostPassword request with e-mail as body:
+
+```bash
+Method: POST   URL: http://localhost:8080/lostPassword (no authorization required)
+Sample body:
+{
+    "email": "<sample-email>"
+}
+```
+Mail with hash is send to specified e-mail:
+
+![img.png](src/main/resources/README%20pictures/mail_with_hash.png)
+
+#### 3.6.2 Change password request
+
+When having hash, it is possible to send change password request:
+
+```bash
+Method: POST   URL: http://localhost:8080/changePassword (no authorization required)
+Sample body:
+{
+   "password": "newPassword1",
+   "repeatPassword": "newPassword1",
+   "hash": "0514d509141a98325ac4c22aa1e47e8159494d1b20bf31956c1a1fba4b90a1cb"
+}
+```
+
+After receiving positive response status 200, user password is changed.
+
 ## 4. Example using Postman tool
 
 We may test API in our application using Postman tool. At first we need to initialize database according to description
