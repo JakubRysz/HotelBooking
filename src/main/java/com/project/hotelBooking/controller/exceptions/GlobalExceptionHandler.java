@@ -1,6 +1,8 @@
 package com.project.hotelBooking.controller.exceptions;
 
+import com.project.hotelBooking.security.exceptions.ChangePasswordHashExpiredException;
 import com.project.hotelBooking.security.exceptions.InvalidLoginCredentialsException;
+import com.project.hotelBooking.security.exceptions.PasswordsMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -68,6 +70,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>("Bad request: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PasswordsMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handlePasswordsNotMatchException(PasswordsMismatchException ex) {
+        return new ResponseEntity<>("Bad request: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(ElementNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<String> handleResourceNotFoundException(ElementNotFoundException ex) {
@@ -78,6 +86,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<String> handleElementAlreadyExistException(ElementAlreadyExistException ex) {
         return new ResponseEntity<>("Conflict: " + ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ChangePasswordHashExpiredException.class)
+    @ResponseStatus(HttpStatus.GONE)
+    public ResponseEntity<String> handleChangePasswordHashExpiredException(ChangePasswordHashExpiredException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.GONE);
     }
 
 

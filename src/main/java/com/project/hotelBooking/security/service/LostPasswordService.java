@@ -4,7 +4,8 @@ import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
-import com.project.hotelBooking.security.exceptions.PasswordMismatchException;
+import com.project.hotelBooking.security.exceptions.ChangePasswordHashExpiredException;
+import com.project.hotelBooking.security.exceptions.PasswordsMismatchException;
 import com.project.hotelBooking.security.model.ChangedPassword;
 import com.project.hotelBooking.security.model.EmailDto;
 import com.project.hotelBooking.service.SimpleEmailService;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -27,6 +29,7 @@ public class LostPasswordService {
     private final UserRepository userRepository;
     private final SimpleEmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final Clock clock;
 
     @Value("${app.serviceAddress}")
     private String serviceAddress;
@@ -41,7 +44,7 @@ public class LostPasswordService {
 
         String hash = generateHashForLostPassword(user);
         user.setHash(hash);
-        user.setHashDate(LocalDateTime.now());
+        user.setHashDate(LocalDateTime.now(clock));
         String MAIL_SUBJECT_RESET_PASSWORD = "Hotel booking - reset password request";
         Mail mail = Mail.builder()
                 .mailTo(emailDto.getEmail())
@@ -58,7 +61,7 @@ public class LostPasswordService {
     }
 
     private String generateHashForLostPassword(User user) {
-        String toHash = user.getId() + user.getUsername() + user.getPassword() + LocalDateTime.now();
+        String toHash = user.getId() + user.getUsername() + user.getPassword() + LocalDateTime.now(clock);
         return DigestUtils.sha256Hex(toHash);
     }
 
@@ -66,11 +69,11 @@ public class LostPasswordService {
     public void changePassword(ChangedPassword changedPassword) {
         checkIfGivenPasswordsMatch(changedPassword);
         User user = userRepository.findByHash(changedPassword.getHash())
-                .orElseThrow(() -> new BadRequestException("Invalid link to change password"));
+                .orElseThrow(() -> new BadRequestException("Invalid hash to change password"));
         if(checkIfChangePasswordLinkIsNotExpired(user)) {
             updateUserPassword(changedPassword, user);
         } else {
-            throw new RuntimeException("Link to change password is expired");
+            throw new ChangePasswordHashExpiredException("Hash to change password is expired");
         }
     }
 
@@ -81,12 +84,12 @@ public class LostPasswordService {
     }
 
     private boolean checkIfChangePasswordLinkIsNotExpired(User user) {
-        return user.getHashDate().plusMinutes(passwordResetLinkValidityMinutes).isAfter(LocalDateTime.now());
+        return user.getHashDate().plusMinutes(passwordResetLinkValidityMinutes).isAfter(LocalDateTime.now(clock));
     }
 
     private static void checkIfGivenPasswordsMatch(ChangedPassword changedPassword) {
         if(!Objects.equals(changedPassword.getPassword(), changedPassword.getRepeatPassword())) {
-            throw new PasswordMismatchException("Given passwords must be the same");
+            throw new PasswordsMismatchException("Given passwords must be the same");
         }
     }
 }
