@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class LostPasswordControllerIT {
+class LostPasswordControllerE2ETest {
 
     private static final String NOT_EXISTING_EMAIL = "test@gmail.com";
     private static final String MAIL_SUBJECT_RESET_PASSWORD = "Hotel booking - reset password request";
