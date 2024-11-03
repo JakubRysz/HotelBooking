@@ -41,8 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
     public class HotelControllerE2ETest {
 
-    public static final String HOTELS_URL = "/v1/hotels";
-    public static final String HOTELS_ROOMS_URL = HOTELS_URL + "/rooms";
+    private static final String HOTELS_URL = "/v1/hotels";
+    private static final String HOTELS_ROOMS_URL = HOTELS_URL + "/rooms";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
