@@ -5,7 +5,6 @@ import com.project.hotelBooking.controller.model.LocalizationDto;
 import com.project.hotelBooking.controller.model.LocalizationWithHotelsDto;
 import com.project.hotelBooking.service.LocalizationService;
 import com.project.hotelBooking.service.model.LocalizationServ;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +21,13 @@ public class LocalizationController {
 
     private final LocalizationService localizationService;
     private final LocalizationMapper localizationMapper;
-    private final Validator validator;
+    private final ValidatorCustom validatorCustom;
 
     @PostMapping("/localizations")
     @PreAuthorize("hasRole('ADMIN')")
     public LocalizationDto createLocalization(@RequestBody LocalizationDto localizationDto) {
         LocalizationServ localization = localizationMapper.mapToLocalization(localizationDto);
-        validator.validateLocalization(localization);
+        validatorCustom.validateLocalization(localization);
         return localizationMapper.mapToLocalizationDto(localizationService.saveLocalization(
                 localizationMapper.mapToLocalization(localizationDto))
         );
@@ -61,14 +60,14 @@ public class LocalizationController {
     @PutMapping("/localizations")
     public LocalizationDto editLocalization(@RequestBody LocalizationDto localizationDto) {
         LocalizationServ localization = localizationMapper.mapToLocalization(localizationDto);
-        validator.validateLocalizationEdit(localization);
+        validatorCustom.validateLocalizationEdit(localization);
         return localizationMapper.mapToLocalizationDto(localizationService.editLocalization(localization));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/localizations/{id}")
     public void deleteSingleLocalization(@PathVariable Long id) {
-        validator.validateIfLocalizationExistById(id);
+        validatorCustom.validateIfLocalizationExistById(id);
         localizationService.deleteLocalizationById(id);
     }
 

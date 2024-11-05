@@ -7,12 +7,13 @@ import com.project.hotelBooking.controller.model.UserWithBookingDto;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;
 import com.project.hotelBooking.service.model.UserServ;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,20 +24,21 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 
     private static final String USER_ROLE = "ROLE_USER";
 
     private final UserService userService;
     private final UserMapper userMapper;
-    private final Validator validator;
+    private final ValidatorCustom validatorCustom;
     private final SimpleEmailService emailService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
-    public UserDto createUser(@RequestBody UserDto userDto) {
+    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
         UserServ user = userMapper.mapToUser(userDto);
-        validator.validateUser(user);
+        validatorCustom.validateUser(user);
         UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(user));
         emailService.sendMailCreatedUser(user);
         return userCreated;
@@ -46,7 +48,7 @@ public class UserController {
     public UserDto createUserRegistration(@RequestBody UserDto userDto) {
         userDto = userDto.withRole(USER_ROLE);
         UserServ user = userMapper.mapToUser(userDto);
-        validator.validateUser(user);
+        validatorCustom.validateUser(user);
         UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(user));
         emailService.sendMailCreatedUser(user);
         return userCreated;
@@ -88,7 +90,7 @@ public class UserController {
     @PutMapping("/users")
     public UserDto editUser(@RequestBody UserDto userDto) {
         UserServ user = userMapper.mapToUser(userDto);
-        validator.validateUserEdit(user);
+        validatorCustom.validateUserEdit(user);
         UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
         emailService.sendMailEditedUser(user);
         return editedUser;
@@ -101,7 +103,7 @@ public class UserController {
         UserServ user = userMapper.mapToUser(userDto);
         if (!Objects.equals(user.getId(), userAuth.getId()))
             throw new BadRequestException("Given user Id is not Id of current authenticated user");
-        validator.validateUserEdit(user);
+        validatorCustom.validateUserEdit(user);
         UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
         emailService.sendMailEditedUser(user);
         return editedUser;

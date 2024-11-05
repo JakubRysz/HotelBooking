@@ -23,7 +23,7 @@ public class BookingController {
 
     private final BookingService bookingService;
     private final BookingMapper bookingMapper;
-    private final Validator validator;
+    private final ValidatorCustom validatorCustom;
     private final UserService userService;
     private final RoomService roomService;
     private final HotelService hotelService;
@@ -34,7 +34,7 @@ public class BookingController {
     @PostMapping("/bookings")
     public BookingDto createBooking(@RequestBody BookingDto bookingDto) {
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
-        validator.validateBooking(booking);
+        validatorCustom.validateBooking(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
         emailService.sendMailCreatedBooking(bookingInfo);
@@ -44,7 +44,7 @@ public class BookingController {
     @PostMapping("/bookings/own")
     public BookingDto createOwnBooking(@RequestBody BookingDto bookingDto) {
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
-        validator.validateBooking(booking);
+        validatorCustom.validateBooking(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
         emailService.sendMailCreatedBooking(bookingInfo);
@@ -79,7 +79,7 @@ public class BookingController {
     public BookingDto editBooking(@RequestBody BookingDto bookingDto) {
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
         BookingServ oldBooking = bookingService.getBookingById(booking.getId());
-        validator.validateBookingEdit(booking, oldBooking);
+        validatorCustom.validateBookingEdit(booking, oldBooking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
         emailService.sendMailEditedBooking(bookingInfo);
@@ -92,7 +92,7 @@ public class BookingController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserServ user = userService.getUserByUsername(auth.getName());
         BookingServ oldBooking = bookingService.getBookingById(booking.getId());
-        validator.validateBookingEditUser(booking, oldBooking, user.getId());
+        validatorCustom.validateBookingEditUser(booking, oldBooking, user.getId());
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
         emailService.sendMailEditedBooking(bookingInfo);
@@ -102,7 +102,7 @@ public class BookingController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/bookings/{id}")
     public void deleteBooking(@PathVariable Long id) {
-        validator.validateIfBookingExistById(id);
+        validatorCustom.validateIfBookingExistById(id);
         BookingServ bookingToDelete = bookingService.getBookingById(id);
         BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
         bookingService.deleteBookingById(id);
@@ -111,11 +111,11 @@ public class BookingController {
 
     @DeleteMapping("/bookings/own/{id}")
     public void deleteOwnBooking(@PathVariable Long id) {
-        validator.validateIfBookingExistById(id);
+        validatorCustom.validateIfBookingExistById(id);
         BookingServ bookingToDelete = bookingService.getBookingById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserServ user = userService.getUserByUsername(auth.getName());
-        validator.validateIfUserIsOwnerOfBooking(bookingToDelete, user.getId());
+        validatorCustom.validateIfUserIsOwnerOfBooking(bookingToDelete, user.getId());
         BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
         bookingService.deleteBookingById(id);
         emailService.sendMailDeletedBooking(bookingInfo);

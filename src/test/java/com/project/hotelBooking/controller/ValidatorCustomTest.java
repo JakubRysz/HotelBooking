@@ -29,10 +29,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ValidatorTest {
+class ValidatorCustomTest {
 
     @InjectMocks
-    private Validator validatorMock;
+    private ValidatorCustom validatorCustomMock;
     @Mock
     private LocalizationService localizationService;
     @Mock
@@ -54,7 +54,7 @@ class ValidatorTest {
                 .hotels(null)
                 .build();
         //when &then
-        assertDoesNotThrow(()->validatorMock.validateLocalization(localization));
+        assertDoesNotThrow(()-> validatorCustomMock.validateLocalization(localization));
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#incorrectLocalizationProvider")
@@ -62,7 +62,7 @@ class ValidatorTest {
         //given
         //when &then
         assertThrows(BadRequestException.class,
-                () -> validatorMock.validateLocalization(localization));
+                () -> validatorCustomMock.validateLocalization(localization));
     }
 
     //Hotel
@@ -81,7 +81,7 @@ class ValidatorTest {
         when(hotelService.getHotelByNameAndHotelChain(any(HotelServ.class))).thenThrow(ElementNotFoundException.class);
         when(localizationService.getLocalizationById(any(Long.class))).thenReturn(LocalizationServ.builder().build());
         //when &then
-        assertDoesNotThrow(()->validatorMock.validateHotel(hotel));
+        assertDoesNotThrow(()-> validatorCustomMock.validateHotel(hotel));
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#incorrectHotelProvider")
@@ -89,7 +89,7 @@ class ValidatorTest {
         //given
         //when & then
         assertThrows(BadRequestException.class,
-                ()->validatorMock.validateHotel(hotel),"Bad hotel data");
+                ()-> validatorCustomMock.validateHotel(hotel),"Bad hotel data");
     }
 
     //Room
@@ -107,7 +107,7 @@ class ValidatorTest {
         when(hotelService.getHotelById(any(Long.class))).thenReturn(HotelServ.builder().build());
         when(roomService.getRoomByRoomNumberAndHotelId(any(RoomServ.class))).thenThrow(ElementNotFoundException.class);
         //when &then
-        assertDoesNotThrow(()->validatorMock.validateRoom(room));
+        assertDoesNotThrow(()-> validatorCustomMock.validateRoom(room));
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#incorrectRoomProvider")
@@ -115,7 +115,7 @@ class ValidatorTest {
         //given
         //when & then
         assertThrows(BadRequestException.class,
-                ()->validatorMock.validateRoom(room),"Bad room data");
+                ()-> validatorCustomMock.validateRoom(room),"Bad room data");
     }
 
     //User
@@ -137,7 +137,7 @@ class ValidatorTest {
         when(userService.getUserByUsername(any(String.class))).thenThrow(ElementNotFoundException.class);
         when(userService.getUserByEmail(any(String.class))).thenThrow(ElementNotFoundException.class);
         //when &then
-        assertDoesNotThrow(()->validatorMock.validateUser(user));
+        assertDoesNotThrow(()-> validatorCustomMock.validateUser(user));
     }
 
     @ParameterizedTest
@@ -146,7 +146,7 @@ class ValidatorTest {
         //given
         //when & then
         assertThrows(BadRequestException.class,
-                ()->validatorMock.validateUser(user),"Bad user data");
+                ()-> validatorCustomMock.validateUser(user),"Bad user data");
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#userProviderBadEmail")
@@ -154,7 +154,7 @@ class ValidatorTest {
         //given
         //when & then
         assertThrows(BadRequestException.class,
-                ()->validatorMock.validateUser(user),"Bad email data");
+                ()-> validatorCustomMock.validateUser(user),"Bad email data");
     }
 
     @ParameterizedTest
@@ -163,7 +163,7 @@ class ValidatorTest {
         //given
         //when & then
         assertThrows(BadRequestException.class,
-                ()->validatorMock.validateUser(user),"Bad user role");
+                ()-> validatorCustomMock.validateUser(user),"Bad user role");
     }
 
     //Booking
@@ -192,7 +192,7 @@ class ValidatorTest {
         when(userService.getUserById(any(Long.class))).thenReturn(UserServ.builder().build());
         when(roomService.getRoomById(5L)).thenReturn(room);
         //when &then
-        assertDoesNotThrow(()->validatorMock.validateBooking(booking));
+        assertDoesNotThrow(()-> validatorCustomMock.validateBooking(booking));
     }
 
     private List<BookingServ> provideBookingsList(){
@@ -212,7 +212,7 @@ class ValidatorTest {
         //given
         //when & then
         assertThrows(BadRequestException.class,
-                ()->validatorMock.validateBooking(booking),"Bad booking date");
+                ()-> validatorCustomMock.validateBooking(booking),"Bad booking date");
     }
     @ParameterizedTest
     @MethodSource("com.project.hotelBooking.controller.ValidationDataProvider#bookingProviderRoomOccupied")
@@ -231,7 +231,7 @@ class ValidatorTest {
         when(roomService.getRoomById(5L)).thenReturn(room);
         //when & then
         assertThrows(ElementAlreadyExistException.class,
-                ()->validatorMock.validateBooking(booking),"Room occupied at this time");
+                ()-> validatorCustomMock.validateBooking(booking),"Room occupied at this time");
     }
 
 }
