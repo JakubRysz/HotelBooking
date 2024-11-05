@@ -26,6 +26,12 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
                     .disableDefaultConstraintViolation();
             return false;
         }
+        if (password.isEmpty()) {
+            context.buildConstraintViolationWithTemplate("password must not be empty")
+                    .addConstraintViolation()
+                    .disableDefaultConstraintViolation();
+            return false;
+        }
 
         try (InputStream inputStream = getClass()
                 .getClassLoader().getResourceAsStream("passay.properties")) {

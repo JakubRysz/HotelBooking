@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.UserMapper;
+import com.project.hotelBooking.controller.model.UserCreateDto;
 import com.project.hotelBooking.controller.model.UserDto;
 import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.mapper.UserMapperServ;
 import com.project.hotelBooking.service.model.Mail;
+import com.project.hotelBooking.service.model.UserServ;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserControllerE2ETest {
 
-    private static final String USERS_URL = "/v1/users";
+    protected static final String USERS_URL = "/v1/users";
     public static final String USERS_REGISTRATION = USERS_URL + "/registration";
     private static final String USERS_BOOKINGS_URL = USERS_URL + "/bookings";
     private final ObjectMapper objectMapper;
@@ -70,8 +72,7 @@ public class UserControllerE2ETest {
     @WithMockUser(roles = {"ADMIN"})
     public void shouldCreateUser() throws Exception {
         //given
-
-        UserDto user1Dto = mapUserToUserDto(USER_1);
+        UserCreateDto user1Dto = mapUserToUserCreateDto(USER_1, USER_1.getPassword());
         final String jsonContentNewUser = objectMapper.writeValueAsString(user1Dto);
         int usersNumberBefore = userRepository.findAllUsers(Pageable.unpaged()).size();
 
@@ -96,7 +97,7 @@ public class UserControllerE2ETest {
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403CreateUserUser() throws Exception {
         //given
-        UserDto user1Dto = mapUserToUserDto(USER_1);
+        UserCreateDto user1Dto = mapUserToUserCreateDto(USER_1, USER_1.getPassword());
         final String jsonContentNewUser = objectMapper.writeValueAsString(user1Dto);
 
         //when & then
@@ -331,6 +332,23 @@ public class UserControllerE2ETest {
 
     private UserDto mapUserToUserDto(User user) {
         return userMapper.mapToUserDto(userMapperServ.mapToUser(user));
+    }
+
+    private UserCreateDto mapUserToUserCreateDto(User user, String confirmPassword) {
+        return mapToUserCreateDto(userMapperServ.mapToUser(user), confirmPassword);
+    }
+
+    private static UserCreateDto mapToUserCreateDto(UserServ userServ, String confirmPassword) {
+        return UserCreateDto.builder()
+                .firstName(userServ.getFirstName())
+                .lastName(userServ.getLastName())
+                .dateOfBirth(userServ.getDateOfBirth())
+                .username(userServ.getUsername())
+                .password(userServ.getPassword())
+                .confirmPassword(confirmPassword)
+                .role(userServ.getRole())
+                .email(userServ.getEmail())
+                .build();
     }
 
     private User mapUserDtoToUser(UserDto userDto) {
