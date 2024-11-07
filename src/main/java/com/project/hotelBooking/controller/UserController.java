@@ -3,6 +3,7 @@ package com.project.hotelBooking.controller;
 import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.mapper.UserMapper;
 import com.project.hotelBooking.controller.model.UserCreateDto;
+import com.project.hotelBooking.controller.model.UserCreateAdminDto;
 import com.project.hotelBooking.controller.model.UserDto;
 import com.project.hotelBooking.controller.model.UserWithBookingDto;
 import com.project.hotelBooking.service.SimpleEmailService;
@@ -37,7 +38,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
-    public UserDto createUser(@Valid @RequestBody UserCreateDto userDto) {
+    public UserDto createUser(@Valid @RequestBody UserCreateAdminDto userDto) {
         UserServ user = userMapper.mapToUser(userDto);
         validatorCustom.validateUser(user);
         UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(user));
@@ -46,9 +47,9 @@ public class UserController {
     }
 
     @PostMapping("/users/registration")
-    public UserDto createUserRegistration(@RequestBody UserDto userDto) {
-        userDto = userDto.withRole(USER_ROLE);
+    public UserDto createUserRegistration(@Valid @RequestBody UserCreateDto userDto) {
         UserServ user = userMapper.mapToUser(userDto);
+        user = user.withRole(USER_ROLE);
         validatorCustom.validateUser(user);
         UserDto userCreated = userMapper.mapToUserDto(userService.saveUser(user));
         emailService.sendMailCreatedUser(user);
