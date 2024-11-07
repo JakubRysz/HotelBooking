@@ -2,10 +2,12 @@ package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.controller.mapper.UserMapper;
+import com.project.hotelBooking.controller.model.UserCreateAdminDto;
 import com.project.hotelBooking.controller.model.UserCreateDto;
 import com.project.hotelBooking.security.SecurityConfig;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -27,6 +29,7 @@ import java.util.stream.Stream;
 
 import static com.project.hotelBooking.common.CommonTestConstants.EMAIL_TEST;
 import static com.project.hotelBooking.common.CommonTestConstants.ROLE_USER;
+import static com.project.hotelBooking.controller.UserControllerE2ETest.USERS_REGISTRATION;
 import static com.project.hotelBooking.controller.UserControllerE2ETest.USERS_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -53,10 +56,9 @@ public class UserControllerInvalidInputIT {
     @ParameterizedTest
     @MethodSource("incorrectUserProvider")
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldCreateUser(UserCreateDto userCreateDto, Map<String, String> expectedMessageMap) throws Exception {
+    public void shouldReturnStatus400_createUserAdminInvalidData(UserCreateAdminDto userCreateDto, Map<String, String> expectedMessageMap) throws Exception {
         //given
         final String jsonContentNewUser = objectMapper.writeValueAsString(userCreateDto);
-
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(USERS_URL)
                         .content(jsonContentNewUser)
@@ -73,7 +75,7 @@ public class UserControllerInvalidInputIT {
 
     static Stream<Arguments> incorrectUserProvider() {
 
-        UserCreateDto userInvalidPassword = UserCreateDto.builder()
+        UserCreateAdminDto userInvalidPassword = UserCreateAdminDto.builder()
                 .firstName("Paul")
                 .lastName("Smith")
                 .dateOfBirth(LocalDate.now().minusYears(22))
@@ -84,7 +86,7 @@ public class UserControllerInvalidInputIT {
                 .email(EMAIL_TEST)
                 .build();
 
-        UserCreateDto userPasswordsDoNotMatch = UserCreateDto.builder()
+        UserCreateAdminDto userPasswordsDoNotMatch = UserCreateAdminDto.builder()
                 .firstName("Paul")
                 .lastName("Smith")
                 .dateOfBirth(LocalDate.now().minusYears(22))
@@ -95,7 +97,7 @@ public class UserControllerInvalidInputIT {
                 .email(EMAIL_TEST)
                 .build();
 
-        UserCreateDto userPasswordsDoNotMatchOneEmpty = UserCreateDto.builder()
+        UserCreateAdminDto userPasswordsDoNotMatchOneEmpty = UserCreateAdminDto.builder()
                 .firstName("Paul")
                 .lastName("Smith")
                 .dateOfBirth(LocalDate.now().minusYears(22))
@@ -106,7 +108,7 @@ public class UserControllerInvalidInputIT {
                 .email(EMAIL_TEST)
                 .build();
 
-        UserCreateDto userEmptyPassword = UserCreateDto.builder()
+        UserCreateAdminDto userEmptyPassword = UserCreateAdminDto.builder()
                 .firstName("Paul")
                 .lastName("Smith")
                 .dateOfBirth(LocalDate.now().minusYears(22))
@@ -117,7 +119,7 @@ public class UserControllerInvalidInputIT {
                 .email(EMAIL_TEST)
                 .build();
 
-        UserCreateDto userNullPassword = UserCreateDto.builder()
+        UserCreateAdminDto userNullPassword = UserCreateAdminDto.builder()
                 .firstName("Paul")
                 .lastName("Smith")
                 .dateOfBirth(LocalDate.now().minusYears(22))
@@ -147,5 +149,37 @@ public class UserControllerInvalidInputIT {
                                 "confirmPassword", "password must not be null")
                 )
         );
+    }
+
+    // serCreateDto is using the same base class as UserCreateDtoAdmin, so only one
+    // validation test is created to check if validation is applied co controller method
+    @Test
+    public void shouldReturnStatus400_createUserInvalidData() throws Exception {
+        //given
+        UserCreateDto userDto = UserCreateDto.builder()
+                .firstName("Paul")
+                .lastName("Smith")
+                .dateOfBirth(LocalDate.now().minusYears(22))
+                .password("Paulsmith123!")
+                .confirmPassword("Paaaaulsmith123!")
+                .username("paulsmith")
+                .email(EMAIL_TEST)
+                .build();
+
+        final String jsonContentNewUser = objectMapper.writeValueAsString(userDto);
+        Map<String, String> expectedMessageMap = Map.of("passwordAndConfirmPasswordMatching", "passwords do not match");
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(USERS_REGISTRATION)
+                        .content(jsonContentNewUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(400))
+                .andReturn();
+
+        //then
+        var actualMessageMap = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Map.class);
+        assertEquals(expectedMessageMap, actualMessageMap);
     }
 }
