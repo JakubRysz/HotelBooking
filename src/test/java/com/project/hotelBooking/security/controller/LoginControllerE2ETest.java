@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class LoginControllerTests {
+public class LoginControllerE2ETest {
 
     public static final String LOGIN_URL = "/login";
     public static final String AUTHENTICATION_ERROR_INVALID_USERNAME_OR_PASSWORD = "Authentication error: Invalid username or password";
