@@ -1,5 +1,6 @@
-package com.project.hotelBooking.controller.Annotations;
+package com.project.hotelBooking.controller.utils;
 
+import com.project.hotelBooking.controller.Annotations.ValidPassword;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;

@@ -5,7 +5,6 @@ import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.security.exceptions.ChangePasswordHashExpiredException;
-import com.project.hotelBooking.security.exceptions.PasswordsMismatchException;
 import com.project.hotelBooking.security.model.ChangedPassword;
 import com.project.hotelBooking.security.model.EmailDto;
 import com.project.hotelBooking.service.SimpleEmailService;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +65,6 @@ public class LostPasswordService {
 
     @Transactional
     public void changePassword(ChangedPassword changedPassword) {
-        checkIfGivenPasswordsMatch(changedPassword);
         User user = userRepository.findByHash(changedPassword.getHash())
                 .orElseThrow(() -> new BadRequestException("Invalid hash to change password"));
         if(checkIfChangePasswordLinkIsNotExpired(user)) {
@@ -85,11 +82,5 @@ public class LostPasswordService {
 
     private boolean checkIfChangePasswordLinkIsNotExpired(User user) {
         return user.getHashDate().plusMinutes(passwordResetLinkValidityMinutes).isAfter(LocalDateTime.now(clock));
-    }
-
-    private static void checkIfGivenPasswordsMatch(ChangedPassword changedPassword) {
-        if(!Objects.equals(changedPassword.getPassword(), changedPassword.getRepeatPassword())) {
-            throw new PasswordsMismatchException("Given passwords must be the same");
-        }
     }
 }

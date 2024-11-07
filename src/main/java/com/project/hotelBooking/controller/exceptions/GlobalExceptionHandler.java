@@ -2,7 +2,6 @@ package com.project.hotelBooking.controller.exceptions;
 
 import com.project.hotelBooking.security.exceptions.ChangePasswordHashExpiredException;
 import com.project.hotelBooking.security.exceptions.InvalidLoginCredentialsException;
-import com.project.hotelBooking.security.exceptions.PasswordsMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -67,12 +66,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleBadRequestException(BadRequestException ex) {
-        return new ResponseEntity<>("Bad request: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(PasswordsMismatchException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handlePasswordsNotMatchException(PasswordsMismatchException ex) {
         return new ResponseEntity<>("Bad request: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 

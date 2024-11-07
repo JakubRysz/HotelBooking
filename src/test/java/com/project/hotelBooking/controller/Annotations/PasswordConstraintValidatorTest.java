@@ -1,5 +1,6 @@
 package com.project.hotelBooking.controller.Annotations;
 
+import com.project.hotelBooking.controller.utils.PasswordConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
