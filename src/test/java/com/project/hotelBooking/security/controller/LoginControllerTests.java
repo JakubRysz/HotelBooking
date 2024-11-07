@@ -1,4 +1,4 @@
-package com.project.hotelBooking.controller;
+package com.project.hotelBooking.security.controller;
 
 import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.annotation.JsonProperty;

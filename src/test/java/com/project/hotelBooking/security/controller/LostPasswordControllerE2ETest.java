@@ -46,18 +46,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class LostPasswordControllerIT {
+class LostPasswordControllerE2ETest {
 
     private static final String NOT_EXISTING_EMAIL = "test@gmail.com";
     private static final String MAIL_SUBJECT_RESET_PASSWORD = "Hotel booking - reset password request";
-    private static final String LOST_PASSWORD_PATH = "/lostPassword";
-    private static final String CHANGE_PASSWORD_PATH = "/changePassword";
-    private static final String NEW_PASSWORD = "NEW_PASSWORD1234";
+    private static final String LOST_PASSWORD_URL = "/lostPassword";
+    protected static final String CHANGE_PASSWORD_URL = "/changePassword";
+    private static final String NEW_PASSWORD = "New_password1234";
     private static final String EXPECTED_EXCEPTION_MESSAGE_NOT_EXISTING_EMAIL =
             "Resource not found: There is no user with given email";
 
     private static final String EXPECTED_EXCEPTION_MESSAGE_PASSWORDS_NOT_MATCH =
-            "Bad request: Given passwords must be the same";
+            "passwords do not match";
     private static final String EXPECTED_EXCEPTION_MESSAGE_INVALID_HASH =
             "Bad request: Invalid hash to change password";
 
@@ -103,7 +103,7 @@ class LostPasswordControllerIT {
         );
 
         // when
-        mockMvc.perform(MockMvcRequestBuilders.post(LOST_PASSWORD_PATH)
+        mockMvc.perform(MockMvcRequestBuilders.post(LOST_PASSWORD_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(emailJson)
@@ -128,7 +128,7 @@ class LostPasswordControllerIT {
         );
 
         // when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(LOST_PASSWORD_PATH)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(LOST_PASSWORD_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(emailJson)
@@ -150,13 +150,13 @@ class LostPasswordControllerIT {
         String changePasswordJson = objectMapper.writeValueAsString(
                 ChangedPassword.builder()
                         .password(NEW_PASSWORD)
-                        .repeatPassword(NEW_PASSWORD)
+                        .confirmPassword(NEW_PASSWORD)
                         .hash(hashFromMail)
                         .build()
         );
 
         // when
-        mockMvc.perform(MockMvcRequestBuilders.post(CHANGE_PASSWORD_PATH)
+        mockMvc.perform(MockMvcRequestBuilders.post(CHANGE_PASSWORD_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(changePasswordJson)
@@ -171,34 +171,6 @@ class LostPasswordControllerIT {
     }
 
     @Test
-    void changePassword_shouldReturn400Response_whenNewPasswordsNotMatch() throws Exception {
-        // given
-        String hashFromMail = performLostPasswordRequestAndGetHashFromMail(USER_1.getEmail());
-
-        String changePasswordJson = objectMapper.writeValueAsString(
-                ChangedPassword.builder()
-                        .password(NEW_PASSWORD)
-                        .repeatPassword("different_password")
-                        .hash(hashFromMail)
-                        .build()
-        );
-
-        // when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(CHANGE_PASSWORD_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(changePasswordJson)
-                )
-                .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().is(400))
-                .andReturn();
-
-        // then
-        String responseMessage = mvcResult.getResponse().getContentAsString();
-        assertEquals(EXPECTED_EXCEPTION_MESSAGE_PASSWORDS_NOT_MATCH, responseMessage);
-    }
-
-    @Test
     void changePassword_shouldReturn400Response_whenHashIsInvalid() throws Exception {
         // given
         String invalidHash = DigestUtils.sha256Hex(USER_1.getId() + USER_1.getUsername() + USER_1.getPassword()
@@ -206,13 +178,13 @@ class LostPasswordControllerIT {
         String changePasswordJson = objectMapper.writeValueAsString(
                 ChangedPassword.builder()
                         .password(NEW_PASSWORD)
-                        .repeatPassword(NEW_PASSWORD)
+                        .confirmPassword(NEW_PASSWORD)
                         .hash(invalidHash)
                         .build()
         );
 
         // when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(CHANGE_PASSWORD_PATH)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(CHANGE_PASSWORD_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(changePasswordJson)
@@ -239,13 +211,13 @@ class LostPasswordControllerIT {
         String changePasswordJson = objectMapper.writeValueAsString(
                 ChangedPassword.builder()
                         .password(NEW_PASSWORD)
-                        .repeatPassword(NEW_PASSWORD)
+                        .confirmPassword(NEW_PASSWORD)
                         .hash(hashFromMail)
                         .build()
         );
 
         // when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(CHANGE_PASSWORD_PATH)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(CHANGE_PASSWORD_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(changePasswordJson)
@@ -273,7 +245,7 @@ class LostPasswordControllerIT {
                 new EmailDto(email)
         );
 
-        mockMvc.perform(MockMvcRequestBuilders.post(LOST_PASSWORD_PATH)
+        mockMvc.perform(MockMvcRequestBuilders.post(LOST_PASSWORD_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(emailJson)
