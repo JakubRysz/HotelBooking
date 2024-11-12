@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-resources/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v1/initializeDb").permitAll()
+                        .requestMatchers("/v1/clearDb").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/v1/users/registration").permitAll()
                         .requestMatchers("/lostPassword").permitAll()

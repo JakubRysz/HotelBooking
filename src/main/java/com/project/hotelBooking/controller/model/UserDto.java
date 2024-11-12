@@ -12,7 +12,6 @@ public class UserDto {
     String lastName;
     LocalDate dateOfBirth;
     String username;
-    String password;
     @With
     String role;
     String email;

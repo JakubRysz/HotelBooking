@@ -47,6 +47,7 @@ public class User implements UserDetails {
 
     @OneToMany(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "userId", updatable = false, insertable = false)
+    @ToString.Exclude
     private List<Booking> bookings;
 
     @Override

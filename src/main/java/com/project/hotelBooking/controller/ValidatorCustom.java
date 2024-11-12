@@ -167,8 +167,8 @@ public class ValidatorCustom {
                 || user.getDateOfBirth().isBefore(LocalDate.now().minusYears(100))
                 || user.getFirstName().length() < 2
                 || user.getLastName().length() < 2
-                || user.getUsername().length() < 2
-                || user.getPassword().length() < 2) throw new BadRequestException("Bad user data");
+                || user.getUsername().length() < 2)
+            throw new BadRequestException("Bad user data");
 
         validateEmail(user.getEmail());
         validateUserRole(user.getRole());
