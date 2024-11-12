@@ -11,6 +11,9 @@ on:
       test_mode:
         description: 'is testing mode enabled'
         default: 'false'
+      disable_deploy_mode:
+        description: 'disabling terraform apply and deploying to EC2'
+        default: 'true'
 
 jobs:
   build-maven:
@@ -63,10 +66,11 @@ jobs:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           test_mode: ${{ github.event.inputs.test_mode }}
+          disable_deploy_mode: ${{ github.event.inputs.disable_deploy_mode }}
 
   deploy-to-EC2:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main' || ${{ github.event.inputs.test_mode }} == 'true'
+    if: (github.ref_name == 'main' && ${{ github.event.inputs.disable_deploy_mode}} == 'false') || ${{ github.event.inputs.test_mode }} == 'true'
     needs: [terraform-init-plan-apply, build-and-push-to-ecr]
     steps:
       - name: Checkout code
