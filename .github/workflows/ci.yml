@@ -70,7 +70,7 @@ jobs:
 
   deploy-to-EC2:
     runs-on: ubuntu-latest
-    if: (github.ref_name == 'main' && ${{ github.event.inputs.disable_deploy_mode}} == 'false') || ${{ github.event.inputs.test_mode }} == 'true'
+    if: ${{ (github.ref_name == 'main' && github.event.inputs.disable_deploy_mode == 'false') || github.event.inputs.test_mode == 'true' }}
     needs: [terraform-init-plan-apply, build-and-push-to-ecr]
     steps:
       - name: Checkout code
