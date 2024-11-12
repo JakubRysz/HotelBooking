@@ -14,7 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,23 +28,22 @@ public class LoginController {
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     private static final String INVALID_USERNAME_OR_PASSWORD_MESSAGE = "Invalid username or password";
     private static final String AUTHENTICATION_FAILED_MESSAGE = "Authentication failed";
-    private long expirationTime;
-    private String secret;
+    @Value("${jwt.expirationTime}")
+    private final long expirationTime;
+    @Value("${jwt.secret}")
+    private final String secret;
 
     public LoginController(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            @Value("${jwt.expirationTime}") long expirationTime,
-                           @Value("${jwt.secret}") String secret,
-                           PasswordEncoder passwordEncoder) {
+                           @Value("${jwt.secret}") String secret) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.expirationTime = expirationTime;
         this.secret = secret;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
@@ -85,14 +83,14 @@ public class LoginController {
     }
 
     @Getter
-    private static class LoginCredentials {
+    public static class LoginCredentials {
         private String username;
         private String password;
     }
 
     @Getter
     @AllArgsConstructor
-    private static class Token {
+    public static class Token {
         private String token;
         private boolean adminAccess;
     }

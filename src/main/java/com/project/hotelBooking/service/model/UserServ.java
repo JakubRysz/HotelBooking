@@ -23,6 +23,7 @@ public class UserServ implements UserDetails {
     String username;
     @With
     String password;
+    @With
     String role;
     String email;
     @With

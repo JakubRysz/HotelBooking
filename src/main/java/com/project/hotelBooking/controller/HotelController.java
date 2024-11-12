@@ -20,14 +20,14 @@ import java.util.stream.Collectors;
 public class HotelController {
 
     private final HotelService hotelService;
-    private final Validator validator;
+    private final ValidatorCustom validatorCustom;
     private final HotelMapper hotelMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/hotels")
     public HotelDto createHotel(@RequestBody HotelWithRoomsDto hotelWithRoomsDto) {
         HotelServ hotel = hotelMapper.mapToHotel(hotelWithRoomsDto);
-        validator.validateHotel(hotel);
+        validatorCustom.validateHotel(hotel);
         return hotelMapper.mapToHotelDto(hotelService.saveHotel(hotel));
     }
 
@@ -58,14 +58,14 @@ public class HotelController {
     @PutMapping("/hotels")
     public HotelDto editHotel(@RequestBody HotelDto hotelDto) {
         HotelServ hotel = hotelMapper.mapToHotel(hotelDto);
-        validator.validateHotelEdit(hotel);
+        validatorCustom.validateHotelEdit(hotel);
         return hotelMapper.mapToHotelDto(hotelService.editHotel(hotel));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/hotels/{id}")
     public void deleteHotel(@PathVariable Long id) {
-        validator.validateIfHotelExistById(id);
+        validatorCustom.validateIfHotelExistById(id);
         hotelService.deleteHotelById(id);
     }
 }

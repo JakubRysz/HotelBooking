@@ -39,7 +39,7 @@ public class CommonDatabaseProvider {
             .lastName("Smith")
             .dateOfBirth(LocalDate.of(1991, 2, 16))
             .username("paulsmith")
-            .password("paulsmith123")
+            .password("Paulsmith123!")
             .role(ROLE_USER)
             .email(EMAIL_TEST)
             .build();
@@ -49,7 +49,7 @@ public class CommonDatabaseProvider {
             .lastName("Kowalski")
             .dateOfBirth(LocalDate.of(1992, 3, 15))
             .username("jankowalski")
-            .password("jankowalski123")
+            .password("Jankowalski123!")
             .role(ROLE_USER)
             .email(EMAIL_TEST)
             .build();

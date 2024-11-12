@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
-public class Validator {
+public class ValidatorCustom {
 
     private final LocalizationService localizationService;
     private final HotelService hotelService;
