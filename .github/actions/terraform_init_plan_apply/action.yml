@@ -27,6 +27,9 @@ inputs:
   test_mode:
     description: 'Is test mode active'
     default: 'false'
+  disable_deploy_mode:
+    description: 'Is disable deploy mode active'
+    default: 'false'
 
 outputs:
   ec2_instance_ip_addr:
