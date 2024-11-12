@@ -3,6 +3,7 @@ package com.project.hotelBooking.service;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.repository.BookingRepository;
 import com.project.hotelBooking.repository.UserRepository;
+import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.service.mapper.BookingMapperServ;
 import com.project.hotelBooking.service.mapper.UserMapperServ;
 import com.project.hotelBooking.service.model.BookingServ;
@@ -82,8 +83,20 @@ public class UserService {
                 .filter(booking -> booking.getUserId() == id).collect(Collectors.toList());
     }
 
-    public UserServ editUser(UserServ user) {
-        return saveUser(user);
+    public UserServ editUser(UserServ userDto) {
+        User existingUser = userRepository.findById(userDto.getId())
+                .orElseThrow(() -> new ElementNotFoundException("No such user"));
+
+        existingUser.setFirstName(userDto.getFirstName());
+        existingUser.setLastName(userDto.getLastName());
+        existingUser.setDateOfBirth(userDto.getDateOfBirth());
+        existingUser.setUsername(userDto.getUsername());
+        existingUser.setRole(userDto.getRole());
+        existingUser.setEmail(userDto.getEmail());
+
+        return userMapperServ.mapToUser(
+                userRepository.save(existingUser)
+        );
     }
 
     public void deleteAllUsers() {

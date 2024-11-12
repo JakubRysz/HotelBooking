@@ -229,7 +229,6 @@ public class UserControllerE2ETest {
                 .lastName(USER_1.getLastName())
                 .dateOfBirth(USER_1.getDateOfBirth())
                 .username("usernameEdited")
-                .password(USER_1.getPassword())
                 .role(USER_1.getRole())
                 .email(USER_1.getEmail())
                 .build();
@@ -252,7 +251,7 @@ public class UserControllerE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403EditUserUser() throws Exception {
+    public void shouldReturnStatus403EditUserUser_whenUsingAdminEndpoint() throws Exception {
         //given
         User userSaved = userRepository.save(USER_1);
         UserDto userEdited = UserDto.builder()
@@ -261,11 +260,11 @@ public class UserControllerE2ETest {
                 .lastName(USER_1.getLastName())
                 .dateOfBirth(USER_1.getDateOfBirth())
                 .username("usernameEdited")
-                .password(USER_1.getPassword())
                 .role(USER_1.getRole())
                 .email(USER_1.getEmail())
                 .build();
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
+
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(USERS_URL)
                         .content(jsonContentUserEdited)
