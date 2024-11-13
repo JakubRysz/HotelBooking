@@ -1,14 +1,12 @@
 package com.project.hotelBooking.controller.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@ToString(callSuper = true)
 @SuperBuilder
-public class UserCreateAdminDto extends UserCreateBaseDto {
+public class UserCreateAdminDto extends UserCreateDto {
     String role;
 }

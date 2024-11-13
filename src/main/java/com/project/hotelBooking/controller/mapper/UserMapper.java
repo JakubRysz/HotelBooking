@@ -1,7 +1,7 @@
 package com.project.hotelBooking.controller.mapper;
 
-import com.project.hotelBooking.controller.model.UserCreateDto;
 import com.project.hotelBooking.controller.model.UserCreateAdminDto;
+import com.project.hotelBooking.controller.model.UserCreateDto;
 import com.project.hotelBooking.controller.model.UserDto;
 import com.project.hotelBooking.controller.model.UserWithBookingDto;
 import com.project.hotelBooking.service.model.UserServ;
