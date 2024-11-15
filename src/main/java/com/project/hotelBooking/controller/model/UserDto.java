@@ -9,5 +9,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class UserDto extends UserBaseDto {
     Long id;
+    String firstName;
+    String lastName;
+    LocalDate dateOfBirth;
+    String username;
+    @With
     String role;
 }

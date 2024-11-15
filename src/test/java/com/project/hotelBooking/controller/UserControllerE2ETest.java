@@ -251,7 +251,7 @@ public class UserControllerE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403EditUserUser() throws Exception {
+    public void shouldReturnStatus403EditUserUser_whenUsingAdminEndpoint() throws Exception {
         //given
         User userSaved = userRepository.save(USER_1);
         UserDto userEdited = UserDto.builder()
@@ -264,6 +264,7 @@ public class UserControllerE2ETest {
                 .email(USER_1.getEmail())
                 .build();
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
+
         //when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(USERS_URL)
                         .content(jsonContentUserEdited)

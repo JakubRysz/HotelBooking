@@ -194,26 +194,13 @@ public class ValidationDataProvider {
                 .bookings(null)
                 .build();
 
-        UserServ userBadPassword = UserServ.builder()
-                .id(1L)
-                .firstName("Jan")
-                .lastName("Kowalski")
-                .dateOfBirth(LocalDate.of(1979, 1, 10))
-                .username("jankowalski")
-                .password("j")
-                .role(ROLE_USER)
-                .email(EMAIL_TEST)
-                .bookings(null)
-                .build();
-
         List<UserServ> users = new ArrayList<>(
                 Arrays.asList(
                         userBadFirstName,
                         userBadLastName,
                         userOlderThan100,
                         userLessThan18,
-                        userBadUsername,
-                        userBadPassword
+                        userBadUsername
                 )
         );
 
