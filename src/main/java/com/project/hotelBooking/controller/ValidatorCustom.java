@@ -151,7 +151,7 @@ public class ValidatorCustom {
     }
 
     public void validateUserEdit(UserServ user) {
-        validateUserData(user);
+        validateUserDataWithoutPassword(user);
         UserServ userFromDatabase = userService.getUserById(user.getId());
         if (!user.getEmail().equals(userFromDatabase.getEmail())) {
             validateIfEmailNotExist(user.getEmail());
@@ -162,13 +162,17 @@ public class ValidatorCustom {
     }
 
     private void validateUserData(UserServ user) {
+        validateUserDataWithoutPassword(user);
+        if (user.getPassword().length() < 2) throw new BadRequestException("Bad user data");
+    }
+
+    private void validateUserDataWithoutPassword(UserServ user) {
         if (user == null
                 || user.getDateOfBirth().isAfter(LocalDate.now().minusYears(18))
                 || user.getDateOfBirth().isBefore(LocalDate.now().minusYears(100))
                 || user.getFirstName().length() < 2
                 || user.getLastName().length() < 2
-                || user.getUsername().length() < 2
-                || user.getPassword().length() < 2) throw new BadRequestException("Bad user data");
+                || user.getUsername().length() < 2) throw new BadRequestException("Bad user data");
 
         validateEmail(user.getEmail());
         validateUserRole(user.getRole());

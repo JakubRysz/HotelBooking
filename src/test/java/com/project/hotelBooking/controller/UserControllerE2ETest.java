@@ -229,7 +229,6 @@ public class UserControllerE2ETest {
                 .lastName(USER_1.getLastName())
                 .dateOfBirth(USER_1.getDateOfBirth())
                 .username("usernameEdited")
-                .password(USER_1.getPassword())
                 .role(USER_1.getRole())
                 .email(USER_1.getEmail())
                 .build();
@@ -261,7 +260,6 @@ public class UserControllerE2ETest {
                 .lastName(USER_1.getLastName())
                 .dateOfBirth(USER_1.getDateOfBirth())
                 .username("usernameEdited")
-                .password(USER_1.getPassword())
                 .role(USER_1.getRole())
                 .email(USER_1.getEmail())
                 .build();
