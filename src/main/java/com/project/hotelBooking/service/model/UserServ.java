@@ -15,7 +15,7 @@ import java.util.List;
 @Value
 @Builder
 public class UserServ implements UserDetails {
-
+    @With
     Long id;
     String firstName;
     String lastName;

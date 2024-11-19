@@ -9,7 +9,5 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @SuperBuilder
-public class UserDto extends UserBaseDto {
-    Long id;
-    String role;
+public class UserEditDto extends UserBaseDto {
 }

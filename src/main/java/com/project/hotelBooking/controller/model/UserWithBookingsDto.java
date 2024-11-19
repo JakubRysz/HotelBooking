@@ -10,6 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @SuperBuilder
-public class UserWithBookingDto extends UserDto {
+public class UserWithBookingsDto extends UserDto {
     List<Booking> bookings;
 }
