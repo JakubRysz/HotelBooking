@@ -175,7 +175,7 @@ public class ValidatorCustom {
                 || user.getUsername().length() < 2) throw new BadRequestException("Bad user data");
 
         validateEmail(user.getEmail());
-        validateUserRole(user.getRole());
+        //validateUserRole(user.getRole());
     }
 
     protected UserServ validateIfUserExistById(Long id) {
