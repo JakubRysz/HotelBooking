@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.UserMapper;
-import com.project.hotelBooking.controller.model.UserCreateAdminDto;
-import com.project.hotelBooking.controller.model.UserCreateDto;
-import com.project.hotelBooking.controller.model.UserDto;
+import com.project.hotelBooking.controller.model.*;
 import com.project.hotelBooking.repository.UserRepository;
 import com.project.hotelBooking.repository.model.User;
 import com.project.hotelBooking.service.SimpleEmailService;
@@ -48,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 public class UserControllerE2ETest {
 
     protected static final String USERS_URL = "/v1/users";
+    protected static final String USERS_OWN_URL = "/v1/users/own";
     protected static final String USERS_REGISTRATION = USERS_URL + "/registration";
     private static final String USERS_BOOKINGS_URL = USERS_URL + "/bookings";
     private final ObjectMapper objectMapper;
@@ -220,7 +219,7 @@ public class UserControllerE2ETest {
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
-    public void shouldEditUser() throws Exception {
+    public void shouldEditUserAdmin() throws Exception {
         //given
         User userSaved = userRepository.save(USER_1);
         UserDto userEdited = UserDto.builder()
@@ -250,17 +249,44 @@ public class UserControllerE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403EditUserUser_whenUsingAdminEndpoint() throws Exception {
+    @WithMockUser(username = USER_1_USERNAME, roles = {"USER"})
+    public void shouldEditUserUser() throws Exception {
         //given
-        User userSaved = userRepository.save(USER_1);
-        UserDto userEdited = UserDto.builder()
-                .id(userSaved.getId())
+        userRepository.save(USER_1);
+        UserEditDto userEdited = UserEditDto.builder()
                 .firstName(USER_1.getFirstName())
                 .lastName(USER_1.getLastName())
                 .dateOfBirth(USER_1.getDateOfBirth())
                 .username("usernameEdited")
-                .role(USER_1.getRole())
+                .email(USER_1.getEmail())
+                .build();
+        final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(USERS_OWN_URL)
+                        .content(jsonContentUserEdited)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(200))
+                .andReturn();
+
+        //then
+        UserDto user = getUserFromResponse(mvcResult.getResponse());
+        User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
+        assertEqualsUsersWithoutId(mapUseDtoToUser(userEdited), userFromDatabase);
+    }
+
+    @Test
+    @WithMockUser(roles = {"USER"})
+    public void shouldReturnStatus403EditUserUser_whenUsingAdminEndpoint() throws Exception {
+        //given
+        userRepository.save(USER_1);
+        UserEditDto userEdited = UserEditDto.builder()
+                .firstName(USER_1.getFirstName())
+                .lastName(USER_1.getLastName())
+                .dateOfBirth(USER_1.getDateOfBirth())
+                .username("usernameEdited")
                 .email(USER_1.getEmail())
                 .build();
         final String jsonContentUserEdited = objectMapper.writeValueAsString(userEdited);
@@ -370,6 +396,10 @@ public class UserControllerE2ETest {
     }
 
     private User mapUserDtoToUser(UserDto userDto) {
+        return userMapperServ.mapToUserRepository(userMapper.mapToUser(userDto));
+    }
+
+    private User mapUseDtoToUser(UserEditDto userDto) {
         return userMapperServ.mapToUserRepository(userMapper.mapToUser(userDto));
     }
 }
