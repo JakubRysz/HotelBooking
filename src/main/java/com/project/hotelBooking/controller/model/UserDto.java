@@ -1,18 +1,15 @@
 package com.project.hotelBooking.controller.model;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
-
-@Value
-@Builder
-public class UserDto {
+@Getter
+@NoArgsConstructor
+@ToString(callSuper = true)
+@SuperBuilder
+public class UserDto extends UserBaseDto {
     Long id;
-    String firstName;
-    String lastName;
-    LocalDate dateOfBirth;
-    String username;
-    @With
     String role;
-    String email;
 }

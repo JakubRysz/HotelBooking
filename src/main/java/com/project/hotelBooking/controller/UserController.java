@@ -1,11 +1,7 @@
 package com.project.hotelBooking.controller;
 
-import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.mapper.UserMapper;
-import com.project.hotelBooking.controller.model.UserCreateDto;
-import com.project.hotelBooking.controller.model.UserCreateAdminDto;
-import com.project.hotelBooking.controller.model.UserDto;
-import com.project.hotelBooking.controller.model.UserWithBookingDto;
+import com.project.hotelBooking.controller.model.*;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;
 import com.project.hotelBooking.service.model.UserServ;
@@ -19,7 +15,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
@@ -30,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private static final String USER_ROLE = "ROLE_USER";
+    public static final String USER_IS_NOT_AUTHENTICATED_MESSAGE = "User is not authenticated";
 
     private final UserService userService;
     private final UserMapper userMapper;
@@ -58,19 +54,19 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/bookings/{id}")
-    public UserWithBookingDto getSingleUser(@PathVariable Long id) {
+    public UserWithBookingsDto getSingleUser(@PathVariable Long id) {
         return userMapper.mapToUserWithBookingDto(userService.getUserById(id));
     }
 
     @GetMapping("/users/own/bookings")
-    public UserWithBookingDto getSingleUserOwner() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public UserWithBookingsDto getSingleUserOwner() {
+        Authentication auth = getAuthentication();
         return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/bookings")
-    public List<UserWithBookingDto> getUsersWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
+    public List<UserWithBookingsDto> getUsersWithBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         return (userService.getUsersWithBookings(page, sort)
@@ -99,12 +95,10 @@ public class UserController {
     }
 
     @PutMapping("/users/own")
-    public UserDto editUserUser(@RequestBody UserDto userDto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserServ userAuth = userService.getUserByUsername(auth.getName());
+    public UserDto editUserUser(@RequestBody UserEditDto userDto) {
+        Long authenticatedUserId = getAuthenticatedUserId();
         UserServ user = userMapper.mapToUser(userDto);
-        if (!Objects.equals(user.getId(), userAuth.getId()))
-            throw new BadRequestException("Given user Id is not Id of current authenticated user");
+        user = user.withId(authenticatedUserId);
         validatorCustom.validateUserEdit(user);
         UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));
         emailService.sendMailEditedUser(user);
@@ -117,5 +111,18 @@ public class UserController {
         UserServ userToDelete = userService.getUserById(id);
         userService.deleteUserById(id);
         emailService.sendMailDeletedUser(userToDelete);
+    }
+
+    private static Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    private Long getAuthenticatedUserId() {
+        Authentication auth = getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new IllegalStateException(USER_IS_NOT_AUTHENTICATED_MESSAGE);
+        }
+        UserServ userAuth = userService.getUserByUsername(auth.getName());
+        return userAuth.getId();
     }
 }
