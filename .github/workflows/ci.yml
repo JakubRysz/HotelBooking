@@ -22,6 +22,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Start Docker Containers
+        run: docker-compose up -d
+
+      - name: Wait for PostgreSQL to Be Ready
+        run: |
+          for i in {1..20}; do
+            docker exec -it postgres pg_isready -U admin -d hotel_booking && break
+            echo "Waiting for database to be ready..."
+            sleep 5
+          done
+
       - name: Build project with Maven and run tests
         uses: ./.github/actions/build_maven
 
