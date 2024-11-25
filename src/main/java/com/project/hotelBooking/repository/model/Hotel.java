@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class Hotel {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="ID")
      Long id;
     @Column(name="Name")
