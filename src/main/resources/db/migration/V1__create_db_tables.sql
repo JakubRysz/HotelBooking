@@ -1,0 +1,42 @@
+CREATE TABLE localizations (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    city VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE hotels (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    hotel_chain VARCHAR(255) NOT NULL,
+    localization_id BIGINT NOT NULL REFERENCES localizations(id),
+    number_of_stars INTEGER NOT NULL
+);
+
+CREATE TABLE rooms (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    hotel_id BIGINT NOT NULL REFERENCES hotels(id),
+    room_number INTEGER NOT NULL,
+    number_of_persons INTEGER NOT NULL,
+    standard INTEGER NOT NULL
+);
+
+CREATE TABLE users (
+    id BIGINT  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    birth_date DATE NOT NULL,
+    role VARCHAR(255) NOT NULL,
+    hash VARCHAR(255),
+    hash_date TIMESTAMP(6)
+);
+
+CREATE TABLE bookings (
+    id BIGINT  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    room_id BIGINT NOT NULL REFERENCES rooms(id),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL
+);
