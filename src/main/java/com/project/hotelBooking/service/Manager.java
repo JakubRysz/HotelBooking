@@ -39,13 +39,13 @@ public class Manager {
         Room roomSaved1 = roomRepository.save(room1);
         Room roomSaved2 = roomRepository.save(room2);
 
-        User user1 = new User(null, "user_firstname", "user_lastname", LocalDate.of(2000, 1, 1),"user_role_user",passwordEncoder.encode("User123!"),"ROLE_USER", EMAIL_USER, null, null, null);
-        User user2 = new User(null, "admin_firstname", "admin_lastname", LocalDate.of(2000, 1, 1),"user_role_admin",passwordEncoder.encode("Admin123!"),"ROLE_ADMIN", EMAIL_TEST, null, null, null);
+        User user1 = new User(null, "user_firstname", "user_lastname", LocalDate.now().minusYears(25),"user_role_user",passwordEncoder.encode("User123!"),"ROLE_USER", EMAIL_USER, null, null, null);
+        User user2 = new User(null, "admin_firstname", "admin_lastname", LocalDate.now().minusYears(30),"user_role_admin",passwordEncoder.encode("Admin123!"),"ROLE_ADMIN", EMAIL_TEST, null, null, null);
         User userSaved1 = userRepository.save(user1);
         User userSaved2 = userRepository.save(user2);
 
-        Booking booking1 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.of(2023, 02, 17), LocalDate.of(2023, 02, 21));
-        Booking booking2 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.of(2023, 02, 11), LocalDate.of(2023, 02, 15));
+        Booking booking1 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.now().plusDays(20), LocalDate.now().plusDays(25));
+        Booking booking2 = new Booking(null, userSaved1.getId(), roomSaved1.getId(), LocalDate.now().plusDays(30), LocalDate.now().plusDays(33));
 
         bookingRepository.save(booking1);
         bookingRepository.save(booking2);

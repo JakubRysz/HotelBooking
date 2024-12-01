@@ -47,50 +47,64 @@ public class SimpleEmailServiceTest {
     @Test
     public void shouldSendEmailCreatedBooking() {
         //Given
+        LocalDate bookingStartDate = LocalDate.now().plusDays(10);
+        LocalDate bookingEndDate = LocalDate.now().plusDays(2);
+        String userName = "Jan";
+        String userLastName = "Kowalski";
+        String hotelName = "hotel1";
+        String hotelChain = "Marriott";
+        String country = "Poland";
+        String city = "Cracow";
+        int roomNumber = 2;
+        int roomStandard = 2;
+        int numberOfPersons = 3;
+
+        String mailMessageSubject = "Hotel booking - confirmation of creating a new booking";
+        String mailMessageText = "New booking with data below has been created. \n\n"
+                + "Start date: " + bookingStartDate + "\n"
+                + "End date: " + bookingEndDate + "\n"
+                + "Booking owner: " + userName + " " + userLastName + "\n"
+                + "Hotel name: " + hotelName + "\n"
+                + "Hotel chain: " + hotelChain + "\n"
+                + "Localization: " + country + ", " + city + "\n"
+                + "Room number: " + roomNumber + "\n"
+                + "Room standard: " + roomStandard + "\n"
+                + "Maximum number of persons in room: " + numberOfPersons + "\n";
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(EMAIL_TEST);
-        mailMessage.setSubject("Hotel booking - confirmation of creating a new booking");
-        mailMessage.setText("New booking with data below has been created. \n\n"
-        +"Start date: 2023-02-17\n"
-                + "End date: 2023-02-21\n"
-                + "Booking owner: Jan Kowalski\n"
-                + "Hotel name: hotel1\n"
-                + "Hotel chain: Mariot\n"
-                + "Localization: Poland, Cracow\n"
-                + "Room number: 2\n"
-                + "Room standard: 2\n"
-                + "Maximum number of persons in room: 3\n");
+        mailMessage.setSubject(mailMessageSubject);
+        mailMessage.setText(mailMessageText);
 
         LocalizationServ localization = LocalizationServ.builder()
                 .id(1L)
-                .city("Cracow")
+                .city(city)
                 .country("Poland")
                 .hotels(null)
                 .build();
 
         HotelServ hotel = HotelServ.builder()
                 .id(1L)
-                .name("hotel1")
+                .name(hotelName)
                 .numberOfStars(2)
-                .hotelChain("Mariot")
+                .hotelChain(hotelChain)
                 .localizationId(1L)
                 .rooms(null)
                 .build();
 
         RoomServ room = RoomServ.builder()
                 .id(1L)
-                .roomNumber(2)
-                .numberOfPersons(3)
-                .standard(2)
+                .roomNumber(roomNumber)
+                .numberOfPersons(numberOfPersons)
+                .standard(roomStandard)
                 .hotelId(1L)
                 .bookings(null)
                 .build();
 
         UserServ user = UserServ.builder()
-                .firstName("Jan")
-                .lastName("Kowalski")
-                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .firstName(userName)
+                .lastName(userLastName)
+                .dateOfBirth(LocalDate.now().minusYears(30))
                 .username("jankowalski")
                 .role(ROLE_USER)
                 .email(EMAIL_TEST)
@@ -101,8 +115,8 @@ public class SimpleEmailServiceTest {
                 .id(1L)
                 .userId(1L)
                 .roomId(1L)
-                .startDate(LocalDate.of(2023, 02, 17))
-                .endDate(LocalDate.of(2023, 02, 21))
+                .startDate(bookingStartDate)
+                .endDate(bookingEndDate)
                 .build();
 
         BookingInfo bookingInfo = BookingInfo.builder()
@@ -118,5 +132,4 @@ public class SimpleEmailServiceTest {
         //Then
         verify(javaMailSender,times(1)).send(mailMessage);
     }
-
 }

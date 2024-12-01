@@ -73,7 +73,7 @@ class ValidatorCustomTest {
                 .id(1L)
                 .name("Hotel1")
                 .numberOfStars(2)
-                .hotelChain("Mariot")
+                .hotelChain("Marriott")
                 .localizationId(2L)
                 .rooms(null)
                 .build();
@@ -126,7 +126,7 @@ class ValidatorCustomTest {
                 .id(1L)
                 .firstName("Jan")
                 .lastName("Kowalski")
-                .dateOfBirth(LocalDate.of(1979, 1, 10))
+                .dateOfBirth(LocalDate.now().minusYears(25))
                 .username("jankowalski")
                 .password("jankowalski123")
                 .role(ROLE_USER)
