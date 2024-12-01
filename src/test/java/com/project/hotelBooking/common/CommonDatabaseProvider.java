@@ -52,7 +52,7 @@ public class CommonDatabaseProvider {
             .username("jankowalski")
             .password("Jankowalski123!")
             .role(ROLE_USER)
-            .email(EMAIL_TEST)
+            .email(EMAIL_TEST_2)
             .build();
 
     public static final User USER_3 = User.builder()
@@ -62,6 +62,6 @@ public class CommonDatabaseProvider {
             .username("crisbrown")
             .password("crisbrown123")
             .role(ROLE_USER)
-            .email(EMAIL_TEST)
+            .email(EMAIL_TEST_3)
             .build();
 }

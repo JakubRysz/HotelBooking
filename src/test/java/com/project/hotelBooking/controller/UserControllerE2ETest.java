@@ -274,7 +274,7 @@ public class UserControllerE2ETest {
         //then
         UserDto user = getUserFromResponse(mvcResult.getResponse());
         User userFromDatabase = userRepository.findById(user.getId()).orElseThrow();
-        assertEqualsUsersWithoutId(mapUseDtoToUser(userEdited), userFromDatabase);
+        assertEqualsUsersWithoutIdAndRole(mapUseDtoToUser(userEdited), userFromDatabase);
     }
 
     @Test
@@ -344,6 +344,14 @@ public class UserControllerE2ETest {
         assertEquals(expectedUser.getDateOfBirth(), actualUser.getDateOfBirth());
         assertEquals(expectedUser.getUsername(), actualUser.getUsername());
         assertEquals(expectedUser.getRole(), actualUser.getRole());
+        assertEquals(expectedUser.getEmail(), actualUser.getEmail());
+    }
+
+    private static void assertEqualsUsersWithoutIdAndRole(User expectedUser, User actualUser) {
+        assertEquals(expectedUser.getFirstName(), actualUser.getFirstName());
+        assertEquals(expectedUser.getLastName(), actualUser.getLastName());
+        assertEquals(expectedUser.getDateOfBirth(), actualUser.getDateOfBirth());
+        assertEquals(expectedUser.getUsername(), actualUser.getUsername());
         assertEquals(expectedUser.getEmail(), actualUser.getEmail());
     }
 
