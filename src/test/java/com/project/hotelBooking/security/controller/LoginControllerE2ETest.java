@@ -49,7 +49,7 @@ public class LoginControllerE2ETest {
     private static User user1 = User.builder()
             .firstName("Paul")
             .lastName("Smith")
-            .dateOfBirth(LocalDate.of(1991, 2, 16))
+            .dateOfBirth(LocalDate.now().minusYears(25))
             .username(username1)
             .email(EMAIL_TEST)
             .build();

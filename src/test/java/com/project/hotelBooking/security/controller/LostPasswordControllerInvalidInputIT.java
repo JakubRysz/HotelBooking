@@ -43,7 +43,7 @@ public class LostPasswordControllerInvalidInputIT {
 
     @ParameterizedTest
     @MethodSource("incorrectChangePasswordProvider")
-    public void shouldReturnStatus400_createUserInvalidData(ChangedPassword changedPassword, Map<String, String> expectedMessageMap) throws Exception {
+    public void changePassword_shouldReturnStatus400_whenInvalidData(ChangedPassword changedPassword, Map<String, String> expectedMessageMap) throws Exception {
         //given
         final String jsonChangePassword = objectMapper.writeValueAsString(changedPassword);
         //when
