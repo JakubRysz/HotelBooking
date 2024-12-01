@@ -15,7 +15,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class Localization {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
     @Column(name = "CITY")

@@ -98,6 +98,7 @@ public class UserController {
     public UserDto editUserUser(@RequestBody UserEditDto userDto) {
         Long authenticatedUserId = getAuthenticatedUserId();
         UserServ user = userMapper.mapToUser(userDto);
+        user = user.withRole(USER_ROLE);
         user = user.withId(authenticatedUserId);
         validatorCustom.validateUserEdit(user);
         UserDto editedUser = userMapper.mapToUserDto(userService.editUser(user));

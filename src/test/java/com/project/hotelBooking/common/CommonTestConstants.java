@@ -10,4 +10,6 @@ public class CommonTestConstants {
     public static String ROLE_USER = "ROLE_USER";
     public static String ROLE_ADMIN = "ROLE_ADMIN";
     public static String EMAIL_TEST = "application.test1010@gmail.com";
+    public static String EMAIL_TEST_2 = "application.test1011@gmail.com";
+    public static String EMAIL_TEST_3 = "application.test1013@gmail.com";
 }
