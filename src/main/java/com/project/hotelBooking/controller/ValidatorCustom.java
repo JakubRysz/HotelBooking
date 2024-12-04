@@ -116,7 +116,7 @@ public class ValidatorCustom {
         validateIfHotelExistById(room.getHotelId());
 
         if (room.getRoomNumber() != roomFromDatabase.getRoomNumber()
-                || room.getHotelId() != roomFromDatabase.getHotelId()) {
+                || !room.getHotelId().equals(roomFromDatabase.getHotelId())) {
             validateIfRoomNotExistByRoomNumberAndHotelId(room);
         }
     }
