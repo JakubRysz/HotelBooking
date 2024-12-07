@@ -2,7 +2,10 @@ package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.controller.mapper.BookingMapper;
+import com.project.hotelBooking.controller.model.BookingCreateAdminDto;
+import com.project.hotelBooking.controller.model.BookingCreateDto;
 import com.project.hotelBooking.controller.model.BookingDto;
+import com.project.hotelBooking.controller.model.BookingEditDto;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.*;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +34,8 @@ public class BookingController {
     private final SimpleEmailService emailService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/bookings")
-    public BookingDto createBooking(@RequestBody BookingDto bookingDto) {
+    @PostMapping("admin/bookings")
+    public BookingDto createBookingAdmin(@RequestBody BookingCreateAdminDto bookingDto) {
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
         validatorCustom.validateBooking(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
@@ -41,32 +44,39 @@ public class BookingController {
         return createdBooking;
     }
 
-    @PostMapping("/bookings/own")
-    public BookingDto createOwnBooking(@RequestBody BookingDto bookingDto) {
+
+    @PostMapping("/bookings")
+    public BookingDto createBookingUser(@RequestBody BookingCreateDto bookingDto) {
+        Long authenticatedUserId = userService.getAuthenticatedUserId();
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
+        booking = booking.withUserId(authenticatedUserId);
         validatorCustom.validateBooking(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
-        BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(bookingMapper.mapToBooking(bookingDto)));
+        BookingDto createdBooking = bookingMapper.mapToBookingDto(bookingService.saveBooking(booking));
         emailService.sendMailCreatedBooking(bookingInfo);
         return createdBooking;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/bookings/{id}")
-    public BookingDto getSingleBooking(@PathVariable Long id) throws ElementNotFoundException {
+    @GetMapping("admin/bookings/{id}")
+    public BookingDto getSingleBookingAdmin(@PathVariable Long id) throws ElementNotFoundException {
         return bookingMapper.mapToBookingDto(bookingService.getBookingById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/bookings")
-    public List<BookingDto> getBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
+    @GetMapping("admin/bookings/user/{userId}")
+    public List<BookingDto> getBookingsAdmin(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false)Sort.Direction sort) {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
-        return (bookingService.getBookings(page, sort).stream().map(bookingMapper::mapToBookingDto).collect(Collectors.toList()));
+        //TODO: this is bad - refactor this, delegate to service layer
+        return (bookingService.getBookingsByUserId(userId, page, sort).stream().map(bookingMapper::mapToBookingDto).collect(Collectors.toList()));
     }
 
-    @GetMapping("/bookings/own")
-    public List<BookingDto> getOwnBookings(@RequestParam(required = false) Integer page, Sort.Direction sort) {
+    @GetMapping("/bookings")
+    public List<BookingDto> getBookingsUser(@RequestParam(required = false) Integer page, Sort.Direction sort) {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -75,24 +85,24 @@ public class BookingController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/bookings")
-    public BookingDto editBooking(@RequestBody BookingDto bookingDto) {
+    @PutMapping("admin/bookings")
+    public BookingDto editBookingAdmin(@RequestBody BookingDto bookingDto) {
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
-        BookingServ oldBooking = bookingService.getBookingById(booking.getId());
-        validatorCustom.validateBookingEdit(booking, oldBooking);
+        validatorCustom.validateBookingEditAdmin(booking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
         emailService.sendMailEditedBooking(bookingInfo);
         return editedBooking;
     }
 
-    @PutMapping("/bookings/own")
-    public BookingDto editOwnBooking(@RequestBody BookingDto bookingDto) {
+    @PutMapping("/bookings")
+    public BookingDto editBookingUser(@RequestBody BookingEditDto bookingDto) {
+        Long authenticatedUserId = userService.getAuthenticatedUserId();
         BookingServ booking = bookingMapper.mapToBooking(bookingDto);
+        booking = booking.withUserId(authenticatedUserId);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserServ user = userService.getUserByUsername(auth.getName());
         BookingServ oldBooking = bookingService.getBookingById(booking.getId());
-        validatorCustom.validateBookingEditUser(booking, oldBooking, user.getId());
+        validatorCustom.validateBookingEditUser(booking, oldBooking);
         BookingInfo bookingInfo = getInfoFromBooking(booking);
         BookingDto editedBooking = bookingMapper.mapToBookingDto(bookingService.editBooking(booking));
         emailService.sendMailEditedBooking(bookingInfo);
@@ -100,8 +110,8 @@ public class BookingController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/bookings/{id}")
-    public void deleteBooking(@PathVariable Long id) {
+    @DeleteMapping("admin/bookings/{id}")
+    public void deleteBookingAdmin(@PathVariable Long id) {
         validatorCustom.validateIfBookingExistById(id);
         BookingServ bookingToDelete = bookingService.getBookingById(id);
         BookingInfo bookingInfo = getInfoFromBooking(bookingToDelete);
@@ -109,8 +119,8 @@ public class BookingController {
         emailService.sendMailDeletedBooking(bookingInfo);
     }
 
-    @DeleteMapping("/bookings/own/{id}")
-    public void deleteOwnBooking(@PathVariable Long id) {
+    @DeleteMapping("/bookings/{id}")
+    public void deleteBookingUser(@PathVariable Long id) {
         validatorCustom.validateIfBookingExistById(id);
         BookingServ bookingToDelete = bookingService.getBookingById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -11,6 +11,8 @@ import com.project.hotelBooking.service.model.UserServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ public class UserService {
     private final BookingMapperServ bookingMapperServ;
     private final PasswordEncoder passwordEncoder;
     private static final int PAGE_SIZE = 5;
+    public static final String USER_IS_NOT_AUTHENTICATED_MESSAGE = "User is not authenticated";
 
     public UserServ getUserByUsername(String username) {
         return userMapperServ.mapToUser(
@@ -99,8 +102,12 @@ public class UserService {
         );
     }
 
-    public void deleteAllUsers() {
-        userRepository.deleteAll();
+    public Long getAuthenticatedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new IllegalStateException(USER_IS_NOT_AUTHENTICATED_MESSAGE);
+        }
+        UserServ userAuth = getUserByUsername(auth.getName());
+        return userAuth.getId();
     }
-
 }

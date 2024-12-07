@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private static final String USER_ROLE = "ROLE_USER";
-    public static final String USER_IS_NOT_AUTHENTICATED_MESSAGE = "User is not authenticated";
 
     private final UserService userService;
     private final UserMapper userMapper;
@@ -60,7 +59,7 @@ public class UserController {
 
     @GetMapping("/users/own/bookings")
     public UserWithBookingsDto getSingleUserOwner() {
-        Authentication auth = getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userMapper.mapToUserWithBookingDto(userService.getUserByUsername(auth.getName()));
     }
 
@@ -96,7 +95,7 @@ public class UserController {
 
     @PutMapping("/users/own")
     public UserDto editUserUser(@RequestBody UserEditDto userDto) {
-        Long authenticatedUserId = getAuthenticatedUserId();
+        Long authenticatedUserId = userService.getAuthenticatedUserId();
         UserServ user = userMapper.mapToUser(userDto);
         user = user.withRole(USER_ROLE);
         user = user.withId(authenticatedUserId);
@@ -112,18 +111,5 @@ public class UserController {
         UserServ userToDelete = userService.getUserById(id);
         userService.deleteUserById(id);
         emailService.sendMailDeletedUser(userToDelete);
-    }
-
-    private static Authentication getAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
-
-    private Long getAuthenticatedUserId() {
-        Authentication auth = getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new IllegalStateException(USER_IS_NOT_AUTHENTICATED_MESSAGE);
-        }
-        UserServ userAuth = userService.getUserByUsername(auth.getName());
-        return userAuth.getId();
     }
 }

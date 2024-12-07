@@ -4,11 +4,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDate;
+
 @Getter
+@ToString
 @NoArgsConstructor
-@ToString(callSuper = true)
 @SuperBuilder
-public class BookingDto extends BookingBaseDto {
-    Long id;
-    Long userId;
+public abstract class BookingBaseDto {
+    Long roomId;
+    LocalDate startDate;
+    LocalDate endDate;
 }

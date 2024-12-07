@@ -116,7 +116,7 @@ public class ValidatorCustom {
         validateIfHotelExistById(room.getHotelId());
 
         if (room.getRoomNumber() != roomFromDatabase.getRoomNumber()
-                || room.getHotelId() != roomFromDatabase.getHotelId()) {
+                || !room.getHotelId().equals(roomFromDatabase.getHotelId())) {
             validateIfRoomNotExistByRoomNumberAndHotelId(room);
         }
     }
@@ -224,17 +224,15 @@ public class ValidatorCustom {
         validateIfRoomIsFree(booking);
     }
 
-    public void validateBookingEdit(BookingServ booking, BookingServ oldBooking) {
+    public void validateBookingEditAdmin(BookingServ booking) {
+        validateBooking(booking);
         validateIfBookingExistById(booking.getId());
-        validateBookingData(booking);
-        validateIfUserExistById(booking.getUserId());
-        validateIfRoomExistById(booking.getRoomId());
-        validateIfRoomIsFree(booking);
     }
 
-    public void validateBookingEditUser(BookingServ booking, BookingServ oldBooking, Long userId) {
-        validateBookingEdit(booking, oldBooking);
-        if (userId != booking.getUserId()) throw new BadRequestException("No privileges to change user id");
+    public void validateBookingEditUser(BookingServ booking, BookingServ oldBooking) {
+        validateBookingData(booking);
+        validateIfBookingExistById(booking.getId());
+        validateIfUserIsOwnerOfBooking(oldBooking, booking.getUserId());
     }
 
     private void validateBookingData(BookingServ booking) {
@@ -268,7 +266,7 @@ public class ValidatorCustom {
 
     protected void validateIfUserIsOwnerOfBooking(BookingServ booking, Long userId) {
         if (!Objects.equals(booking.getUserId(), userId))
-            throw new BadRequestException("User is not owner of booking with id:" + booking.getId());
+            throw new BadRequestException("User is not owner of booking with id: " + booking.getId());
     }
 
 }

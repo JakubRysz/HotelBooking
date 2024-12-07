@@ -11,6 +11,7 @@ public class CommonDatabaseProvider {
     public static final LocalDate BOOKING_START_DATE = LocalDate.now().plusDays(2);
     public static final LocalDate BOOKING_END_DATE = LocalDate.now().plusDays(4);
     public static final String USER_1_USERNAME = "paulsmith";
+    public static final String USER_2_USERNAME = "jankowalskie";
 
     public static final Localization LOCALIZATION_1 = Localization.builder()
             .city(CRACOW_CITY)
@@ -49,7 +50,7 @@ public class CommonDatabaseProvider {
             .firstName("Jan")
             .lastName("Kowalski")
             .dateOfBirth(LocalDate.now().minusYears(25))
-            .username("jankowalski")
+            .username(USER_2_USERNAME)
             .password("Jankowalski123!")
             .role(ROLE_USER)
             .email(EMAIL_TEST_2)

@@ -2,6 +2,11 @@ package com.project.hotelBooking.common;
 
 public class CommonTestConstants {
 
+    //====URLs====
+    public static final String ADMIN_BOOKINGS_URL = "/v1/admin/bookings";
+    public static final String ADMIN_BOOKINGS_USERS_URL = "/v1/admin/bookings/user";
+    public static final String BOOKINGS_URL = "/v1/bookings";
+
     public static String POLAND_COUNTRY = "Poland";
     public static String WARSAW_CITY = "Warsaw";
     public static String CRACOW_CITY = "Cracow";

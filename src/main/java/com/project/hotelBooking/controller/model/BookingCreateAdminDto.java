@@ -4,11 +4,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+
 @Getter
 @NoArgsConstructor
 @ToString(callSuper = true)
 @SuperBuilder
-public class BookingDto extends BookingBaseDto {
-    Long id;
+public class BookingCreateAdminDto extends BookingBaseDto{
     Long userId;
 }

@@ -364,10 +364,6 @@ public class UserControllerE2ETest {
         return objectMapper.readValue(response.getContentAsString(), UserDto.class);
     }
 
-    private UserDto mapUserToUserDto(User user) {
-        return userMapper.mapToUserDto(userMapperServ.mapToUser(user));
-    }
-
     private UserCreateAdminDto mapUserToUserCreateDtoAdmin(User user, String confirmPassword) {
         return mapToUserCreateDtoAdmin(userMapperServ.mapToUser(user), confirmPassword);
     }
