@@ -9,6 +9,5 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @SuperBuilder
-public class HotelDto extends HotelBaseDto {
-        Long id;
+public class HotelCreateDto extends HotelBaseDto {
 }

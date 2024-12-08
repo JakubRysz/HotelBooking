@@ -6,9 +6,12 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Getter
+@ToString
 @NoArgsConstructor
-@ToString(callSuper = true)
 @SuperBuilder
-public class HotelDto extends HotelBaseDto {
-        Long id;
+public class HotelBaseDto {
+    String name;
+    int numberOfStars;
+    String hotelChain;
+    Long localizationId;
 }
