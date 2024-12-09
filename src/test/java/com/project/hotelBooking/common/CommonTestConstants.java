@@ -6,6 +6,10 @@ public class CommonTestConstants {
     public static final String ADMIN_BOOKINGS_URL = "/v1/admin/bookings";
     public static final String ADMIN_BOOKINGS_USERS_URL = "/v1/admin/bookings/user";
     public static final String BOOKINGS_URL = "/v1/bookings";
+    public static final String HOTELS_URL = "/v1/hotels";
+    public static final String ADMIN_HOTELS_URL = "/v1/admin/hotels";
+    public static final String ROOMS = "rooms";
+
 
     public static String POLAND_COUNTRY = "Poland";
     public static String WARSAW_CITY = "Warsaw";

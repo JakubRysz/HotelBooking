@@ -6,12 +6,8 @@ import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.HotelMapper;
 import com.project.hotelBooking.controller.model.HotelDto;
 import com.project.hotelBooking.controller.model.HotelWithRoomsDto;
-import com.project.hotelBooking.repository.HotelRepository;
-import com.project.hotelBooking.repository.LocalizationRepository;
-import com.project.hotelBooking.repository.RoomRepository;
-import com.project.hotelBooking.repository.model.Hotel;
-import com.project.hotelBooking.repository.model.Localization;
-import com.project.hotelBooking.repository.model.Room;
+import com.project.hotelBooking.repository.*;
+import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.mapper.HotelMapperServ;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
+import static com.project.hotelBooking.common.CommonTestConstants.*;
 import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -43,17 +40,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
     public class HotelControllerE2ETest {
 
-    private static final String HOTELS_URL = "/v1/hotels";
-    private static final String ROOMS = "rooms";
     private final ObjectMapper objectMapper;
     private final LocalizationRepository localizationRepository;
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
     private final HotelMapper hotelMapper;
     private final HotelMapperServ hotelMapperServ;
     private final MockMvc mockMvc;
     private final CommonDatabaseUtils commonDatabaseUtils;
 
+    private final static String HOTEL_COULD_NOT_BE_DELETED_MESSAGE =
+            "Conflict: Hotel could not be deleted as there are bookings assigned to this hotel";
     private Localization localization1;
 
     @BeforeEach
@@ -77,7 +76,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         int hotelsNumberBefore = hotelRepository.findAllHotels(Pageable.unpaged()).size();
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(HOTELS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(ADMIN_HOTELS_URL)
                         .content(jsonContentNewHotel)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -102,7 +101,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         final String jsonContentNewHotel = objectMapper.writeValueAsString(hotel1Dto);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(HOTELS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(ADMIN_HOTELS_URL)
                         .content(jsonContentNewHotel)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -222,6 +221,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         //given
         Hotel hotel1 = getHotel1(localization1.getId());
         Hotel hotel1Saved = hotelRepository.save(hotel1);
+        Room room1 = getRoom1(hotel1Saved.getId());
+        Room roomSaved1 = roomRepository.save(room1);
 
         HotelDto hotelEdited = HotelDto.builder()
                 .id(hotel1Saved.getId())
@@ -234,7 +235,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         final String jsonContentHotelEdited = objectMapper.writeValueAsString(hotelEdited);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(HOTELS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(ADMIN_HOTELS_URL)
                         .content(jsonContentHotelEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -244,8 +245,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
         //then
         HotelDto hotel = getHotelFromResponse(mvcResult);
-        Hotel hotelFromDatabase = hotelRepository.findById(hotel.getId()).orElseThrow();
-        assertEqualsHotelsWithoutId(mapHotelDtoToHotel(hotelEdited), hotelFromDatabase);
+        Hotel hotelFromDatabase = hotelRepository.findWithRoomsById(hotel.getId()).orElseThrow();
+        assertEqualsHotels(mapHotelDtoToHotel(hotelEdited), hotelFromDatabase);
+        assertEquals(1, hotelFromDatabase.getRooms().size());
     }
 
     @Test
@@ -266,7 +268,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         final String jsonContentHotelEdited = objectMapper.writeValueAsString(hotelEdited);
 
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(HOTELS_URL)
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(ADMIN_HOTELS_URL)
                         .content(jsonContentHotelEdited)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -288,7 +290,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         int hotelsNumberBefore = hotelRepository.findAllHotels(Pageable.unpaged()).size();
 
         //when
-        mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + "/" +hotel1Saved.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete(ADMIN_HOTELS_URL + "/" + hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200));
 
@@ -299,14 +301,47 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     }
 
     @Test
+    @WithMockUser(roles = {"ADMIN"})
+    public void shouldReturnStatus409_deleteHotel_whenHotelHasBookings() throws Exception {
+        //given
+        Hotel hotel1 = getHotel1(localization1.getId());
+        Hotel hotel1Saved = hotelRepository.save(hotel1);
+        Room roomSaved1 = roomRepository.save(getRoom1(hotel1Saved.getId()));
+        User userSaved1 = userRepository.save(USER_1);
+        bookingRepository.save(
+                Booking.builder()
+                        .userId(userSaved1.getId())
+                        .roomId(roomSaved1.getId())
+                        .startDate(BOOKING_START_DATE)
+                        .endDate(BOOKING_END_DATE)
+                        .build()
+        );
+
+        int hotelsNumberBefore = hotelRepository.findAllHotels(Pageable.unpaged()).size();
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(ADMIN_HOTELS_URL + "/" + hotel1Saved.getId()))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().is(409))
+                .andReturn();
+
+        int hotelsNumberAfter = hotelRepository.findAllHotels(Pageable.unpaged()).size();
+
+        //then
+        String responseMessage = mvcResult.getResponse().getContentAsString();
+        assertEquals(hotelsNumberBefore, hotelsNumberAfter);
+        assertEquals(HOTEL_COULD_NOT_BE_DELETED_MESSAGE, responseMessage);
+    }
+
+    @Test
     @WithMockUser(roles = {"USER"})
     public void shouldReturnStatus403_deleteHotel_withoutAdminPermissions() throws Exception {
         //given
         Hotel hotel1 = getHotel1(localization1.getId());
         Hotel hotel1Saved = hotelRepository.save(hotel1);
 
-        //when & then
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(HOTELS_URL + "/" + hotel1Saved.getId()))
+        //when
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.delete(ADMIN_HOTELS_URL + "/" + hotel1Saved.getId()))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(403))
                 .andReturn();
