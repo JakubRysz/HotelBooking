@@ -1,7 +1,6 @@
 package com.project.hotelBooking.service.model;
 
 
-import com.project.hotelBooking.repository.model.Room;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -19,5 +18,5 @@ public class HotelServ {
     String hotelChain;
     Long localizationId;
     @With
-    List<Room> rooms;
+    List<RoomServ> rooms;
 }

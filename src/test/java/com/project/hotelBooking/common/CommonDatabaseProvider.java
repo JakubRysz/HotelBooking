@@ -36,6 +36,15 @@ public class CommonDatabaseProvider {
                 .build();
     }
 
+    public static Room getRoom2(Long hotelId) {
+        return Room.builder()
+                .roomNumber(16)
+                .numberOfPersons(3)
+                .standard(4)
+                .hotelId(hotelId)
+                .build();
+    }
+
     public static final User USER_1 = User.builder()
             .firstName("Paul")
             .lastName("Smith")

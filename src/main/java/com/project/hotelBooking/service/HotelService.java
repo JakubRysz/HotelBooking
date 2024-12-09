@@ -4,15 +4,17 @@ import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.controller.mapper.RoomMapper;
 import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.RoomRepository;
-import com.project.hotelBooking.repository.model.Room;
 import com.project.hotelBooking.service.mapper.HotelMapperServ;
+import com.project.hotelBooking.service.mapper.RoomMapperServ;
 import com.project.hotelBooking.service.model.HotelServ;
+import com.project.hotelBooking.service.model.RoomServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +24,7 @@ public class HotelService {
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
+    private final RoomMapperServ roomMapperServ;
     private static final int PAGE_SIZE=5;
     private final HotelMapperServ hotelMapperServ;
 
@@ -36,10 +39,17 @@ public class HotelService {
                 hotelRepository.save(hotelMapperServ.mapToRepositoryHotel(hotel))
         );
     }
+    public HotelServ getHotelByIdWithRooms(Long id) {
+
+        return hotelMapperServ.mapToHotel(
+                hotelRepository.findWithRoomsById(id)
+                        .orElseThrow(() -> new ElementNotFoundException("No such hotel"))
+        );
+    }
     public HotelServ getHotelById(Long id) {
 
         return hotelMapperServ.mapToHotel(
-                hotelRepository.findById(id)
+                hotelRepository.findWithoutRoomsById(id)
                         .orElseThrow(() -> new ElementNotFoundException("No such hotel"))
         );
     }
@@ -56,13 +66,14 @@ public class HotelService {
                 hotelRepository.findAllHotels(PageRequest.of(page, PAGE_SIZE, Sort.by(sort, "id")))
         );
         List<Long> ids = hotels.stream().map(HotelServ::getId).collect(Collectors.toList());
-        List<Room> rooms = roomRepository.findAllByHotelIdIn(ids).stream().toList();
+        List<RoomServ> rooms = roomMapperServ.mapToRoms(
+                roomRepository.findAllByHotelIdIn(ids).stream().toList());
         hotels.forEach(hotel -> hotel.withRooms(extractRooms(rooms, hotel.getId())));
         return hotels;
     }
-    private List<Room> extractRooms(List<Room> rooms, Long id) {
+    private List<RoomServ> extractRooms(List<RoomServ> rooms, Long id) {
         return rooms.stream()
-                .filter(room -> room.getHotelId()==id).collect(Collectors.toList());
+                .filter(room -> Objects.equals(room.getHotelId(), id)).collect(Collectors.toList());
     }
     public HotelServ editHotel(HotelServ hotel) {
         return hotelMapperServ.mapToHotel(

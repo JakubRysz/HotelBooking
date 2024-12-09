@@ -18,8 +18,11 @@ public interface  RoomRepository extends JpaRepository<Room,Long> {
     @Query("SELECT r from Room r")
     List<Room> findAllRooms(Pageable page);
 
-    @Query("select h from Room h where h.hotelId in :ids")
+    @Query("select r from Room r where r.hotelId in :ids")
     List<Room> findAllByHotelIdIn(@Param("ids") List<Long> list);
+
+    @Query("SELECT r.id FROM Room r WHERE r.hotelId = :id")
+    List<Long> findAllIdsByHotelId(@Param("id") Long id);
 
     Optional<Room> findRoomByRoomNumberAndHotelId(int roomNumber, Long hotelId);
 }

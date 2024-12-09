@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RoomMapperServ {
-    RoomServ mapToRoom(com.project.hotelBooking.repository.model.Room room);
+    RoomServ mapToRoom(Room room);
     List<RoomServ> mapToRoms(List<Room> rooms);
     Room mapToRepositoryRoom(RoomServ room);
 }

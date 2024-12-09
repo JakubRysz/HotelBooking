@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

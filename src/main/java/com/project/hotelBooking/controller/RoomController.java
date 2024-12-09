@@ -34,7 +34,7 @@ public class RoomController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/rooms/bookings/{id}")
-    public RoomWithBookingsDto getSingleRoomwithBookings(@PathVariable Long id) {
+    public RoomWithBookingsDto getSingleRoomWithBookings(@PathVariable Long id) {
         return roomMapper.mapToRoomWithBookingsDto(roomService.getRoomById(id));
     }
 
