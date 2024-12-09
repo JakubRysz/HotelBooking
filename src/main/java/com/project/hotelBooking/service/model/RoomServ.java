@@ -16,5 +16,4 @@ public class RoomServ {
     Long hotelId;
     @With
     List<BookingServ> bookings;
-
 }

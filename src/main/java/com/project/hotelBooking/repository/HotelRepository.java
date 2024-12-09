@@ -14,7 +14,12 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
-    //List<Hotel> findAll();
+
+    @Query("SELECT h FROM Hotel h LEFT JOIN FETCH h.rooms r WHERE h.id = :id")
+    Optional<Hotel> findWithRoomsById(Long id);
+
+    @Query("SELECT h FROM Hotel h WHERE h.id = :id")
+    Optional<Hotel> findWithoutRoomsById(Long id);
     @Query("SELECT h from Hotel h")
     List<Hotel> findAllHotels(Pageable page);
 
