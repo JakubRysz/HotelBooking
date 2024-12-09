@@ -33,7 +33,7 @@ public class HotelController {
 
     @GetMapping("/hotels/{id}/rooms")
     public HotelWithRoomsDto getSingleHotelWithRooms(@PathVariable Long id) {
-        return hotelMapper.mapToHotelWithRoomsDto(hotelService.getHotelById(id));
+        return hotelMapper.mapToHotelWithRoomsDto(hotelService.getHotelByIdWithRooms(id));
     }
 
     @GetMapping("/hotels/rooms")
@@ -66,6 +66,7 @@ public class HotelController {
     @DeleteMapping("admin/hotels/{id}")
     public void deleteHotel(@PathVariable Long id) {
         validatorCustom.validateIfHotelExistById(id);
+        validatorCustom.validateIfHotelHasNoBookings(id);
         hotelService.deleteHotelById(id);
     }
 }
