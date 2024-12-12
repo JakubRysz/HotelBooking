@@ -81,6 +81,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>("Conflict: " + ex.getMessage(), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ResourceDeletionConflict.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<String> handleResourceDeletionConflict(ResourceDeletionConflict ex) {
+        return new ResponseEntity<>("Conflict: " + ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ChangePasswordHashExpiredException.class)
     @ResponseStatus(HttpStatus.GONE)
     public ResponseEntity<String> handleChangePasswordHashExpiredException(ChangePasswordHashExpiredException ex) {

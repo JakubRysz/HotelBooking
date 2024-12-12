@@ -24,16 +24,16 @@ public class HotelController {
     private final HotelMapper hotelMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/hotels")
+    @PostMapping("admin/hotels")
     public HotelDto createHotel(@RequestBody HotelWithRoomsDto hotelWithRoomsDto) {
         HotelServ hotel = hotelMapper.mapToHotel(hotelWithRoomsDto);
         validatorCustom.validateHotel(hotel);
         return hotelMapper.mapToHotelDto(hotelService.saveHotel(hotel));
     }
 
-    @GetMapping("/hotels/rooms/{id}")
+    @GetMapping("/hotels/{id}/rooms")
     public HotelWithRoomsDto getSingleHotelWithRooms(@PathVariable Long id) {
-        return hotelMapper.mapToHotelWithRoomsDto(hotelService.getHotelById(id));
+        return hotelMapper.mapToHotelWithRoomsDto(hotelService.getHotelByIdWithRooms(id));
     }
 
     @GetMapping("/hotels/rooms")
@@ -41,7 +41,7 @@ public class HotelController {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         return (hotelService.getHotelsWithRooms(page, sort)
-                .stream().map(k -> hotelMapper.mapToHotelWithRoomsDto(k))
+                .stream().map(hotelMapper::mapToHotelWithRoomsDto)
                 .collect(Collectors.toList()));
     }
 
@@ -50,12 +50,12 @@ public class HotelController {
         if (page == null || page < 0) page = 0;
         if (sort == null) sort = Sort.Direction.ASC;
         return (hotelService.getHotels(page, sort).stream()
-                .map(hotel -> hotelMapper.mapToHotelDto(hotel))
+                .map(hotelMapper::mapToHotelDto)
                 .collect(Collectors.toList()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/hotels")
+    @PutMapping("admin/hotels")
     public HotelDto editHotel(@RequestBody HotelDto hotelDto) {
         HotelServ hotel = hotelMapper.mapToHotel(hotelDto);
         validatorCustom.validateHotelEdit(hotel);
@@ -63,9 +63,10 @@ public class HotelController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/hotels/{id}")
+    @DeleteMapping("admin/hotels/{id}")
     public void deleteHotel(@PathVariable Long id) {
         validatorCustom.validateIfHotelExistById(id);
+        validatorCustom.validateIfHotelHasNoBookings(id);
         hotelService.deleteHotelById(id);
     }
 }

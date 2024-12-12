@@ -595,18 +595,18 @@ BookingControllerTestSuiteE2ETest {
                 .build();
     }
 
-    private Booking getBooking2(User user2Saved) {
+    private Booking getBooking2(User user) {
         return Booking.builder()
-                .userId(user2Saved.getId())
+                .userId(user.getId())
                 .roomId(room1.getId())
                 .startDate(BOOKING_START_DATE.plusDays(10))
                 .endDate(BOOKING_START_DATE.plusDays(12))
                 .build();
     }
 
-    private Booking getBooking3(User user2Saved) {
+    private Booking getBooking3(User user) {
         return Booking.builder()
-                .userId(user2Saved.getId())
+                .userId(user.getId())
                 .roomId(room1.getId())
                 .startDate(BOOKING_START_DATE.plusDays(20))
                 .endDate(BOOKING_START_DATE.plusDays(22))

@@ -3,6 +3,9 @@ package com.project.hotelBooking.controller;
 import com.project.hotelBooking.controller.exceptions.BadRequestException;
 import com.project.hotelBooking.controller.exceptions.ElementAlreadyExistException;
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
+import com.project.hotelBooking.controller.exceptions.ResourceDeletionConflict;
+import com.project.hotelBooking.repository.BookingRepository;
+import com.project.hotelBooking.repository.RoomRepository;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.*;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +23,10 @@ public class ValidatorCustom {
 
     private final LocalizationService localizationService;
     private final HotelService hotelService;
+    private final RoomRepository roomRepository;
     private final RoomService roomService;
     private final UserService userService;
+    private final BookingRepository bookingRepository;
     private final BookingService bookingService;
     private static final String[] ROLES = new String[]{"ROLE_USER", "ROLE_ADMIN"};
     private final List<String> possibleUserRoles = Arrays.asList(ROLES);
@@ -235,6 +240,13 @@ public class ValidatorCustom {
         validateIfUserIsOwnerOfBooking(oldBooking, booking.getUserId());
     }
 
+    public void validateIfHotelHasNoBookings(Long hotelId) {
+        List<Long> roomIds = roomRepository.findAllIdsByHotelId(hotelId);
+        List<Long> bookingIds = bookingRepository.findAllIdsByRoomIdIn(roomIds);
+        if (bookingIds.size() > 0)
+            throw new ResourceDeletionConflict("Hotel could not be deleted as there are bookings assigned to this hotel");
+    }
+
     private void validateBookingData(BookingServ booking) {
         if (booking == null
                 || booking.getStartDate().isBefore(LocalDate.now())
@@ -268,5 +280,4 @@ public class ValidatorCustom {
         if (!Objects.equals(booking.getUserId(), userId))
             throw new BadRequestException("User is not owner of booking with id: " + booking.getId());
     }
-
 }

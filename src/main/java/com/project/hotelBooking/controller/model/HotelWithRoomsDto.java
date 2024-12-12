@@ -1,19 +1,14 @@
 package com.project.hotelBooking.controller.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Value;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
-@Value
-@Builder
-public class HotelWithRoomsDto {
-    Long id;
-    String name;
-    int numberOfStars;
-    String hotelChain;
-    Long localizationId;
+@Getter
+@NoArgsConstructor
+@ToString(callSuper = true)
+@SuperBuilder
+public class HotelWithRoomsDto extends HotelDto {
     List<RoomDto> rooms;
 }
