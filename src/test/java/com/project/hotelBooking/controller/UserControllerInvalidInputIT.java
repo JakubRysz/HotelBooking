@@ -2,8 +2,8 @@ package com.project.hotelBooking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.controller.mapper.UserMapper;
-import com.project.hotelBooking.controller.model.UserCreateAdminDto;
-import com.project.hotelBooking.controller.model.UserCreateDto;
+import com.project.hotelBooking.controller.model.user.UserCreateAdminDto;
+import com.project.hotelBooking.controller.model.user.UserCreateDto;
 import com.project.hotelBooking.security.SecurityConfig;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;

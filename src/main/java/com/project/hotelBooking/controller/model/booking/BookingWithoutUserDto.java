@@ -1,4 +1,4 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.booking;
 
 import lombok.*;
 

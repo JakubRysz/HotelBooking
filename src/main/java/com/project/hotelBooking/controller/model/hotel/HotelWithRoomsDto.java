@@ -1,5 +1,6 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.hotel;
 
+import com.project.hotelBooking.controller.model.room.RoomDto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 

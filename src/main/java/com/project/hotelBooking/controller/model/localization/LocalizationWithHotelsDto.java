@@ -1,8 +1,7 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.localization;
 
-import lombok.AllArgsConstructor;
+import com.project.hotelBooking.controller.model.hotel.HotelDto;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Value;
 
 import java.util.List;

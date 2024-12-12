@@ -1,4 +1,4 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,5 +9,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @SuperBuilder
-public class BookingCreateDto extends BookingBaseDto {
+public class UserDto extends UserBaseDto {
+    Long id;
+    String role;
 }

@@ -1,7 +1,7 @@
 package com.project.hotelBooking.controller.mapper;
 
-import com.project.hotelBooking.controller.model.HotelDto;
-import com.project.hotelBooking.controller.model.HotelWithRoomsDto;
+import com.project.hotelBooking.controller.model.hotel.HotelDto;
+import com.project.hotelBooking.controller.model.hotel.HotelWithRoomsDto;
 import com.project.hotelBooking.service.model.HotelServ;
 import org.mapstruct.Mapper;
 
