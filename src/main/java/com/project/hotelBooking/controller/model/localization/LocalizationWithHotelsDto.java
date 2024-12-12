@@ -1,16 +1,15 @@
 package com.project.hotelBooking.controller.model.localization;
 
 import com.project.hotelBooking.controller.model.hotel.HotelDto;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
-@Value
-@Builder
-public class LocalizationWithHotelsDto {
-    Long id;
-    String city;
-    String country;
+@Getter
+@NoArgsConstructor
+@ToString(callSuper = true)
+@SuperBuilder
+public class LocalizationWithHotelsDto extends LocalizationDto{
     List<HotelDto> hotels;
 }
