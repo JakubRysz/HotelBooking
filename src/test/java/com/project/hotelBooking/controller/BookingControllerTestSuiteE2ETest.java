@@ -38,8 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
-import static com.project.hotelBooking.common.CommonTestConstants.*;
-import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.HotelMapper;
+import com.project.hotelBooking.controller.model.hotel.HotelCreateDto;
 import com.project.hotelBooking.controller.model.hotel.HotelDto;
 import com.project.hotelBooking.controller.model.hotel.HotelWithRoomsDto;
 import com.project.hotelBooking.repository.*;
@@ -30,8 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
-import static com.project.hotelBooking.common.CommonTestConstants.*;
-import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -71,7 +71,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     public void shouldCreateHotel() throws Exception {
         //given
         Hotel hotel1 = getHotel1(localization1.getId());
-        HotelDto hotel1Dto = mapHotelToHotelDto(hotel1);
+        HotelCreateDto hotel1Dto = mapHotelToHotelCreateDto(hotel1);
         final String jsonContentNewHotel = objectMapper.writeValueAsString(hotel1Dto);
         int hotelsNumberBefore = hotelRepository.findAllHotels(Pageable.unpaged()).size();
 
@@ -97,7 +97,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     public void shouldReturnStatus403_createHotel_withoutAdminPermissions() throws Exception {
         //given
         Hotel hotel1 = getHotel1(localization1.getId());
-        HotelDto hotel1Dto = mapHotelToHotelDto(hotel1);
+        HotelCreateDto hotel1Dto = mapHotelToHotelCreateDto(hotel1);
         final String jsonContentNewHotel = objectMapper.writeValueAsString(hotel1Dto);
 
         //when
@@ -161,20 +161,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         Hotel hotel2Saved = hotelRepository.save(hotel2);
         Hotel hotel3Saved = hotelRepository.save(hotel3);
 
+        Room room1 = getRoom1(hotel1Saved.getId());
+        Room room2 = getRoom2(hotel2Saved.getId());
+        Room roomSaved1 = roomRepository.save(room1);
+        Room roomSaved2 = roomRepository.save(room2);
+
         //when
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(HOTELS_URL))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(HOTELS_URL + "/" + ROOMS))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andReturn();
 
         //then
-        HotelDto[] hotelsArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), HotelDto[].class);
-        List<HotelDto> hotels = new ArrayList<>((Arrays.asList(hotelsArray)));
+        HotelWithRoomsDto[] hotelsArray = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), HotelWithRoomsDto[].class);
+        List<HotelWithRoomsDto> hotels = new ArrayList<>((Arrays.asList(hotelsArray)));
 
         assertEquals(3, hotels.size());
-        assertEqualsHotels(hotel1Saved, mapHotelDtoToHotel(hotels.get(0)));
-        assertEqualsHotels(hotel2Saved, mapHotelDtoToHotel(hotels.get(1)));
-        assertEqualsHotels(hotel3Saved, mapHotelDtoToHotel(hotels.get(2)));
+        assertEqualsHotelsWithRooms(hotel1Saved, mapHotelWithRoomsDtoToHotel(hotels.get(0)), List.of(roomSaved1));
+        assertEqualsHotelsWithRooms(hotel2Saved, mapHotelWithRoomsDtoToHotel(hotels.get(1)), List.of(roomSaved2));
+        assertEqualsHotelsWithRooms(hotel3Saved, mapHotelWithRoomsDtoToHotel(hotels.get(2)), List.of());
     }
 
     @Test
@@ -368,13 +373,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
     }
 
     private static void assertEqualsHotelsWithRooms(Hotel expectedHotel, Hotel actualHotel, List<Room> expectedRooms) {
-        assertEquals(expectedHotel.getId(), actualHotel.getId());
-        assertEqualsHotelsWithoutId(expectedHotel, actualHotel);
+        assertEqualsHotels(expectedHotel, actualHotel);
         assertEquals(expectedRooms, actualHotel.getRooms());
     }
 
-    private HotelDto mapHotelToHotelDto(Hotel hotel) {
-        return hotelMapper.mapToHotelDto(hotelMapperServ.mapToHotel(hotel));
+    private HotelCreateDto mapHotelToHotelCreateDto(Hotel hotel) {
+        return hotelMapper.mapToHotelCreateDto(hotelMapperServ.mapToHotel(hotel));
     }
 
     private Hotel mapHotelDtoToHotel(HotelDto hotelDto) {
