@@ -209,7 +209,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_createBookingUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_createBookingUser_withoutAdminPermission() throws Exception {
         //given
         Booking booking1 = getBooking1();
         BookingDto booking1Dto = mapBookingToBookingDto(booking1);
@@ -250,7 +250,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_getSingleBookingUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_getSingleBookingUser_withoutAdminPermission() throws Exception {
         //given
         Booking booking1 = getBooking1();
 
@@ -296,7 +296,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_getMultipleBookingsUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_getMultipleBookingsUser_withoutAdminPermission() throws Exception {
         //given
         //when & then
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ADMIN_BOOKINGS_USERS_URL  + "/" + user1.getId()))
@@ -479,7 +479,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_editBookingUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_editBookingUser_withoutAdminPermission() throws Exception {
         //given
         Booking booking1 = getBooking1();
         Booking booking1Saved = bookingRepository.save(booking1);

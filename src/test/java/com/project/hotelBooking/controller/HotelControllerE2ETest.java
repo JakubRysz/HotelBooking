@@ -257,7 +257,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403EditHotelUser() throws Exception {
+    public void shouldReturnStatus403_editHotel_withoutAdminPermission() throws Exception {
         //given
         Hotel hotel1 = getHotel1(localization1.getId());
         Hotel hotel1Saved = hotelRepository.save(hotel1);
@@ -340,7 +340,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_deleteHotel_withoutAdminPermissions() throws Exception {
+    public void shouldReturnStatus403_deleteHotel_withoutAdminPermission() throws Exception {
         //given
         Hotel hotel1 = getHotel1(localization1.getId());
         Hotel hotel1Saved = hotelRepository.save(hotel1);
