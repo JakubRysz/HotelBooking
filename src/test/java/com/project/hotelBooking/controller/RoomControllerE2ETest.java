@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.RoomMapper;
-import com.project.hotelBooking.controller.model.RoomDto;
+import com.project.hotelBooking.controller.model.room.RoomDto;
 import com.project.hotelBooking.repository.HotelRepository;
 import com.project.hotelBooking.repository.LocalizationRepository;
 import com.project.hotelBooking.repository.RoomRepository;

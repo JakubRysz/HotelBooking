@@ -1,7 +1,8 @@
 package com.project.hotelBooking.controller.mapper;
 
-import com.project.hotelBooking.controller.model.HotelDto;
-import com.project.hotelBooking.controller.model.HotelWithRoomsDto;
+import com.project.hotelBooking.controller.model.hotel.HotelCreateDto;
+import com.project.hotelBooking.controller.model.hotel.HotelDto;
+import com.project.hotelBooking.controller.model.hotel.HotelWithRoomsDto;
 import com.project.hotelBooking.service.model.HotelServ;
 import org.mapstruct.Mapper;
 
@@ -9,6 +10,7 @@ import org.mapstruct.Mapper;
 public interface HotelMapper {
     HotelServ mapToHotel(HotelDto hotelDto);
     HotelDto mapToHotelDto(HotelServ hotel);
+    HotelCreateDto mapToHotelCreateDto(HotelServ hotel);
     HotelWithRoomsDto mapToHotelWithRoomsDto(HotelServ hotel);
     HotelServ mapToHotel(HotelWithRoomsDto hotelWithRoomsDto);
 }

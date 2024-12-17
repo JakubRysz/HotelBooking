@@ -1,8 +1,7 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.room;
 
-import lombok.AllArgsConstructor;
+import com.project.hotelBooking.controller.model.booking.BookingWithoutUserDto;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.Value;
 
 import java.util.List;

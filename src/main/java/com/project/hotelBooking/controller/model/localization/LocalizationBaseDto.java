@@ -1,14 +1,15 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.localization;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+
 @Getter
+@ToString
 @NoArgsConstructor
-@ToString(callSuper = true)
 @SuperBuilder
-public class BookingDto extends BookingBaseDto {
-    Long id;
-    Long userId;
+public class LocalizationBaseDto {
+    String city;
+    String country;
 }

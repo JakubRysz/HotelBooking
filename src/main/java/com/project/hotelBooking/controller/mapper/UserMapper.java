@@ -1,6 +1,6 @@
 package com.project.hotelBooking.controller.mapper;
 
-import com.project.hotelBooking.controller.model.*;
+import com.project.hotelBooking.controller.model.user.*;
 import com.project.hotelBooking.service.model.UserServ;
 import org.mapstruct.Mapper;
 

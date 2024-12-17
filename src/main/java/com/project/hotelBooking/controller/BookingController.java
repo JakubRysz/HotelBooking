@@ -2,10 +2,10 @@ package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.controller.mapper.BookingMapper;
-import com.project.hotelBooking.controller.model.BookingCreateAdminDto;
-import com.project.hotelBooking.controller.model.BookingCreateDto;
-import com.project.hotelBooking.controller.model.BookingDto;
-import com.project.hotelBooking.controller.model.BookingEditDto;
+import com.project.hotelBooking.controller.model.booking.BookingCreateAdminDto;
+import com.project.hotelBooking.controller.model.booking.BookingCreateDto;
+import com.project.hotelBooking.controller.model.booking.BookingDto;
+import com.project.hotelBooking.controller.model.booking.BookingEditDto;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.*;
 import lombok.RequiredArgsConstructor;

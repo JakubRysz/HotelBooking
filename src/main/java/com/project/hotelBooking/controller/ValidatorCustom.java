@@ -5,6 +5,8 @@ import com.project.hotelBooking.controller.exceptions.ElementAlreadyExistExcepti
 import com.project.hotelBooking.controller.exceptions.ElementNotFoundException;
 import com.project.hotelBooking.controller.exceptions.ResourceDeletionConflict;
 import com.project.hotelBooking.repository.BookingRepository;
+import com.project.hotelBooking.repository.HotelRepository;
+import com.project.hotelBooking.repository.LocalizationRepository;
 import com.project.hotelBooking.repository.RoomRepository;
 import com.project.hotelBooking.service.*;
 import com.project.hotelBooking.service.model.*;
@@ -22,7 +24,9 @@ import java.util.regex.Pattern;
 public class ValidatorCustom {
 
     private final LocalizationService localizationService;
+    private final LocalizationRepository localizationRepository;
     private final HotelService hotelService;
+    private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
     private final RoomService roomService;
     private final UserService userService;
@@ -67,6 +71,12 @@ public class ValidatorCustom {
         }
     }
 
+    public void validateIfLocalizationHasNoHotels(Long localizationId) {
+        List<Long> hotelIds = hotelRepository.findAllIdsByLocalizationIdIn(localizationId);
+        if (!hotelIds.isEmpty())
+            throw new ResourceDeletionConflict("Localization could not be deleted as there are hotels assigned to this localization");
+    }
+
 
     //Hotel
     public void validateHotel(HotelServ hotel) {
@@ -107,6 +117,12 @@ public class ValidatorCustom {
         }
     }
 
+    public void validateIfHotelHasNoBookings(Long hotelId) {
+        List<Long> roomIds = roomRepository.findAllIdsByHotelId(hotelId);
+        List<Long> bookingIds = bookingRepository.findAllIdsByRoomIdIn(roomIds);
+        if (!bookingIds.isEmpty())
+            throw new ResourceDeletionConflict("Hotel could not be deleted as there are bookings assigned to this hotel");
+    }
 
     //Room
     public void validateRoom(RoomServ room) {
@@ -238,13 +254,6 @@ public class ValidatorCustom {
         validateBookingData(booking);
         validateIfBookingExistById(booking.getId());
         validateIfUserIsOwnerOfBooking(oldBooking, booking.getUserId());
-    }
-
-    public void validateIfHotelHasNoBookings(Long hotelId) {
-        List<Long> roomIds = roomRepository.findAllIdsByHotelId(hotelId);
-        List<Long> bookingIds = bookingRepository.findAllIdsByRoomIdIn(roomIds);
-        if (bookingIds.size() > 0)
-            throw new ResourceDeletionConflict("Hotel could not be deleted as there are bookings assigned to this hotel");
     }
 
     private void validateBookingData(BookingServ booking) {

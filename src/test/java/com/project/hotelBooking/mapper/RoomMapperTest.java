@@ -1,7 +1,7 @@
 package com.project.hotelBooking.mapper;
 
 import com.project.hotelBooking.controller.mapper.RoomMapper;
-import com.project.hotelBooking.controller.model.RoomDto;
+import com.project.hotelBooking.controller.model.room.RoomDto;
 import com.project.hotelBooking.service.model.BookingServ;
 import com.project.hotelBooking.service.model.RoomServ;
 import lombok.RequiredArgsConstructor;

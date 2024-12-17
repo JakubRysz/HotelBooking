@@ -1,5 +1,6 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.hotel;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -9,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @SuperBuilder
-public class UserDto extends UserBaseDto {
-    Long id;
-    String role;
+@EqualsAndHashCode
+public class HotelDto extends HotelBaseDto {
+        Long id;
 }
