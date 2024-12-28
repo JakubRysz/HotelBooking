@@ -1,7 +1,7 @@
 package com.project.hotelBooking.controller;
 
 import com.project.hotelBooking.controller.mapper.UserMapper;
-import com.project.hotelBooking.controller.model.*;
+import com.project.hotelBooking.controller.model.user.*;
 import com.project.hotelBooking.service.SimpleEmailService;
 import com.project.hotelBooking.service.UserService;
 import com.project.hotelBooking.service.model.UserServ;

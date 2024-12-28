@@ -1,4 +1,4 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.user;
 
 import com.project.hotelBooking.controller.Annotations.ValidPassword;
 import com.project.hotelBooking.controller.utils.PasswordUtils;

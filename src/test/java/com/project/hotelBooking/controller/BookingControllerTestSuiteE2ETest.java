@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hotelBooking.common.CommonDatabaseUtils;
 import com.project.hotelBooking.controller.mapper.BookingMapper;
-import com.project.hotelBooking.controller.model.BookingCreateAdminDto;
-import com.project.hotelBooking.controller.model.BookingCreateDto;
-import com.project.hotelBooking.controller.model.BookingDto;
-import com.project.hotelBooking.controller.model.BookingEditDto;
+import com.project.hotelBooking.controller.model.booking.BookingCreateAdminDto;
+import com.project.hotelBooking.controller.model.booking.BookingCreateDto;
+import com.project.hotelBooking.controller.model.booking.BookingDto;
+import com.project.hotelBooking.controller.model.booking.BookingEditDto;
 import com.project.hotelBooking.repository.*;
 import com.project.hotelBooking.repository.model.*;
 import com.project.hotelBooking.service.SimpleEmailService;
@@ -38,8 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.project.hotelBooking.common.CommonDatabaseProvider.*;
-import static com.project.hotelBooking.common.CommonTestConstants.*;
-import static com.project.hotelBooking.controller.CommonControllerTestConstants.ACCESS_DENIED_MESSAGE;
+import static com.project.hotelBooking.controller.CommonControllerTestConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -210,7 +209,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_createBookingUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_createBookingUser_withoutAdminPermission() throws Exception {
         //given
         Booking booking1 = getBooking1();
         BookingDto booking1Dto = mapBookingToBookingDto(booking1);
@@ -251,7 +250,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_getSingleBookingUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_getSingleBookingUser_withoutAdminPermission() throws Exception {
         //given
         Booking booking1 = getBooking1();
 
@@ -297,7 +296,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_getMultipleBookingsUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_getMultipleBookingsUser_withoutAdminPermission() throws Exception {
         //given
         //when & then
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(ADMIN_BOOKINGS_USERS_URL  + "/" + user1.getId()))
@@ -480,7 +479,7 @@ BookingControllerTestSuiteE2ETest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    public void shouldReturnStatus403_editBookingUser_usingAdminEndpoint() throws Exception {
+    public void shouldReturnStatus403_editBookingUser_withoutAdminPermission() throws Exception {
         //given
         Booking booking1 = getBooking1();
         Booking booking1Saved = bookingRepository.save(booking1);

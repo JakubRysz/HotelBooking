@@ -1,4 +1,4 @@
-package com.project.hotelBooking.controller.model;
+package com.project.hotelBooking.controller.model.localization;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,5 +9,5 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @SuperBuilder
-public class HotelCreateDto extends HotelBaseDto {
+public class LocalizationCreateDto extends LocalizationBaseDto{
 }
